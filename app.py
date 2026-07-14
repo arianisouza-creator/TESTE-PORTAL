@@ -426,9 +426,7 @@ def render_sidebar(selected_month: str) -> str:
         label_visibility="collapsed",
         key="main_nav",
     )
-    if auth_ok():
-        st.button("Sair do cadastro", on_click=logout, use_container_width=True, key="logout_main_nav")
-    else:
+    if not auth_ok():
         st.markdown('<div class="nav-protected">Cadastro protegido</div>', unsafe_allow_html=True)
     return page
 
@@ -795,18 +793,11 @@ def main() -> None:
             color:#fff !important;
             border-color:var(--blue) !important;
           }
-          .app-shell {
-            display:grid;
-            grid-template-columns: 270px minmax(0,1fr);
-            min-height:100vh;
-          }
-          .left-shell {
+          .main-left-col {
             background:linear-gradient(180deg,#213f76 0%,#2a4a84 100%);
+            border-radius:0;
             padding:22px 20px 26px;
-          }
-          .right-shell {
-            background:var(--bg);
-            min-width:0;
+            min-height:calc(100vh - 24px);
           }
           .top-shell {
             height:74px;
@@ -815,6 +806,8 @@ def main() -> None:
             align-items:center;
             justify-content:flex-end;
             padding:0 28px;
+            border-radius:0;
+            margin-bottom:0;
           }
           .top-shell span {
             color:#f8fafc;
@@ -825,6 +818,7 @@ def main() -> None:
           .hero-shell {
             background: radial-gradient(640px 360px at 85% -30%, rgba(64,120,210,.5), transparent 62%), linear-gradient(118deg,#13223b,#193053 68%,#1f3a63);
             padding:28px 28px 30px;
+            margin-bottom:0;
           }
           .content-shell {
             padding:28px;
@@ -953,22 +947,22 @@ def main() -> None:
             font-size:15px;
             font-weight:700;
           }
-          .left-shell .stRadio > div {
+          .stRadio > div {
             background:#232834;
             border:1px solid rgba(255,255,255,.14);
             border-radius:0 0 12px 12px;
             padding:16px 14px;
           }
-          .left-shell .stRadio label {
+          .stRadio label {
             padding:10px 8px;
             border-radius:10px;
           }
-          .left-shell .stRadio label:hover { background:rgba(255,255,255,.05); }
-          .left-shell .stRadio p {
+          .stRadio label:hover { background:rgba(255,255,255,.05); }
+          .stRadio p {
             color:#ffffff !important;
             letter-spacing:1.6px !important;
           }
-          .left-shell .stButton button {
+          .nav-button .stButton button {
             margin-top:14px;
             background:#1f232d !important;
             color:#ffffff !important;
@@ -1001,18 +995,18 @@ def main() -> None:
         """,
         unsafe_allow_html=True,
     )
-    st.markdown('<div class="app-shell">', unsafe_allow_html=True)
     left_col, right_col = st.columns([0.95, 5.05], gap="small")
-
     selected_month = st.session_state.get("selected_month", month_key())
 
     with left_col:
-        st.markdown('<div class="left-shell">', unsafe_allow_html=True)
+        st.markdown('<div class="main-left-col">', unsafe_allow_html=True)
         page = render_sidebar(selected_month)
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('<div class="nav-button">', unsafe_allow_html=True)
+        if auth_ok():
+            st.button("Sair do cadastro", on_click=logout, use_container_width=True, key="logout_main_nav_bottom")
+        st.markdown('</div></div>', unsafe_allow_html=True)
 
     with right_col:
-        st.markdown('<div class="right-shell">', unsafe_allow_html=True)
         st.markdown('<div class="top-shell"><span>Share &nbsp;&nbsp; ☆ &nbsp;&nbsp; ✎ &nbsp;&nbsp; GitHub</span></div>', unsafe_allow_html=True)
         st.markdown('<div class="hero-shell">', unsafe_allow_html=True)
         hero_cols = st.columns([1.15, 3.85], gap="large")
@@ -1041,8 +1035,7 @@ def main() -> None:
                 else:
                     render_contracts_page(selected_month)
 
-        st.markdown('</div></div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
