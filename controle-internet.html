@@ -235,8 +235,8 @@
           <span class="chev" data-icon="chevronRight"></span>
         </button>
         <div class="navtree">
-          <button class="subitem on" id="navInternet" type="button">Controle de Internet</button>
-          <button class="subitem" id="navDiarista" type="button">Controle da Diarista</button>
+          <button class="subitem on" id="navInternet" type="button">INTERNET</button>
+          <button class="subitem" id="navDiarista" type="button">DIARISTA</button>
         </div>
       </div>
     </aside>
@@ -491,7 +491,7 @@
 
         <div class="monthbar">
           <div class="search"><span data-icon="search"></span><input id="dq" placeholder="Buscar por obra ou nome..."></div>
-          <div class="selectbox"><span data-icon="calendar"></span><input id="dMonthMirror" type="month" disabled></div>
+          <div class="selectbox"><span data-icon="calendar"></span><input id="dMonthMirror" type="month"></div>
           <button class="danger" id="resetDiarista"><span data-icon="trash"></span>Zerar mes</button>
           <button class="ghost" id="openDiaristaCadastro"><span data-icon="lock"></span>Cadastro</button>
         </div>
@@ -1800,6 +1800,14 @@
 
     document.getElementById('q').addEventListener('input', render);
     monthPicker.addEventListener('change', () => {
+      selectedId = null;
+      render();
+      renderDiarista();
+    });
+    document.getElementById('dMonthMirror').addEventListener('change', event => {
+      if (event.target.value) {
+        monthPicker.value = event.target.value;
+      }
       selectedId = null;
       render();
       renderDiarista();
