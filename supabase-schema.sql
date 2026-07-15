@@ -62,11 +62,35 @@ create table if not exists public.diarista_month_entries (
   primary key (month_key, diarista_id)
 );
 
+create table if not exists public.hitachi_collaborators (
+  id bigint primary key,
+  month_key text not null,
+  empresa text not null default 'MSE ENGENHARIA',
+  colaborador text not null default '',
+  situacao text not null default 'Ativo',
+  holerite text not null default 'OK',
+  comprovante_pagamento text not null default 'OK',
+  comprovante_adiantamento text not null default 'OK',
+  kit_rescisao text not null default 'NA',
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.hitachi_company_docs (
+  id bigint primary key,
+  month_key text not null,
+  empresa text not null default 'MSE ENGENHARIA',
+  documento text not null default '',
+  status text not null default 'OK',
+  created_at timestamptz not null default now()
+);
+
 alter table public.internet_contracts enable row level security;
 alter table public.internet_month_entries enable row level security;
 alter table public.internet_lines enable row level security;
 alter table public.diarista_cadastros enable row level security;
 alter table public.diarista_month_entries enable row level security;
+alter table public.hitachi_collaborators enable row level security;
+alter table public.hitachi_company_docs enable row level security;
 
 drop policy if exists "anon_full_internet_contracts" on public.internet_contracts;
 create policy "anon_full_internet_contracts"
@@ -103,6 +127,22 @@ with check (true);
 drop policy if exists "anon_full_diarista_month_entries" on public.diarista_month_entries;
 create policy "anon_full_diarista_month_entries"
 on public.diarista_month_entries
+for all
+to anon
+using (true)
+with check (true);
+
+drop policy if exists "anon_full_hitachi_collaborators" on public.hitachi_collaborators;
+create policy "anon_full_hitachi_collaborators"
+on public.hitachi_collaborators
+for all
+to anon
+using (true)
+with check (true);
+
+drop policy if exists "anon_full_hitachi_company_docs" on public.hitachi_company_docs;
+create policy "anon_full_hitachi_company_docs"
+on public.hitachi_company_docs
 for all
 to anon
 using (true)

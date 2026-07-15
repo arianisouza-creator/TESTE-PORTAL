@@ -239,6 +239,16 @@
           <button class="subitem" id="navDiarista" type="button">DIARISTA</button>
         </div>
       </div>
+      <div class="navblock" id="docsBlock" style="margin-top:10px">
+        <button class="nv" id="docsToggle" type="button">
+          <span class="ni" data-icon="folder"></span>
+          <span class="nl">Gestao documental</span>
+          <span class="chev" data-icon="chevronRight"></span>
+        </button>
+        <div class="navtree">
+          <button class="subitem" id="navHitachi" type="button">KPI HITACHI</button>
+        </div>
+      </div>
     </aside>
 
     <main class="main">
@@ -595,6 +605,250 @@
           </div>
         </div>
       </section>
+
+      <section class="module" id="moduleHitachi">
+        <div class="subrow2">
+          <button class="sidetoggle" type="button" title="Recolher menu" aria-label="Recolher menu" data-icon="menu"></button>
+          <span class="ico" data-icon="barChart3"></span>
+          <span class="lab">
+            <b>KPI Hitachi</b>
+            <small>Gestao documental mensal</small>
+          </span>
+        </div>
+
+        <div class="monthbar">
+          <div class="search"><span data-icon="search"></span><input id="hq" placeholder="Buscar por colaborador, empresa ou situacao..."></div>
+          <div class="selectbox"><span data-icon="calendar"></span><input id="hMonthPicker" type="month"></div>
+          <button class="danger" id="resetHitachi"><span data-icon="trash"></span>Zerar mes</button>
+          <button class="ghost" id="openHitachiCadastro"><span data-icon="folder"></span>Cadastro</button>
+        </div>
+
+        <div class="topmenu">
+          <button class="toplink on" data-h-view="overview">Visao Geral</button>
+          <button class="toplink" data-h-view="cadastro">Cadastro</button>
+        </div>
+
+        <div class="view on" id="hview-overview">
+          <div class="hero">
+            <h1 id="hPageTitle">KPI Hitachi</h1>
+            <p id="hPageSubtitle">Controle mensal de documentacao de colaboradores e documentos da empresa.</p>
+          </div>
+
+          <div class="toolbar">
+            <div class="seg" aria-label="Filtros Hitachi">
+              <button class="on" data-h-filter="todos">Todos</button>
+              <button data-h-filter="ok">OK</button>
+              <button data-h-filter="pendente">Pendentes</button>
+              <button data-h-filter="rescindidos">Rescindidos</button>
+            </div>
+            <div class="eyebrow" id="hCountLabel">0 colaboradores no mes</div>
+          </div>
+
+          <section class="kpis" style="grid-template-columns:repeat(4,1fr)">
+            <div class="kpi">
+              <div class="ktop"><div class="kicon blue" data-icon="users"></div><div class="klabel">Colaboradores</div></div>
+              <div class="kvalue" id="hCollaborators">0</div>
+              <div class="kmeta">Cadastros no mes</div>
+            </div>
+            <div class="kpi">
+              <div class="ktop"><div class="kicon green" data-icon="badgeCheck"></div><div class="klabel">Documentos OK</div></div>
+              <div class="kvalue" id="hOkPct">0%</div>
+              <div class="kmeta">Percentual validado</div>
+            </div>
+            <div class="kpi">
+              <div class="ktop"><div class="kicon blue" data-icon="alertCircle"></div><div class="klabel">Pendencias</div></div>
+              <div class="kvalue" id="hPendings">0</div>
+              <div class="kmeta">Itens pendentes</div>
+            </div>
+            <div class="kpi">
+              <div class="ktop"><div class="kicon slate" data-icon="files"></div><div class="klabel">Docs empresa</div></div>
+              <div class="kvalue" id="hCompanyDocs">0</div>
+              <div class="kmeta">Registros mensais</div>
+            </div>
+          </section>
+
+          <section class="dashgrid" style="grid-template-columns:1.35fr .95fr .95fr">
+            <article class="card pad">
+              <div class="chead"><span class="ti2">Proporcao de documentos</span><span class="eyebrow">Mes selecionado</span></div>
+              <div class="donut-wrap">
+                <div class="donut" id="hDonut">
+                  <div class="donut-hole"><div><b id="hDonutPct">0%</b><div class="eyebrow">OK</div></div></div>
+                </div>
+                <div class="legend" id="hLegend"></div>
+              </div>
+            </article>
+
+            <article class="card pad">
+              <div class="chead"><span class="ti2">Evolucao mensal</span><span class="eyebrow">Historico</span></div>
+              <div class="list" id="hEvolution"></div>
+            </article>
+
+            <article class="card pad">
+              <div class="chead"><span class="ti2">Volume de docs</span><span class="eyebrow">Postados</span></div>
+              <div class="bars" id="hVolumeBars"></div>
+            </article>
+          </section>
+
+          <div class="cred-grid" style="margin-bottom:16px">
+            <section class="card pad">
+              <div class="chead"><span class="ti2">MSE Engenharia</span><span class="eyebrow">Resumo da empresa</span></div>
+              <div class="cred-list" id="hEngineeringCard"></div>
+            </section>
+            <section class="card pad">
+              <div class="chead"><span class="ti2">MSE Service</span><span class="eyebrow">Resumo da empresa</span></div>
+              <div class="cred-list" id="hServiceCard"></div>
+            </section>
+          </div>
+
+          <section class="card table-card" style="margin-bottom:16px">
+            <div class="pad">
+              <div class="chead"><span class="ti2">Colaboradores do mes</span><span class="eyebrow" id="hFootCount">0 registros</span></div>
+            </div>
+            <div style="overflow:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Colaborador</th>
+                    <th>Empresa</th>
+                    <th>Situacao</th>
+                    <th>Holerite</th>
+                    <th>Comprovante</th>
+                    <th>Adiantamento</th>
+                    <th>Kit rescisao</th>
+                    <th>Acoes</th>
+                  </tr>
+                </thead>
+                <tbody id="hRows"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="card table-card">
+            <div class="pad">
+              <div class="chead"><span class="ti2">Documentos da empresa</span><span class="eyebrow">Status mensal</span></div>
+            </div>
+            <div style="overflow:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Empresa</th>
+                    <th>Documento</th>
+                    <th>Status</th>
+                    <th>Acoes</th>
+                  </tr>
+                </thead>
+                <tbody id="hCompanyRows"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div class="view" id="hview-cadastro">
+          <div id="hCadastroContent">
+            <div class="hero" style="margin-bottom:14px">
+              <h1>Cadastro KPI Hitachi</h1>
+              <p>Cadastre os colaboradores, situacoes especiais e documentos mensais que alimentam o dashboard do cliente.</p>
+            </div>
+
+            <section class="card pad">
+              <div class="chead"><span class="ti2">Novo colaborador</span><span class="eyebrow">Competencia mensal</span></div>
+              <form id="hitachiForm" class="formgrid">
+                <label>Competencia<input name="monthKey" type="month" required></label>
+                <label>Empresa
+                  <select name="empresa" required>
+                    <option value="MSE ENGENHARIA">MSE ENGENHARIA</option>
+                    <option value="MSE SERVICE">MSE SERVICE</option>
+                  </select>
+                </label>
+                <label style="grid-column:1 / -1">Colaborador<input name="colaborador" required placeholder="Nome do colaborador"></label>
+                <label>Situacao
+                  <select name="situacao">
+                    <option value="Ativo">Ativo</option>
+                    <option value="Rescindido">Rescindido</option>
+                    <option value="Demitido">Demitido</option>
+                    <option value="Transferido">Transferido</option>
+                  </select>
+                </label>
+                <label>Holerite
+                  <select name="holerite">
+                    <option value="OK">OK</option>
+                    <option value="PENDENTE">PENDENTE</option>
+                    <option value="NA">NA</option>
+                  </select>
+                </label>
+                <label>Comprovante de pagamento
+                  <select name="comprovantePagamento">
+                    <option value="OK">OK</option>
+                    <option value="PENDENTE">PENDENTE</option>
+                    <option value="NA">NA</option>
+                  </select>
+                </label>
+                <label>Comprovante de adiantamento
+                  <select name="comprovanteAdiantamento">
+                    <option value="OK">OK</option>
+                    <option value="PENDENTE">PENDENTE</option>
+                    <option value="NA">NA</option>
+                  </select>
+                </label>
+                <label>Kit rescisao
+                  <select name="kitRescisao">
+                    <option value="NA">NA</option>
+                    <option value="OK">OK</option>
+                    <option value="PENDENTE">PENDENTE</option>
+                  </select>
+                </label>
+                <div style="grid-column:1 / -1;display:flex;justify-content:flex-end;gap:10px">
+                  <button class="ghost" type="button" id="cancelHitachiEdit" style="display:none">Cancelar edicao</button>
+                  <button class="primary" type="submit" id="saveHitachiBtn"><span data-icon="plus"></span>Salvar colaborador</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="card pad" style="margin-top:14px">
+              <div class="chead"><span class="ti2">Documentos da empresa</span><span class="eyebrow">Competencia mensal</span></div>
+              <form id="hitachiCompanyForm" class="formgrid">
+                <label>Competencia<input name="monthKey" type="month" required></label>
+                <label>Empresa
+                  <select name="empresa" required>
+                    <option value="MSE ENGENHARIA">MSE ENGENHARIA</option>
+                    <option value="MSE SERVICE">MSE SERVICE</option>
+                  </select>
+                </label>
+                <label>Documento
+                  <select name="documento" required>
+                    <option value="FOLHA DE PAGAMENTO">FOLHA DE PAGAMENTO</option>
+                    <option value="DCTFWEB">DCTFWEB</option>
+                    <option value="FGTS DIGITAL + GUIA E COMPROVANTE">FGTS DIGITAL + GUIA E COMPROVANTE</option>
+                    <option value="INSS">INSS</option>
+                  </select>
+                </label>
+                <label>Status
+                  <select name="status" required>
+                    <option value="OK">OK</option>
+                    <option value="PENDENTE">PENDENTE</option>
+                    <option value="NA">NA</option>
+                  </select>
+                </label>
+                <div style="grid-column:1 / -1;display:flex;justify-content:flex-end;gap:10px">
+                  <button class="ghost" type="button" id="cancelHitachiCompanyEdit" style="display:none">Cancelar edicao</button>
+                  <button class="primary" type="submit" id="saveHitachiCompanyBtn"><span data-icon="plus"></span>Salvar documento</button>
+                </div>
+              </form>
+            </section>
+
+            <div class="cred-grid" style="margin-top:14px">
+              <section class="card pad">
+                <div class="chead"><span class="ti2">Colaboradores cadastrados</span><span class="eyebrow" id="hCadastroCount">0 registros</span></div>
+                <div class="cred-list" id="hCadastroList"></div>
+              </section>
+              <section class="card pad">
+                <div class="chead"><span class="ti2">Docs da empresa cadastrados</span><span class="eyebrow" id="hCompanyCadastroCount">0 registros</span></div>
+                <div class="cred-list" id="hCompanyCadastroList"></div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -711,7 +965,13 @@
       chat:'M21 12a8 8 0 0 1-11 7.3L3 21l1.7-7A8 8 0 1 1 21 12Z',
       unlock:'M5 11h14v10H5zM8 11V7a4 4 0 0 1 7.9-1',
       lock:'M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4',
-      edit:'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z'
+      edit:'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z',
+      folder:'M3 7h5l2 2h11v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7V5a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2',
+      barChart3:'M4 20V10M12 20V4M20 20v-7',
+      users:'M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M9.5 7a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7M20 21v-2a4 4 0 0 0-3-3.9M16 4.1a3.5 3.5 0 0 1 0 6.8',
+      badgeCheck:'M12 3l2.5 1.2 2.8-.3.8 2.7 2.2 1.8-1.2 2.5 1.2 2.5-2.2 1.8-.8 2.7-2.8-.3L12 21l-2.5-1.2-2.8.3-.8-2.7-2.2-1.8 1.2-2.5-1.2-2.5 2.2-1.8.8-2.7 2.8.3zM9 12l2 2 4-4',
+      alertCircle:'M12 8v4M12 16h.01M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18',
+      files:'M8 2h8v4H8zM6 6h12a2 2 0 0 1 2 2v12H8a2 2 0 0 1-2-2zM4 10V6a2 2 0 0 1 2-2'
     };
 
     function icon(name, size = 18) {
@@ -735,6 +995,9 @@
     document.getElementById('adminToggle').addEventListener('click', () => {
       document.getElementById('adminBlock').classList.toggle('open');
     });
+    document.getElementById('docsToggle').addEventListener('click', () => {
+      document.getElementById('docsBlock').classList.toggle('open');
+    });
     function openView(viewName) {
       document.querySelectorAll('.toplink[data-view]').forEach(item => item.classList.remove('on'));
       document.querySelectorAll('#moduleInternet .view').forEach(view => view.classList.remove('on'));
@@ -747,12 +1010,20 @@
       document.querySelector(`.toplink[data-d-view="${viewName}"]`).classList.add('on');
       document.getElementById(`dview-${viewName}`).classList.add('on');
     }
+    function openHitachiView(viewName) {
+      document.querySelectorAll('.toplink[data-h-view]').forEach(item => item.classList.remove('on'));
+      document.querySelectorAll('#moduleHitachi .view').forEach(view => view.classList.remove('on'));
+      document.querySelector(`.toplink[data-h-view="${viewName}"]`).classList.add('on');
+      document.getElementById(`hview-${viewName}`).classList.add('on');
+    }
     function switchModule(moduleName) {
       currentModule = moduleName;
       document.getElementById('moduleInternet').classList.toggle('on', moduleName === 'internet');
       document.getElementById('moduleDiarista').classList.toggle('on', moduleName === 'diarista');
+      document.getElementById('moduleHitachi').classList.toggle('on', moduleName === 'hitachi');
       document.getElementById('navInternet').classList.toggle('on', moduleName === 'internet');
       document.getElementById('navDiarista').classList.toggle('on', moduleName === 'diarista');
+      document.getElementById('navHitachi').classList.toggle('on', moduleName === 'hitachi');
       document.getElementById('dMonthMirror').value = currentMonthKey();
     }
     function refreshProtectedViews() {
@@ -761,6 +1032,7 @@
       document.getElementById('contractsContent').style.display = protectedAuthenticated ? 'block' : 'none';
       document.getElementById('dCadastroAuth').style.display = protectedAuthenticated ? 'none' : 'block';
       document.getElementById('dCadastroContent').style.display = protectedAuthenticated ? 'block' : 'none';
+      document.getElementById('hCadastroContent').style.display = 'block';
     }
     document.querySelectorAll('.toplink[data-view]').forEach(button => {
       button.addEventListener('click', () => {
@@ -782,6 +1054,9 @@
     let editingDiaristaId = null;
     let editingDiaristaMasterId = null;
     let editingLineId = null;
+    let hitachiFilter = 'todos';
+    let editingHitachiId = null;
+    let editingHitachiCompanyId = null;
     let protectedAuthenticated = false;
     let currentModule = 'internet';
     const PROTECTED_USER = 'ADM';
@@ -798,6 +1073,9 @@
     const contracts = [];
     const diaristaMasters = [];
     const diaristaMonthOverrides = {};
+    const hitachiCollaborators = [];
+    const hitachiCompanyDocs = [];
+    const hMonthPicker = document.getElementById('hMonthPicker');
 
     function defaultMonth() {
       const now = new Date();
@@ -825,7 +1103,9 @@
         monthEntries: [],
         monthLines: [],
         diaristaMasters: [],
-        diaristaMonthEntries: []
+        diaristaMonthEntries: [],
+        hitachiCollaborators: [],
+        hitachiCompanyDocs: []
       };
     }
 
@@ -867,7 +1147,9 @@
             protocolado: override.protocolado || '',
             link: override.link || ''
           }))
-        )
+        ),
+        hitachiCollaborators: hitachiCollaborators.map(item => ({ ...item })),
+        hitachiCompanyDocs: hitachiCompanyDocs.map(item => ({ ...item }))
       };
     }
 
@@ -929,6 +1211,26 @@
           link: entry.link || ''
         };
       });
+
+      hitachiCollaborators.splice(0, hitachiCollaborators.length, ...((payload.hitachiCollaborators || []).map(item => ({
+        id: Number(item.id),
+        monthKey: item.monthKey ?? item.month_key ?? defaultMonth(),
+        empresa: item.empresa || 'MSE ENGENHARIA',
+        colaborador: item.colaborador || '',
+        situacao: item.situacao || 'Ativo',
+        holerite: item.holerite || 'OK',
+        comprovantePagamento: item.comprovantePagamento ?? item.comprovante_pagamento ?? 'OK',
+        comprovanteAdiantamento: item.comprovanteAdiantamento ?? item.comprovante_adiantamento ?? 'OK',
+        kitRescisao: item.kitRescisao ?? item.kit_rescisao ?? 'NA'
+      }))));
+
+      hitachiCompanyDocs.splice(0, hitachiCompanyDocs.length, ...((payload.hitachiCompanyDocs || []).map(item => ({
+        id: Number(item.id),
+        monthKey: item.monthKey ?? item.month_key ?? defaultMonth(),
+        empresa: item.empresa || 'MSE ENGENHARIA',
+        documento: item.documento || '',
+        status: item.status || 'OK'
+      }))));
     }
 
     function saveLocalCache() {
@@ -975,19 +1277,23 @@
     }
 
     async function loadRemoteState() {
-      const [remoteContracts, remoteMonthEntries, remoteLines, remoteDiarista, remoteDiaristaEntries] = await Promise.all([
+      const [remoteContracts, remoteMonthEntries, remoteLines, remoteDiarista, remoteDiaristaEntries, remoteHitachi, remoteHitachiCompanyDocs] = await Promise.all([
         supabaseRequest('internet_contracts', { query: 'select=*&order=id.asc' }),
         supabaseRequest('internet_month_entries', { query: 'select=*&order=month_key.asc,contract_id.asc' }),
         supabaseRequest('internet_lines', { query: 'select=*&order=month_key.asc,id.asc' }),
         supabaseRequest('diarista_cadastros', { query: 'select=*&order=id.asc' }),
-        supabaseRequest('diarista_month_entries', { query: 'select=*&order=month_key.asc,diarista_id.asc' })
+        supabaseRequest('diarista_month_entries', { query: 'select=*&order=month_key.asc,diarista_id.asc' }),
+        supabaseRequest('hitachi_collaborators', { query: 'select=*&order=month_key.desc,empresa.asc,colaborador.asc' }),
+        supabaseRequest('hitachi_company_docs', { query: 'select=*&order=month_key.desc,empresa.asc,documento.asc' })
       ]);
       return {
         contracts: remoteContracts,
         monthEntries: remoteMonthEntries,
         monthLines: remoteLines,
         diaristaMasters: remoteDiarista,
-        diaristaMonthEntries: remoteDiaristaEntries
+        diaristaMonthEntries: remoteDiaristaEntries,
+        hitachiCollaborators: remoteHitachi,
+        hitachiCompanyDocs: remoteHitachiCompanyDocs
       };
     }
 
@@ -1106,6 +1412,40 @@
       });
     }
 
+    async function upsertHitachiRemote(item) {
+      if (!REMOTE_ENABLED) return;
+      await supabaseRequest('hitachi_collaborators', {
+        method: 'POST',
+        prefer: 'resolution=merge-duplicates,return=representation',
+        body: [{
+          id: Number(item.id),
+          month_key: item.monthKey || defaultMonth(),
+          empresa: item.empresa || 'MSE ENGENHARIA',
+          colaborador: item.colaborador || '',
+          situacao: item.situacao || 'Ativo',
+          holerite: item.holerite || 'OK',
+          comprovante_pagamento: item.comprovantePagamento || 'OK',
+          comprovante_adiantamento: item.comprovanteAdiantamento || 'OK',
+          kit_rescisao: item.kitRescisao || 'NA'
+        }]
+      });
+    }
+
+    async function upsertHitachiCompanyDocRemote(item) {
+      if (!REMOTE_ENABLED) return;
+      await supabaseRequest('hitachi_company_docs', {
+        method: 'POST',
+        prefer: 'resolution=merge-duplicates,return=representation',
+        body: [{
+          id: Number(item.id),
+          month_key: item.monthKey || defaultMonth(),
+          empresa: item.empresa || 'MSE ENGENHARIA',
+          documento: item.documento || '',
+          status: item.status || 'OK'
+        }]
+      });
+    }
+
     async function resetRemoteMonth(table, monthKey) {
       if (!REMOTE_ENABLED) return;
       await supabaseRequest(table, {
@@ -1133,6 +1473,10 @@
 
     function currentMonthKey() {
       return monthPicker.value || defaultMonth();
+    }
+
+    function currentHitachiMonth() {
+      return hMonthPicker.value || currentMonthKey() || defaultMonth();
     }
 
     function monthIndex(monthKey) {
@@ -1297,6 +1641,75 @@
       if (!monthKey) return '-';
       const [year, month] = monthKey.split('-');
       return new Date(Number(year), Number(month) - 1, 1).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }).replace('.', '');
+    }
+
+    function statusTone(value) {
+      if (value === 'OK') return 'ok';
+      if (value === 'PENDENTE') return 'warn';
+      return 'neutral';
+    }
+
+    function hitachiDocStatuses(row) {
+      const docs = [
+        row.holerite,
+        row.comprovantePagamento,
+        row.comprovanteAdiantamento
+      ];
+      if (row.situacao !== 'Ativo') docs.push(row.kitRescisao);
+      return docs.filter(item => item && item !== 'NA');
+    }
+
+    function hitachiRowsForMonth(monthKey = currentHitachiMonth()) {
+      return hitachiCollaborators.filter(item => item.monthKey === monthKey);
+    }
+
+    function hitachiCompanyDocsForMonth(monthKey = currentHitachiMonth()) {
+      return hitachiCompanyDocs.filter(item => item.monthKey === monthKey);
+    }
+
+    function hitachiMonthlySummary(monthKey = currentHitachiMonth()) {
+      const rows = hitachiRowsForMonth(monthKey);
+      const companyDocs = hitachiCompanyDocsForMonth(monthKey);
+      let ok = 0;
+      let pending = 0;
+
+      rows.forEach(row => {
+        hitachiDocStatuses(row).forEach(status => {
+          if (status === 'OK') ok += 1;
+          if (status === 'PENDENTE') pending += 1;
+        });
+      });
+
+      companyDocs.forEach(item => {
+        if (item.status === 'OK') ok += 1;
+        if (item.status === 'PENDENTE') pending += 1;
+      });
+
+      return {
+        rows,
+        companyDocs,
+        ok,
+        pending,
+        total: ok + pending
+      };
+    }
+
+    function hitachiHistory() {
+      const months = [...new Set([
+        ...hitachiCollaborators.map(item => item.monthKey),
+        ...hitachiCompanyDocs.map(item => item.monthKey)
+      ])].filter(Boolean).sort((a, b) => monthIndex(b) - monthIndex(a));
+
+      return months.map(monthKey => {
+        const summary = hitachiMonthlySummary(monthKey);
+        const pct = summary.total ? Math.round((summary.ok / summary.total) * 100) : 0;
+        return {
+          monthKey,
+          pct,
+          total: summary.total,
+          pending: summary.pending
+        };
+      });
     }
 
     function brl(value) {
@@ -1676,6 +2089,207 @@
       }
     }
 
+    function resetHitachiForm() {
+      editingHitachiId = null;
+      const form = document.getElementById('hitachiForm');
+      form.reset();
+      form.elements.monthKey.value = currentHitachiMonth();
+      form.elements.empresa.value = 'MSE ENGENHARIA';
+      form.elements.situacao.value = 'Ativo';
+      form.elements.holerite.value = 'OK';
+      form.elements.comprovantePagamento.value = 'OK';
+      form.elements.comprovanteAdiantamento.value = 'OK';
+      form.elements.kitRescisao.value = 'NA';
+      document.getElementById('saveHitachiBtn').innerHTML = `${icon('plus')}Salvar colaborador`;
+      document.getElementById('cancelHitachiEdit').style.display = 'none';
+    }
+
+    function resetHitachiCompanyForm() {
+      editingHitachiCompanyId = null;
+      const form = document.getElementById('hitachiCompanyForm');
+      form.reset();
+      form.elements.monthKey.value = currentHitachiMonth();
+      form.elements.empresa.value = 'MSE ENGENHARIA';
+      form.elements.documento.value = 'FOLHA DE PAGAMENTO';
+      form.elements.status.value = 'OK';
+      document.getElementById('saveHitachiCompanyBtn').innerHTML = `${icon('plus')}Salvar documento`;
+      document.getElementById('cancelHitachiCompanyEdit').style.display = 'none';
+    }
+
+    function editHitachiRow(id) {
+      const item = hitachiCollaborators.find(entry => entry.id === id);
+      if (!item) return;
+      editingHitachiId = id;
+      const form = document.getElementById('hitachiForm');
+      form.elements.monthKey.value = item.monthKey || currentHitachiMonth();
+      form.elements.empresa.value = item.empresa || 'MSE ENGENHARIA';
+      form.elements.colaborador.value = item.colaborador || '';
+      form.elements.situacao.value = item.situacao || 'Ativo';
+      form.elements.holerite.value = item.holerite || 'OK';
+      form.elements.comprovantePagamento.value = item.comprovantePagamento || 'OK';
+      form.elements.comprovanteAdiantamento.value = item.comprovanteAdiantamento || 'OK';
+      form.elements.kitRescisao.value = item.kitRescisao || 'NA';
+      document.getElementById('saveHitachiBtn').innerHTML = `${icon('edit')}Salvar colaborador`;
+      document.getElementById('cancelHitachiEdit').style.display = 'inline-flex';
+      switchModule('hitachi');
+      openHitachiView('cadastro');
+      refreshProtectedViews();
+    }
+    window.editHitachiRow = editHitachiRow;
+
+    function editHitachiCompanyDoc(id) {
+      const item = hitachiCompanyDocs.find(entry => entry.id === id);
+      if (!item) return;
+      editingHitachiCompanyId = id;
+      const form = document.getElementById('hitachiCompanyForm');
+      form.elements.monthKey.value = item.monthKey || currentHitachiMonth();
+      form.elements.empresa.value = item.empresa || 'MSE ENGENHARIA';
+      form.elements.documento.value = item.documento || 'FOLHA DE PAGAMENTO';
+      form.elements.status.value = item.status || 'OK';
+      document.getElementById('saveHitachiCompanyBtn').innerHTML = `${icon('edit')}Salvar documento`;
+      document.getElementById('cancelHitachiCompanyEdit').style.display = 'inline-flex';
+      switchModule('hitachi');
+      openHitachiView('cadastro');
+      refreshProtectedViews();
+    }
+    window.editHitachiCompanyDoc = editHitachiCompanyDoc;
+
+    function renderHitachi() {
+      const monthKey = currentHitachiMonth();
+      const summary = hitachiMonthlySummary(monthKey);
+      const q = norm(document.getElementById('hq').value);
+      const filteredRows = summary.rows.filter(row => {
+        const hasPending = hitachiDocStatuses(row).some(status => status === 'PENDENTE');
+        const statusOk =
+          hitachiFilter === 'todos' ||
+          (hitachiFilter === 'ok' && !hasPending) ||
+          (hitachiFilter === 'pendente' && hasPending) ||
+          (hitachiFilter === 'rescindidos' && row.situacao !== 'Ativo');
+        const queryOk = !q || norm([row.colaborador, row.empresa, row.situacao].join(' ')).includes(q);
+        return statusOk && queryOk;
+      });
+      const pct = summary.total ? Math.round((summary.ok / summary.total) * 100) : 0;
+      const history = hitachiHistory();
+      const maxHistoryTotal = history.length ? Math.max(...history.map(item => item.total || 0), 1) : 1;
+      const companyBoxes = ['MSE ENGENHARIA', 'MSE SERVICE'].reduce((acc, empresa) => {
+        const rows = summary.rows.filter(row => row.empresa === empresa);
+        const docs = summary.companyDocs.filter(row => row.empresa === empresa);
+        let ok = 0;
+        let pending = 0;
+        rows.forEach(row => {
+          hitachiDocStatuses(row).forEach(status => {
+            if (status === 'OK') ok += 1;
+            if (status === 'PENDENTE') pending += 1;
+          });
+        });
+        docs.forEach(row => {
+          if (row.status === 'OK') ok += 1;
+          if (row.status === 'PENDENTE') pending += 1;
+        });
+        acc[empresa] = { rows, docs, ok, pending };
+        return acc;
+      }, {});
+
+      hMonthPicker.value = monthKey;
+      document.getElementById('hPageTitle').textContent = `KPI Hitachi | ${monthLabel(monthKey)}`;
+      document.getElementById('hPageSubtitle').textContent = `Competencia ${monthLabel(monthKey)} com ${summary.rows.length} colaborador(es) e ${summary.companyDocs.length} documento(s) da empresa.`;
+      document.getElementById('hCollaborators').textContent = summary.rows.length;
+      document.getElementById('hOkPct').textContent = `${pct}%`;
+      document.getElementById('hPendings').textContent = summary.pending;
+      document.getElementById('hCompanyDocs').textContent = summary.companyDocs.length;
+      document.getElementById('hCountLabel').textContent = `${summary.rows.length} colaboradores no mes`;
+      document.getElementById('hFootCount').textContent = `${summary.rows.length} registros mensais`;
+      document.getElementById('hDonut').style.background = `conic-gradient(var(--green) 0deg ${pct * 3.6}deg,#edf1f5 ${pct * 3.6}deg 360deg)`;
+      document.getElementById('hDonutPct').textContent = `${pct}%`;
+      document.getElementById('hLegend').innerHTML = `
+        <div class="leg"><span><span class="dot" style="background:var(--green)"></span>OK</span><b>${summary.ok}</b></div>
+        <div class="leg"><span><span class="dot" style="background:var(--amber)"></span>Pendentes</span><b>${summary.pending}</b></div>
+        <div class="leg"><span><span class="dot" style="background:var(--slate)"></span>Total</span><b>${summary.total}</b></div>
+      `;
+
+      document.getElementById('hEvolution').innerHTML = history.length ? history.map(item => `
+        <div class="li">
+          <div>
+            <b class="link">${monthLabel(item.monthKey)}</b>
+            <div class="lisub">${item.total} documento(s) considerados</div>
+          </div>
+          <div class="tag ${item.pct === 100 ? 'ok' : item.pct >= 85 ? 'warn' : 'neutral'}">${item.pct}% OK</div>
+        </div>
+      `).join('') : `<div class="empty-state"><b>Sem historico.</b>Cadastre um mes para acompanhar a evolucao.</div>`;
+
+      document.getElementById('hVolumeBars').innerHTML = history.length ? [...history].reverse().map(item => `
+        <div class="baritem">
+          <div class="barlabel"><span>${monthLabel(item.monthKey)}</span><b>${item.total} docs</b></div>
+          <div class="track"><div class="fill" style="width:${maxHistoryTotal ? (item.total / maxHistoryTotal) * 100 : 0}%"></div></div>
+        </div>
+      `).join('') : `<div class="empty-state"><b>Sem volume mensal.</b>Os meses cadastrados aparecerao aqui.</div>`;
+
+      document.getElementById('hEngineeringCard').innerHTML = companyBoxes['MSE ENGENHARIA'].rows.length || companyBoxes['MSE ENGENHARIA'].docs.length ? `
+        <div class="cred-item">
+          <h4>MSE ENGENHARIA</h4>
+          <div class="cred-row"><span>Colaboradores</span><b>${companyBoxes['MSE ENGENHARIA'].rows.length}</b></div>
+          <div class="cred-row"><span>Itens OK</span><b>${companyBoxes['MSE ENGENHARIA'].ok}</b></div>
+          <div class="cred-row"><span>Pendentes</span><b>${companyBoxes['MSE ENGENHARIA'].pending}</b></div>
+        </div>` : `<div class="empty-state"><b>Sem dados da engenharia.</b>Cadastre os colaboradores do mes.</div>`;
+      document.getElementById('hServiceCard').innerHTML = companyBoxes['MSE SERVICE'].rows.length || companyBoxes['MSE SERVICE'].docs.length ? `
+        <div class="cred-item">
+          <h4>MSE SERVICE</h4>
+          <div class="cred-row"><span>Colaboradores</span><b>${companyBoxes['MSE SERVICE'].rows.length}</b></div>
+          <div class="cred-row"><span>Itens OK</span><b>${companyBoxes['MSE SERVICE'].ok}</b></div>
+          <div class="cred-row"><span>Pendentes</span><b>${companyBoxes['MSE SERVICE'].pending}</b></div>
+        </div>` : `<div class="empty-state"><b>Sem dados do service.</b>Cadastre os colaboradores do mes.</div>`;
+
+      const rowsBody = document.getElementById('hRows');
+      rowsBody.innerHTML = filteredRows.length ? filteredRows.map(row => `
+        <tr>
+          <td><span class="company">${row.colaborador}</span></td>
+          <td>${row.empresa}</td>
+          <td><span class="tag ${row.situacao === 'Ativo' ? 'ok' : 'warn'}">${row.situacao}</span></td>
+          <td><span class="tag ${statusTone(row.holerite)}">${row.holerite}</span></td>
+          <td><span class="tag ${statusTone(row.comprovantePagamento)}">${row.comprovantePagamento}</span></td>
+          <td><span class="tag ${statusTone(row.comprovanteAdiantamento)}">${row.comprovanteAdiantamento}</span></td>
+          <td><span class="tag ${statusTone(row.kitRescisao)}">${row.kitRescisao}</span></td>
+          <td class="actioncell"><button class="rowact" title="Editar colaborador" aria-label="Editar colaborador" onclick="editHitachiRow(${row.id})">${icon('edit')}</button></td>
+        </tr>
+      `).join('') : `<tr><td colspan="8"><div class="empty-state"><b>Nenhum colaborador encontrado.</b>Ajuste os filtros ou cadastre o mes.</div></td></tr>`;
+
+      const companyBody = document.getElementById('hCompanyRows');
+      companyBody.innerHTML = summary.companyDocs.length ? summary.companyDocs.map(row => `
+        <tr>
+          <td>${row.empresa}</td>
+          <td><b class="link">${row.documento}</b></td>
+          <td><span class="tag ${statusTone(row.status)}">${row.status}</span></td>
+          <td class="actioncell"><button class="rowact" title="Editar documento" aria-label="Editar documento" onclick="editHitachiCompanyDoc(${row.id})">${icon('edit')}</button></td>
+        </tr>
+      `).join('') : `<tr><td colspan="4"><div class="empty-state"><b>Nenhum documento da empresa cadastrado.</b>Use a aba protegida para preencher a competencia.</div></td></tr>`;
+
+      document.getElementById('hCadastroCount').textContent = `${hitachiCollaborators.length} registros`;
+      document.getElementById('hCadastroList').innerHTML = hitachiCollaborators.length ? hitachiCollaborators.slice().sort((a, b) => monthIndex(b.monthKey) - monthIndex(a.monthKey)).map(item => `
+        <div class="cred-item">
+          <h4>${item.colaborador}</h4>
+          <div class="cred-row"><span>Competencia</span><b>${monthLabel(item.monthKey)}</b></div>
+          <div class="cred-row"><span>Empresa</span><b>${item.empresa}</b></div>
+          <div class="cred-row"><span>Situacao</span><b>${item.situacao}</b></div>
+          <div style="margin-top:10px;display:flex;justify-content:flex-end">
+            <button class="inline-btn" type="button" onclick="editHitachiRow(${item.id})">Editar colaborador</button>
+          </div>
+        </div>
+      `).join('') : `<div class="empty-state"><b>Nenhum colaborador salvo.</b>Cadastre a competencia para montar o dashboard.</div>`;
+
+      document.getElementById('hCompanyCadastroCount').textContent = `${hitachiCompanyDocs.length} registros`;
+      document.getElementById('hCompanyCadastroList').innerHTML = hitachiCompanyDocs.length ? hitachiCompanyDocs.slice().sort((a, b) => monthIndex(b.monthKey) - monthIndex(a.monthKey)).map(item => `
+        <div class="cred-item">
+          <h4>${item.documento}</h4>
+          <div class="cred-row"><span>Competencia</span><b>${monthLabel(item.monthKey)}</b></div>
+          <div class="cred-row"><span>Empresa</span><b>${item.empresa}</b></div>
+          <div class="cred-row"><span>Status</span><b>${item.status}</b></div>
+          <div style="margin-top:10px;display:flex;justify-content:flex-end">
+            <button class="inline-btn" type="button" onclick="editHitachiCompanyDoc(${item.id})">Editar documento</button>
+          </div>
+        </div>
+      `).join('') : `<div class="empty-state"><b>Nenhum documento salvo.</b>Cadastre os documentos mensais da empresa.</div>`;
+    }
+
     function selectRow(id) {
       selectedId = id;
       const row = currentData().find(item => item.id === id);
@@ -1803,6 +2417,8 @@
       selectedId = null;
       render();
       renderDiarista();
+      if (!hMonthPicker.value) hMonthPicker.value = currentMonthKey();
+      renderHitachi();
     });
     document.getElementById('dMonthMirror').addEventListener('change', event => {
       if (event.target.value) {
@@ -1813,6 +2429,11 @@
       renderDiarista();
     });
     document.getElementById('dq').addEventListener('input', renderDiarista);
+    document.getElementById('hq').addEventListener('input', renderHitachi);
+    hMonthPicker.addEventListener('change', () => {
+      if (!hMonthPicker.value) hMonthPicker.value = currentMonthKey();
+      renderHitachi();
+    });
 
     document.getElementById('tabLoginForm').addEventListener('submit', event => {
       event.preventDefault();
@@ -1840,7 +2461,6 @@
       }
       document.getElementById('dTabAuthError').style.display = 'block';
     });
-
     document.querySelectorAll('.seg button').forEach(button => {
       button.addEventListener('click', () => {
         document.querySelectorAll('.seg button').forEach(item => item.classList.remove('on'));
@@ -2101,6 +2721,12 @@
         refreshProtectedViews();
       });
     });
+    document.querySelectorAll('.toplink[data-h-view]').forEach(button => {
+      button.addEventListener('click', () => {
+        openHitachiView(button.dataset.hView);
+        refreshProtectedViews();
+      });
+    });
     document.getElementById('diaristaMonthForm').addEventListener('submit', async event => {
       event.preventDefault();
       const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
@@ -2126,14 +2752,118 @@
     });
     document.getElementById('navInternet').addEventListener('click', () => switchModule('internet'));
     document.getElementById('navDiarista').addEventListener('click', () => switchModule('diarista'));
+    document.getElementById('navHitachi').addEventListener('click', () => switchModule('hitachi'));
+    document.getElementById('openHitachiCadastro').addEventListener('click', () => {
+      switchModule('hitachi');
+      openHitachiView('cadastro');
+      refreshProtectedViews();
+    });
+    document.getElementById('resetHitachi').addEventListener('click', async () => {
+      const monthKey = currentHitachiMonth();
+      const label = monthLabel(monthKey);
+      if (!window.confirm(`Deseja zerar os registros HITACHI do mes ${label}?`)) return;
+      for (let index = hitachiCollaborators.length - 1; index >= 0; index -= 1) {
+        if (hitachiCollaborators[index].monthKey === monthKey) hitachiCollaborators.splice(index, 1);
+      }
+      for (let index = hitachiCompanyDocs.length - 1; index >= 0; index -= 1) {
+        if (hitachiCompanyDocs[index].monthKey === monthKey) hitachiCompanyDocs.splice(index, 1);
+      }
+      saveLocalCache();
+      renderHitachi();
+      try {
+        await Promise.all([
+          resetRemoteMonth('hitachi_collaborators', monthKey),
+          resetRemoteMonth('hitachi_company_docs', monthKey)
+        ]);
+        setSyncStatus(`KPI Hitachi de ${label} zerado no Supabase`);
+      } catch (error) {
+        console.error(error);
+        setSyncStatus(`Falha ao zerar KPI Hitachi de ${label}. Cache local mantido.`);
+      }
+    });
+    document.querySelectorAll('[data-h-filter]').forEach(button => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('[data-h-filter]').forEach(item => item.classList.remove('on'));
+        button.classList.add('on');
+        hitachiFilter = button.dataset.hFilter;
+        renderHitachi();
+      });
+    });
+    document.getElementById('cancelHitachiEdit').addEventListener('click', resetHitachiForm);
+    document.getElementById('cancelHitachiCompanyEdit').addEventListener('click', resetHitachiCompanyForm);
+    document.getElementById('hitachiForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
+      const payload = {
+        id: editingHitachiId || createId(),
+        monthKey: formData.monthKey || currentHitachiMonth(),
+        empresa: formData.empresa,
+        colaborador: formData.colaborador,
+        situacao: formData.situacao,
+        holerite: formData.holerite,
+        comprovantePagamento: formData.comprovantePagamento,
+        comprovanteAdiantamento: formData.comprovanteAdiantamento,
+        kitRescisao: formData.kitRescisao
+      };
+      if (editingHitachiId) {
+        const index = hitachiCollaborators.findIndex(item => item.id === editingHitachiId);
+        if (index >= 0) hitachiCollaborators[index] = payload;
+      } else {
+        hitachiCollaborators.push(payload);
+      }
+      hMonthPicker.value = payload.monthKey;
+      resetHitachiForm();
+      saveLocalCache();
+      renderHitachi();
+      try {
+        await upsertHitachiRemote(payload);
+        setSyncStatus(`Colaborador ${payload.colaborador} sincronizado no KPI Hitachi`);
+      } catch (error) {
+        console.error(error);
+        setSyncStatus(`Falha ao sincronizar colaborador ${payload.colaborador}. Cache local mantido.`);
+      }
+    });
+    document.getElementById('hitachiCompanyForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
+      const payload = {
+        id: editingHitachiCompanyId || createId(),
+        monthKey: formData.monthKey || currentHitachiMonth(),
+        empresa: formData.empresa,
+        documento: formData.documento,
+        status: formData.status
+      };
+      if (editingHitachiCompanyId) {
+        const index = hitachiCompanyDocs.findIndex(item => item.id === editingHitachiCompanyId);
+        if (index >= 0) hitachiCompanyDocs[index] = payload;
+      } else {
+        hitachiCompanyDocs.push(payload);
+      }
+      hMonthPicker.value = payload.monthKey;
+      resetHitachiCompanyForm();
+      saveLocalCache();
+      renderHitachi();
+      try {
+        await upsertHitachiCompanyDocRemote(payload);
+        setSyncStatus(`Documento ${payload.documento} sincronizado no KPI Hitachi`);
+      } catch (error) {
+        console.error(error);
+        setSyncStatus(`Falha ao sincronizar documento ${payload.documento}. Cache local mantido.`);
+      }
+    });
 
     async function initializePortal() {
       await bootstrapData();
+      hMonthPicker.value = currentMonthKey();
+      resetHitachiForm();
+      resetHitachiCompanyForm();
       refreshProtectedViews();
       openView('overview');
       render();
       openDiaristaView('overview');
       renderDiarista();
+      openHitachiView('overview');
+      renderHitachi();
       switchModule('internet');
     }
 
