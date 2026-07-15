@@ -773,26 +773,26 @@
                   <select name="holerite">
                     <option value="OK">OK</option>
                     <option value="PENDENTE">PENDENTE</option>
-                    <option value="NA">NA</option>
+                    <option value="N/A">N/A</option>
                   </select>
                 </label>
                 <label>Comprovante de pagamento
                   <select name="comprovantePagamento">
                     <option value="OK">OK</option>
                     <option value="PENDENTE">PENDENTE</option>
-                    <option value="NA">NA</option>
+                    <option value="N/A">N/A</option>
                   </select>
                 </label>
                 <label>Comprovante de adiantamento
                   <select name="comprovanteAdiantamento">
                     <option value="OK">OK</option>
                     <option value="PENDENTE">PENDENTE</option>
-                    <option value="NA">NA</option>
+                    <option value="N/A">N/A</option>
                   </select>
                 </label>
                 <label>Kit rescisao
                   <select name="kitRescisao">
-                    <option value="NA">NA</option>
+                    <option value="N/A">N/A</option>
                     <option value="OK">OK</option>
                     <option value="PENDENTE">PENDENTE</option>
                   </select>
@@ -826,7 +826,7 @@
                   <select name="status" required>
                     <option value="OK">OK</option>
                     <option value="PENDENTE">PENDENTE</option>
-                    <option value="NA">NA</option>
+                    <option value="N/A">N/A</option>
                   </select>
                 </label>
                 <div style="grid-column:1 / -1;display:flex;justify-content:flex-end;gap:10px">
@@ -1221,7 +1221,7 @@
         holerite: item.holerite || 'OK',
         comprovantePagamento: item.comprovantePagamento ?? item.comprovante_pagamento ?? 'OK',
         comprovanteAdiantamento: item.comprovanteAdiantamento ?? item.comprovante_adiantamento ?? 'OK',
-        kitRescisao: item.kitRescisao ?? item.kit_rescisao ?? 'NA'
+        kitRescisao: item.kitRescisao ?? item.kit_rescisao ?? 'N/A'
       }))));
 
       hitachiCompanyDocs.splice(0, hitachiCompanyDocs.length, ...((payload.hitachiCompanyDocs || []).map(item => ({
@@ -1426,7 +1426,7 @@
           holerite: item.holerite || 'OK',
           comprovante_pagamento: item.comprovantePagamento || 'OK',
           comprovante_adiantamento: item.comprovanteAdiantamento || 'OK',
-          kit_rescisao: item.kitRescisao || 'NA'
+          kit_rescisao: item.kitRescisao || 'N/A'
         }]
       });
     }
@@ -1656,7 +1656,7 @@
         row.comprovanteAdiantamento
       ];
       if (row.situacao !== 'Ativo') docs.push(row.kitRescisao);
-      return docs.filter(item => item && item !== 'NA');
+      return docs.filter(item => item && item !== 'N/A');
     }
 
     function hitachiRowsForMonth(monthKey = currentHitachiMonth()) {
@@ -2099,7 +2099,7 @@
       form.elements.holerite.value = 'OK';
       form.elements.comprovantePagamento.value = 'OK';
       form.elements.comprovanteAdiantamento.value = 'OK';
-      form.elements.kitRescisao.value = 'NA';
+      form.elements.kitRescisao.value = 'N/A';
       document.getElementById('saveHitachiBtn').innerHTML = `${icon('plus')}Salvar colaborador`;
       document.getElementById('cancelHitachiEdit').style.display = 'none';
     }
@@ -2128,7 +2128,7 @@
       form.elements.holerite.value = item.holerite || 'OK';
       form.elements.comprovantePagamento.value = item.comprovantePagamento || 'OK';
       form.elements.comprovanteAdiantamento.value = item.comprovanteAdiantamento || 'OK';
-      form.elements.kitRescisao.value = item.kitRescisao || 'NA';
+      form.elements.kitRescisao.value = item.kitRescisao || 'N/A';
       document.getElementById('saveHitachiBtn').innerHTML = `${icon('edit')}Salvar colaborador`;
       document.getElementById('cancelHitachiEdit').style.display = 'inline-flex';
       switchModule('hitachi');

@@ -71,7 +71,7 @@ create table if not exists public.hitachi_collaborators (
   holerite text not null default 'OK',
   comprovante_pagamento text not null default 'OK',
   comprovante_adiantamento text not null default 'OK',
-  kit_rescisao text not null default 'NA',
+  kit_rescisao text not null default 'N/A',
   created_at timestamptz not null default now()
 );
 
