@@ -20,51 +20,73 @@
     button,input,select{font:inherit}
     button{cursor:pointer}
     button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+    .utilitybar{background:#fff;border-bottom:1px solid var(--line)}
+    .uinner{max-width:var(--maxw);margin:auto;padding:0 28px;display:flex;align-items:center;gap:6px;height:46px}
+    .utab{height:30px;display:inline-flex;align-items:center;padding:0 14px;border-radius:8px;border:1px solid transparent;background:transparent;color:#3f5d91;font:500 12px "IBM Plex Sans",system-ui,sans-serif;text-decoration:none}
+    .utab.on{background:#eef3fe;border-color:#d8e3fb;color:#1a4fd6}
     .hdr{background:radial-gradient(640px 360px at 85% -30%, rgba(64,120,210,.5), transparent 62%),linear-gradient(118deg,#13223b,#193053 68%,#1f3a63);color:#fff}
-    .hinner{max-width:var(--maxw);margin:auto;padding:14px 28px;display:flex;align-items:center;gap:18px;min-height:72px}
-    .brand{display:flex;align-items:center;gap:13px}
-    .logo{width:38px;height:38px;border:1px solid rgba(255,255,255,.26);border-radius:10px;display:grid;place-items:center;font-weight:700}
-    .hsep{width:1px;height:34px;background:rgba(255,255,255,.22)}
-    .titles .t{font-size:15px;font-weight:700;text-transform:uppercase}
-    .titles .s,.clock,.status,.user small,.mini .meta,.eyebrow,.labelmono,.table-foot{font-family:"IBM Plex Mono",monospace}
-    .titles .s{font-size:10px;color:rgba(255,255,255,.68);text-transform:uppercase;margin-top:3px}
+    .hinner{max-width:var(--maxw);margin:auto;padding:14px 28px;display:flex;align-items:center;gap:18px;min-height:76px}
+    .brand{display:flex;align-items:center;gap:18px}
+    .logo{font:700 28px/1 "IBM Plex Sans",system-ui,sans-serif;letter-spacing:-1.5px;text-transform:lowercase;color:#fff}
+    .hsep{width:1px;height:38px;background:rgba(255,255,255,.18)}
+    .titles .t{font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.2px}
+    .titles .t b{color:#5b9bf0}
+    .titles .s,.clock,.status,.user small,.eyebrow,.labelmono,.table-foot,.grp,.ti,.cta,.lab,.lab small{font-family:"IBM Plex Mono",monospace}
+    .titles .s{font-size:10px;color:rgba(255,255,255,.62);text-transform:uppercase;margin-top:3px;letter-spacing:1px}
     .grow{flex:1}
-    .status{border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:7px 10px;font-size:10px;text-transform:uppercase;display:flex;align-items:center;gap:7px;color:rgba(255,255,255,.78)}
-    .live{width:7px;height:7px;border-radius:999px;background:#35d17b;box-shadow:0 0 0 4px rgba(53,209,123,.15)}
-    .clock{font-size:10px;color:rgba(255,255,255,.72)}
-    .ic{width:36px;height:36px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);color:#fff;border-radius:10px;display:grid;place-items:center}
-    .user{display:flex;align-items:center;gap:9px}
-    .av{width:36px;height:36px;border-radius:999px;background:#fff;color:var(--navy);display:grid;place-items:center;font-weight:700}
-    .user b{display:block;font-size:13px}
+    .status{border:1px solid rgba(95,227,163,.25);background:rgba(57,217,138,.08);border-radius:999px;padding:7px 12px;font-size:10px;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:7px;color:#5fe3a3}
+    .live{width:7px;height:7px;border-radius:999px;background:#39d98a;box-shadow:0 0 0 7px rgba(57,217,138,0);animation:pulse 2s infinite}
+    .clock{font-size:14px;letter-spacing:1.5px;color:rgba(255,255,255,.78)}
+    .tecto{display:flex;flex-direction:column;line-height:1;padding-left:16px;border-left:1px solid rgba(255,255,255,.14)}
+    .tecto b{font:700 18px "IBM Plex Sans",system-ui,sans-serif;letter-spacing:-.5px}
+    .tecto b i{color:#5b9bf0;font-style:normal}
+    .tecto small{font:400 8px "IBM Plex Mono",monospace;letter-spacing:3px;color:rgba(255,255,255,.45);margin-top:3px}
+    .acts{display:flex;align-items:center;gap:3px;padding:0 4px}
+    .ic{width:34px;height:34px;border:0;border-radius:9px;background:transparent;color:rgba(255,255,255,.62);display:grid;place-items:center;position:relative;transition:.15s}
+    .ic:hover{background:rgba(255,255,255,.08);color:#fff}
+    .nbadge{position:absolute;top:1px;right:1px;background:var(--red);color:#fff;border-radius:8px;padding:1px 4px;font:600 8px "IBM Plex Mono",monospace}
+    .user{display:flex;align-items:center;gap:10px;padding-left:14px;border-left:1px solid rgba(255,255,255,.14)}
+    .av{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);color:#fff;display:grid;place-items:center;font-weight:700}
+    .uinfo b,.user b{display:block;font-size:13px;color:#fff}
+    .uinfo small,.user small{font-size:9.5px;letter-spacing:.5px;color:rgba(255,255,255,.5)}
     .ticker{background:#fff;border-bottom:1px solid var(--line)}
-    .trow{max-width:var(--maxw);margin:auto;padding:14px 28px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-    .mini{display:flex;align-items:center;gap:12px;padding-right:12px;border-right:1px solid var(--line)}
-    .mini:last-child{border-right:0}
-    .miniicon{width:34px;height:34px;border-radius:999px;background:#edf4ff;color:var(--blue);display:grid;place-items:center;flex:0 0 auto}
-    .mini b{display:block;font-size:13px;color:#27407a}
-    .mini .meta{font-size:10px;text-transform:uppercase;color:var(--body);margin-top:2px}
-    .shell{max-width:var(--maxw);margin:auto;display:grid;grid-template-columns:255px 1fr;gap:18px;padding:18px 28px 38px}
-    .side{background:linear-gradient(180deg,#2a4775,#27416e);color:#fff;border-radius:16px;box-shadow:var(--shadow);padding:12px;min-height:calc(100vh - 138px);position:sticky;top:12px}
-    .ssearch{height:40px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(255,255,255,.92);display:flex;align-items:center;gap:9px;color:#9aa5b6;padding:0 11px;margin-bottom:14px}
-    .ssearch kbd{margin-left:auto;font:500 9px "IBM Plex Mono",monospace;color:#98a1b0;background:#fff;border:1px solid var(--line);border-radius:6px;padding:3px 5px}
-    .navblock{border-top:1px solid rgba(255,255,255,.08);padding-top:12px}
-    .nv{height:42px;border-radius:12px;display:flex;align-items:center;gap:10px;padding:0 12px;color:rgba(255,255,255,.88);transition:.16s ease;border:1px solid transparent;background:rgba(255,255,255,.03)}
-    .nv:hover{background:rgba(255,255,255,.08)}
-    .nv.on{background:#3a5583;color:#fff;font-weight:700;border-color:#182a47;box-shadow:2px 2px 0 #182a47}
-    .ni{width:18px;height:18px;display:grid;place-items:center;flex:0 0 auto}
-    .nl{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .chev{width:18px;height:18px;display:grid;place-items:center;transition:transform .16s ease}
+    .trow{max-width:var(--maxw);margin:auto;height:46px;padding:0 28px;display:flex;align-items:center;gap:0}
+    .greet{padding-right:18px;font:600 13px "IBM Plex Sans",system-ui,sans-serif;color:var(--ink);white-space:nowrap}
+    .tscroll{display:flex;align-items:center;min-width:0;flex:1;overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 90px),transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 90px),transparent)}
+    .ti{height:100%;display:inline-flex;align-items:center;gap:8px;padding:0 18px;border-left:1px solid var(--line-2);font-size:10.5px;letter-spacing:.7px;text-transform:uppercase;color:var(--body);white-space:nowrap}
+    .ti svg{width:13px;height:13px;stroke-width:2;color:var(--blue)}
+    .ti.ok svg{color:var(--green)}
+    .cta{margin-left:auto;background:#eef3fe;border:1px solid #d8e3fb;border-radius:8px;padding:7px 12px;color:var(--blue);font-size:10.5px;letter-spacing:.8px;text-transform:uppercase}
+    .shell{max-width:var(--maxw);margin:auto;display:flex;gap:0;padding:0 28px}
+    .side{width:272px;position:sticky;top:14px;max-height:calc(100vh - 28px);overflow-y:auto;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);margin-top:20px;padding:12px;transition:width .22s,opacity .18s,margin .22s,padding .22s,border-width .22s}
+    .main{flex:1;min-width:0;padding:20px 0 70px 28px}
+    .ssearch{height:42px;border:0;border-radius:999px;background:#eef0f3;display:flex;align-items:center;gap:10px;color:var(--mut-2);padding:0 14px;margin-bottom:8px}
+    .ssearch .pl,.navlabel{font-size:13.5px;color:var(--mut-2)}
+    .ssearch kbd{margin-left:auto;font:400 10px "IBM Plex Mono",monospace;color:var(--mut);background:#fff;border:1px solid var(--line);border-radius:5px;padding:3px 5px}
+    .grp{padding:14px 12px 6px;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--mut-2)}
+    .navblock{padding-top:4px}
+    .nv{min-height:40px;border-radius:999px;display:flex;align-items:center;gap:13px;padding:9px 12px;color:#3f4858;transition:.13s ease;border:1px solid transparent;background:transparent}
+    .nv:hover{background:#f4f6f8}
+    .nv.on{background:#e9f1fe;color:#1a4fd6;font-weight:600}
+    .nv.on .ni,.nv.on .chev{color:#1a4fd6}
+    .ni{width:20px;height:20px;display:grid;place-items:center;flex:0 0 auto;color:#6b7280}
+    .ni svg{width:19px;height:19px}
+    .nl{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+    .chev{width:18px;height:18px;display:grid;place-items:center;transition:transform .16s ease;color:#98a1b0}
     .navblock.open .chev{transform:rotate(90deg)}
     .navblock:not(.open) .navtree{display:none}
-    .navtree{padding:8px 0 0 8px;border-left:1px solid rgba(255,255,255,.14);margin:8px 0 0 10px}
-    .subitem{width:100%;height:34px;display:flex;align-items:center;padding:0 12px;border-radius:10px;color:rgba(255,255,255,.76);font-size:13px;border:0;background:transparent;text-align:left;cursor:pointer}
-    .subitem.on{background:rgba(255,255,255,.12);color:#fff;font-weight:700}
-    .main{min-width:0}
-    .subrow2{display:flex;align-items:center;gap:10px;margin-bottom:18px}
-    .sidetoggle,.rowact{width:38px;height:38px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--body);display:grid;place-items:center}
-    .ico{width:38px;height:38px;background:#e9f1fe;color:var(--blue);border-radius:10px;display:grid;place-items:center}
-    .lab b{display:block;font-size:18px;color:#1a3770}
-    .lab small{display:block;font-size:10px;text-transform:uppercase;color:var(--mut);margin-top:3px;font-family:"IBM Plex Mono",monospace}
+    .navtree{padding:8px 0 0 10px;margin:0 0 0 10px;border-left:1px solid var(--line-2)}
+    .subitem{width:100%;height:34px;display:flex;align-items:center;padding:0 12px;border-radius:999px;color:#5b6677;font-size:13px;border:0;background:transparent;text-align:left;cursor:pointer}
+    .subitem:hover{background:#f4f6f8}
+    .subitem.on{background:#e9f1fe;color:#1a4fd6;font-weight:600}
+    .subrow2{display:flex;align-items:center;gap:10px;padding:2px 2px 16px}
+    .sidetoggle,.rowact{width:34px;height:34px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--body);display:grid;place-items:center}
+    .sidetoggle:hover,.rowact:hover{background:#f1f3f5}
+    .ico{width:34px;height:34px;background:#fff;color:var(--blue);border:1px solid var(--line);border-radius:9px;display:grid;place-items:center}
+    .ico svg{width:16px;height:16px;stroke-width:2}
+    .lab{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mut)}
+    .lab b{display:block;font-size:11px;color:var(--ink);letter-spacing:2px;text-transform:uppercase}
+    .lab small{display:block;font-size:10px;text-transform:uppercase;color:var(--mut);margin-top:3px;letter-spacing:1.4px}
     .monthbar{display:grid;grid-template-columns:1fr auto auto auto;gap:10px;margin-bottom:16px}
     .topmenu{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:6px 0 18px}
     .toplink{padding:12px 16px;background:transparent;border:0;border-bottom:2px solid transparent;color:#456191;font-size:12px;font-weight:600}
@@ -171,15 +193,13 @@
     input,select,textarea{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff;color:var(--ink);min-width:0}
     textarea{resize:vertical;min-height:120px;font:13px "IBM Plex Sans",system-ui,sans-serif}
     footer{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
-    .fab{position:fixed;right:24px;bottom:24px;width:52px;height:52px;border:0;border-radius:16px;background:var(--navy);color:#fff;display:grid;place-items:center;box-shadow:0 12px 24px rgba(22,36,60,.22)}
-    .side-closed{grid-template-columns:86px 1fr}
-    .side-closed .side{padding:12px 10px}
-    .side-closed .ssearch span,.side-closed .navlabel,.side-closed .navtree,.side-closed .nl,.side-closed .chev,.side-closed .ssearch kbd{display:none}
-    .side-closed .nv{justify-content:center;padding:0}
+    .fab{position:fixed;right:22px;bottom:22px;width:52px;height:52px;border:0;border-radius:16px;background:linear-gradient(135deg,#2563eb,#1a4fd6);color:#fff;display:grid;place-items:center;box-shadow:0 12px 26px -8px rgba(37,99,235,.6)}
+    .side-closed .side{width:0;padding:0;opacity:0;border-width:0;overflow:hidden;margin-top:20px}
+    .side-closed .main{padding-left:0}
     svg{width:18px;height:18px;stroke-width:1.8}
     @media (max-width:1280px){.kpis{grid-template-columns:repeat(3,1fr)}.dashgrid{grid-template-columns:1fr 1fr}.detail-grid,.cred-grid{grid-template-columns:1fr}}
-    @media (max-width:980px){.shell{grid-template-columns:1fr;padding:14px}.side{position:static;min-height:0}.trow{grid-template-columns:1fr 1fr;padding:14px}.monthbar,.toolbar{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.detail-grid{grid-template-columns:1fr}.hinner{padding:14px}.user,.clock{display:none}}
-    @media (max-width:640px){.trow{grid-template-columns:1fr}.mini{border-right:0;border-bottom:1px solid var(--line);padding-bottom:10px}.mini:last-child{border-bottom:0}.kpis{grid-template-columns:1fr}.dashgrid{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.donut-wrap,.cred-grid{grid-template-columns:1fr}}
+    @media (max-width:980px){.shell{padding:0 20px}.side{display:none}.main{padding-left:0}.monthbar,.toolbar{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.detail-grid{grid-template-columns:1fr}.hinner{padding:14px}.clock,.tecto,.user{display:none}.uinner{padding:0 20px}.trow{padding:0 20px}}
+    @media (max-width:640px){.trow{height:auto;display:grid;grid-template-columns:1fr;gap:8px;padding:12px 20px}.tscroll{display:grid;mask-image:none;-webkit-mask-image:none}.ti{padding:8px 0;border-left:0;border-top:1px solid var(--line-2)}.greet{padding-right:0}.kpis{grid-template-columns:1fr}.dashgrid{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.donut-wrap,.cred-grid{grid-template-columns:1fr}.uinner{overflow:auto}}
     .pending-mail-list{display:grid;gap:12px;max-height:340px;overflow:auto;padding-right:4px}
     .pending-mail-item{border:1px solid var(--line);border-radius:12px;background:#fbfcff;padding:12px}
     .pending-mail-item b{display:block;color:#17356c;margin-bottom:6px}
@@ -190,63 +210,74 @@
   </style>
 </head>
 <body>
+  <div class="utilitybar">
+    <div class="uinner">
+      <a class="utab" href="#">Identidade Visual</a>
+      <a class="utab on" href="#">Prompt Design MSE</a>
+      <a class="utab" href="#">Manual IA Portal</a>
+      <a class="utab" href="#">HUB MSE</a>
+      <a class="utab" href="#">Video Tutorial</a>
+      <a class="utab" href="#">Sincronizar BD</a>
+    </div>
+  </div>
   <header class="hdr">
     <div class="hinner">
       <div class="brand">
-        <div class="logo">MSE</div>
+        <div class="logo">mse</div>
         <span class="hsep"></span>
         <div class="titles">
-          <div class="t">Portal Administrativo</div>
-          <div class="s">Controle mensal administrativo</div>
+          <div class="t">Portal <b>MSE</b></div>
+          <div class="s">Controle administrativo · operacao mensal</div>
         </div>
       </div>
       <div class="grow"></div>
       <span class="status"><span class="live"></span>Monitoramento ativo</span>
       <span class="clock" id="clock">00:00:00</span>
-      <button class="ic" title="Notificacoes" aria-label="Notificacoes" data-icon="bell"></button>
-      <button class="ic" title="Configuracoes" aria-label="Configuracoes" data-icon="settings"></button>
+      <div class="tecto"><b>MSE <i>DATA</i></b><small>PORTAL OPERACIONAL</small></div>
+      <div class="acts">
+        <button class="ic" title="Ajuda" aria-label="Ajuda" data-icon="help"></button>
+        <button class="ic" title="Notificacoes" aria-label="Notificacoes"><span class="nbadge">07</span><span data-icon="bell"></span></button>
+        <button class="ic" title="Configuracoes" aria-label="Configuracoes" data-icon="settings"></button>
+      </div>
       <div class="user">
         <div class="av">AD</div>
-        <div><b>Administrativo</b><small>Controle operacional</small></div>
+        <div class="uinfo"><b>Administrativo</b><small>MSE · sessao ativa</small></div>
       </div>
     </div>
   </header>
 
   <div class="ticker">
     <div class="trow">
-      <div class="mini">
-        <div class="miniicon" data-icon="refresh"></div>
-        <div><b>Dados atualizados automaticamente</b><div class="meta" id="updatedAt">Ultima atualizacao agora</div></div>
+      <span class="greet">Boa tarde. Bem-vinda ao portal MSE.</span>
+      <div class="tscroll">
+        <span class="ti"><span data-icon="settings2"></span>Parametrizavel</span>
+        <span class="ti"><span data-icon="refresh"></span><span id="updatedAt">Atualizado agora</span></span>
+        <span class="ti"><span data-icon="activity"></span><span id="miniIndicators">0 contratos ativos</span></span>
+        <span class="ti"><span data-icon="clock"></span>Monitoramento continuo 24h</span>
+        <span class="ti ok"><span data-icon="checkCircle"></span>Dados atualizados automaticamente</span>
+        <span class="ti"><span data-icon="shield"></span>Protecao total do CAPEX</span>
       </div>
-      <div class="mini">
-        <div class="miniicon" data-icon="activity"></div>
-        <div><b>Indicadores monitorados</b><div class="meta" id="miniIndicators">0 contratos ativos</div></div>
-      </div>
-      <div class="mini">
-        <div class="miniicon" data-icon="shield"></div>
-        <div><b>Protecao total do CAPEX</b><div class="meta">Controles e aprovacoes ativos</div></div>
-      </div>
-      <div class="mini">
-        <div class="miniicon" data-icon="settings2"></div>
-        <div><b>100% parametrizavel</b><div class="meta">Cadastre conforme sua operacao</div></div>
-      </div>
+      <button class="cta" type="button">Conheca a MSE →</button>
     </div>
   </div>
 
   <div class="shell">
     <aside class="side">
-      <div class="ssearch"><span data-icon="search"></span><span class="navlabel">Buscar aplicacoes</span><kbd>Ctrl K</kbd></div>
+      <div class="ssearch"><span data-icon="search"></span><span class="pl">Buscar aplicacoes</span><kbd>Ctrl K</kbd></div>
+      <div class="grp">Acesso rapido</div>
       <div class="navblock open" id="adminBlock">
-        <button class="nv on" id="adminToggle" type="button">
+        <button class="nv" id="adminToggle" type="button">
           <span class="ni" data-icon="briefcase"></span>
           <span class="nl">Administrativo</span>
           <span class="chev" data-icon="chevronRight"></span>
         </button>
         <div class="navtree">
-          <button class="subitem on" id="navInternet" type="button">INTERNET</button>
-          <button class="subitem" id="navDiarista" type="button">DIARISTA</button>
+          <button class="subitem on" id="navInternet" type="button">Internet</button>
+          <button class="subitem" id="navDiarista" type="button">Diarista</button>
+          <button class="subitem" id="navPassagens" type="button">Passagens</button>
         </div>
       </div>
+      <div class="grp">Disciplinas</div>
       <div class="navblock" id="docsBlock" style="margin-top:10px">
         <button class="nv" id="docsToggle" type="button">
           <span class="ni" data-icon="folder"></span>
@@ -254,7 +285,7 @@
           <span class="chev" data-icon="chevronRight"></span>
         </button>
         <div class="navtree">
-          <button class="subitem" id="navHitachi" type="button">KPI HITACHI</button>
+          <button class="subitem" id="navHitachi" type="button">KPI Hitachi</button>
         </div>
       </div>
     </aside>
@@ -614,6 +645,165 @@
         </div>
       </section>
 
+      <section class="module" id="modulePassagens">
+        <div class="subrow2">
+          <button class="sidetoggle" type="button" title="Recolher menu" aria-label="Recolher menu" data-icon="menu"></button>
+          <span class="ico" data-icon="plane"></span>
+          <span class="lab">
+            <b>Controle de Passagens</b>
+            <small>Integracao operacional com API</small>
+          </span>
+        </div>
+
+        <div class="monthbar">
+          <div class="search"><span data-icon="search"></span><input id="pq" placeholder="Buscar por colaborador, obra, funcao ou tipo..."></div>
+          <div class="selectbox"><span data-icon="calendar"></span><input id="pMonthPicker" type="month"></div>
+          <button class="ghost" id="openPassagensConfig"><span data-icon="settings"></span>Configurar API</button>
+          <button class="primary" id="syncPassagens"><span data-icon="refresh"></span>Sincronizar passagens</button>
+        </div>
+
+        <div class="topmenu">
+          <button class="toplink on" data-p-view="overview">Visao Geral</button>
+          <button class="toplink" data-p-view="air">Aereo</button>
+          <button class="toplink" data-p-view="road">Rodoviario</button>
+        </div>
+
+        <div class="view on" id="pview-overview">
+          <div class="hero">
+            <h1 id="pPageTitle">Controle de Passagens</h1>
+            <p id="pPageSubtitle">Sincronize a API do portal MSE e complemente apenas os dados que nao vierem automaticamente.</p>
+          </div>
+
+          <section class="kpis" style="grid-template-columns:repeat(5,1fr)">
+            <div class="kpi">
+              <div class="ktop"><div class="kicon blue" data-icon="fileText"></div><div class="klabel">Solicitacoes</div></div>
+              <div class="kvalue" id="pTotal">0</div>
+              <div class="kmeta">Registros do mes</div>
+            </div>
+            <div class="kpi">
+              <div class="ktop"><div class="kicon blue" data-icon="plane"></div><div class="klabel">Aereo</div></div>
+              <div class="kvalue" id="pAir">0</div>
+              <div class="kmeta">Classificados no mes</div>
+            </div>
+            <div class="kpi">
+              <div class="ktop"><div class="kicon blue" data-icon="bus"></div><div class="klabel">Rodoviario</div></div>
+              <div class="kvalue" id="pRoad">0</div>
+              <div class="kmeta">Classificados no mes</div>
+            </div>
+            <div class="kpi">
+              <div class="ktop"><div class="kicon green" data-icon="dollar"></div><div class="klabel">Valor pago</div></div>
+              <div class="kvalue" id="pPaid">R$ 0,00</div>
+              <div class="kmeta">Total informado</div>
+            </div>
+            <div class="kpi">
+              <div class="ktop"><div class="kicon slate" data-icon="clipboard"></div><div class="klabel">Pendentes</div></div>
+              <div class="kvalue" id="pPending">0</div>
+              <div class="kmeta">Sem complemento interno</div>
+            </div>
+          </section>
+
+          <section class="dashgrid">
+            <article class="card pad">
+              <div class="chead"><span class="ti2">Distribuicao por obra</span><span class="eyebrow" id="pSyncStamp">Aguardando sincronizacao</span></div>
+              <div class="bars" id="pBars"></div>
+            </article>
+            <article class="card pad">
+              <div class="chead"><span class="ti2">Tipos da solicitacao</span><span class="eyebrow">API Passagens</span></div>
+              <div class="list" id="pTypes"></div>
+            </article>
+            <article class="card pad">
+              <div class="chead"><span class="ti2">Conferencia interna</span><span class="eyebrow">Complemento manual</span></div>
+              <div class="list" id="pChecklist"></div>
+            </article>
+          </section>
+
+          <section class="card table-card">
+            <div class="pad">
+              <div class="chead"><span class="ti2">Solicitacoes do mes</span><span class="eyebrow" id="pCountLabel">0 registros</span></div>
+            </div>
+            <div style="overflow:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Colaborador</th>
+                    <th>Obra</th>
+                    <th>Tipo</th>
+                    <th>Modalidade</th>
+                    <th>Data</th>
+                    <th>Valor pago</th>
+                    <th>Localizador</th>
+                    <th>Pedido</th>
+                    <th>Acoes</th>
+                  </tr>
+                </thead>
+                <tbody id="pRows"></tbody>
+              </table>
+            </div>
+            <div class="table-foot">Sincronizacao mensal: <span id="pFootCount">0</span></div>
+          </section>
+        </div>
+
+        <div class="view" id="pview-air">
+          <div class="hero">
+            <h1>Aereo</h1>
+            <p>Conferencie compras de passagens aereas, localizador, companhia e pedido interno.</p>
+          </div>
+          <section class="card table-card">
+            <div class="pad">
+              <div class="chead"><span class="ti2">Passagens aereas</span><span class="eyebrow" id="pAirCount">0 registros</span></div>
+            </div>
+            <div style="overflow:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Colaborador</th>
+                    <th>Obra</th>
+                    <th>Funcao</th>
+                    <th>Tipo</th>
+                    <th>Data</th>
+                    <th>Companhia</th>
+                    <th>Localizador</th>
+                    <th>Valor</th>
+                    <th>Acoes</th>
+                  </tr>
+                </thead>
+                <tbody id="pAirRows"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div class="view" id="pview-road">
+          <div class="hero">
+            <h1>Rodoviario</h1>
+            <p>Conferencie trechos rodoviarios, conexoes, observacoes e numero do pedido final.</p>
+          </div>
+          <section class="card table-card">
+            <div class="pad">
+              <div class="chead"><span class="ti2">Passagens rodoviarias</span><span class="eyebrow" id="pRoadCount">0 registros</span></div>
+            </div>
+            <div style="overflow:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Colaborador</th>
+                    <th>Obra</th>
+                    <th>Funcao</th>
+                    <th>Tipo</th>
+                    <th>Data</th>
+                    <th>Origem</th>
+                    <th>Destino</th>
+                    <th>Valor</th>
+                    <th>Acoes</th>
+                  </tr>
+                </thead>
+                <tbody id="pRoadRows"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </section>
+
       <section class="module" id="moduleHitachi">
         <div class="subrow2">
           <button class="sidetoggle" type="button" title="Recolher menu" aria-label="Recolher menu" data-icon="menu"></button>
@@ -629,7 +819,6 @@
           <div class="selectbox"><span data-icon="calendar"></span><input id="hMonthPicker" type="month"></div>
           <button class="danger" id="resetHitachi"><span data-icon="trash"></span>Zerar mes</button>
           <button class="ghost" id="openHitachiPendencias"><span data-icon="mail"></span>Enviar pendencias</button>
-          <button class="ghost" id="openHitachiCadastro"><span data-icon="folder"></span>Cadastro</button>
         </div>
 
         <div class="topmenu">
@@ -1054,10 +1243,53 @@
         </label>
       </div>
       <div class="helper">O portal monta o texto automaticamente com base no mes selecionado. Depois voce pode abrir o e-mail ja preenchido.</div>
+      <div class="helper" id="hitachiMailFeedback"></div>
       <footer>
+        <button class="ghost" type="button" id="copyHitachiPendencias"><span data-icon="copy"></span>Copiar texto</button>
         <button class="ghost" type="button" id="refreshHitachiPendencias"><span data-icon="refresh"></span>Atualizar lista</button>
         <button class="primary" type="button" id="sendHitachiPendencias"><span data-icon="mail"></span>Abrir e-mail</button>
       </footer>
+    </div>
+  </div>
+
+  <div class="modal" id="passagensConfigModal" role="dialog" aria-modal="true" aria-labelledby="passagensConfigTitle">
+    <div class="dialog">
+      <div class="chead"><span class="ti2" id="passagensConfigTitle">Configurar API de passagens</span><button class="rowact" type="button" id="closePassagensConfigModal" aria-label="Fechar" data-icon="close"></button></div>
+      <form id="passagensConfigForm" class="formgrid">
+        <label style="grid-column:1 / -1">Base da API<input name="baseUrl" placeholder="https://portalmse.com.br/microservices/hub_mse/api_passagens"></label>
+        <label style="grid-column:1 / -1">Token da API<input name="token" type="password" placeholder="Cole aqui a chave Bearer"></label>
+        <div class="helper" style="grid-column:1 / -1">A chave fica salva apenas no navegador deste portal. O codigo do repositório nao grava seu token.</div>
+        <footer style="grid-column:1 / -1">
+          <button class="ghost" type="button" id="cancelPassagensConfigModal">Cancelar</button>
+          <button class="primary" type="submit"><span data-icon="save"></span>Salvar configuracao</button>
+        </footer>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="passagensEditModal" role="dialog" aria-modal="true" aria-labelledby="passagensEditTitle">
+    <div class="dialog wide">
+      <div class="chead"><span class="ti2" id="passagensEditTitle">Complementar dados da passagem</span><button class="rowact" type="button" id="closePassagensEditModal" aria-label="Fechar" data-icon="close"></button></div>
+      <form id="passagensEditForm" class="formgrid">
+        <label>Modalidade
+          <select name="modalidade" required>
+            <option value="Aereo">Aereo</option>
+            <option value="Rodoviario">Rodoviario</option>
+          </select>
+        </label>
+        <label>Numero do pedido<input name="numeroPedido" placeholder="Ex.: 110766"></label>
+        <label>Origem<input name="origem" placeholder="Ex.: GRU"></label>
+        <label>Destino<input name="destino" placeholder="Ex.: AMS"></label>
+        <label>Horario<input name="horario" placeholder="Ex.: 20:59 - 12:20"></label>
+        <label>Companhia<input name="companhia" placeholder="Ex.: LATAM"></label>
+        <label>Localizador<input name="localizador" placeholder="Ex.: ZHVOGT"></label>
+        <label>Valor pago<input name="valorPago" placeholder="Ex.: 16451,16"></label>
+        <label style="grid-column:1 / -1">Observacao interna<input name="observacaoInterna" placeholder="Ex.: emitida, remarcada, retorno aguardando..."></label>
+        <footer style="grid-column:1 / -1">
+          <button class="ghost" type="button" id="cancelPassagensEditModal">Cancelar</button>
+          <button class="primary" type="submit"><span data-icon="save"></span>Salvar complemento</button>
+        </footer>
+      </form>
     </div>
   </div>
 
@@ -1096,7 +1328,9 @@
       users:'M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M9.5 7a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7M20 21v-2a4 4 0 0 0-3-3.9M16 4.1a3.5 3.5 0 0 1 0 6.8',
       badgeCheck:'M12 3l2.5 1.2 2.8-.3.8 2.7 2.2 1.8-1.2 2.5 1.2 2.5-2.2 1.8-.8 2.7-2.8-.3L12 21l-2.5-1.2-2.8.3-.8-2.7-2.2-1.8 1.2-2.5-1.2-2.5 2.2-1.8.8-2.7 2.8.3zM9 12l2 2 4-4',
       alertCircle:'M12 8v4M12 16h.01M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18',
-      files:'M8 2h8v4H8zM6 6h12a2 2 0 0 1 2 2v12H8a2 2 0 0 1-2-2zM4 10V6a2 2 0 0 1 2-2'
+      files:'M8 2h8v4H8zM6 6h12a2 2 0 0 1 2 2v12H8a2 2 0 0 1-2-2zM4 10V6a2 2 0 0 1 2-2',
+      plane:'M2 16l20-5-20-5 5 5-5 5zm5 0 5 5',
+      bus:'M6 17h12M7 3h10a2 2 0 0 1 2 2v10H5V5a2 2 0 0 1 2-2zm1 15a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm8 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M5 9h14'
     };
 
     function icon(name, size = 18) {
@@ -1141,14 +1375,27 @@
       document.querySelector(`.toplink[data-h-view="${viewName}"]`).classList.add('on');
       document.getElementById(`hview-${viewName}`).classList.add('on');
     }
+    function openPassagensView(viewName) {
+      document.querySelectorAll('.toplink[data-p-view]').forEach(item => item.classList.remove('on'));
+      document.querySelectorAll('#modulePassagens .view').forEach(view => view.classList.remove('on'));
+      document.querySelector(`.toplink[data-p-view="${viewName}"]`).classList.add('on');
+      document.getElementById(`pview-${viewName}`).classList.add('on');
+    }
     function switchModule(moduleName) {
       currentModule = moduleName;
+      const isAdminModule = moduleName === 'internet' || moduleName === 'diarista' || moduleName === 'passagens';
       document.getElementById('moduleInternet').classList.toggle('on', moduleName === 'internet');
       document.getElementById('moduleDiarista').classList.toggle('on', moduleName === 'diarista');
+      document.getElementById('modulePassagens').classList.toggle('on', moduleName === 'passagens');
       document.getElementById('moduleHitachi').classList.toggle('on', moduleName === 'hitachi');
       document.getElementById('navInternet').classList.toggle('on', moduleName === 'internet');
       document.getElementById('navDiarista').classList.toggle('on', moduleName === 'diarista');
+      document.getElementById('navPassagens').classList.toggle('on', moduleName === 'passagens');
       document.getElementById('navHitachi').classList.toggle('on', moduleName === 'hitachi');
+      document.getElementById('adminToggle').classList.toggle('on', isAdminModule);
+      document.getElementById('docsToggle').classList.toggle('on', moduleName === 'hitachi');
+      document.getElementById('adminBlock').classList.toggle('open', isAdminModule);
+      document.getElementById('docsBlock').classList.toggle('open', moduleName === 'hitachi');
       document.getElementById('dMonthMirror').value = currentMonthKey();
     }
     function refreshProtectedViews() {
@@ -1184,6 +1431,7 @@
     let editingHitachiCompanyId = null;
     let overviewEditingHitachiId = null;
     let overviewEditingHitachiCompanyId = null;
+    let editingPassagemKey = '';
     let protectedAuthenticated = false;
     let currentModule = 'internet';
     let hitachiRecipients = '';
@@ -1191,6 +1439,7 @@
     const PROTECTED_PASS = 'mse2026';
     const portalConfig = window.PORTAL_CONFIG || {};
     const supabaseConfig = portalConfig.supabase || {};
+    const passagensConfig = portalConfig.passagens || {};
     const SUPABASE_URL = (supabaseConfig.url || '').replace(/\/+$/, '');
     const SUPABASE_ANON_KEY = supabaseConfig.anonKey || '';
     const REMOTE_ENABLED = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
@@ -1204,6 +1453,12 @@
     const hitachiCollaborators = [];
     const hitachiCompanyDocs = [];
     const hMonthPicker = document.getElementById('hMonthPicker');
+    const pMonthPicker = document.getElementById('pMonthPicker');
+    const passagensRows = [];
+    const passagensComplements = {};
+    let passagensApiToken = (passagensConfig.token || '').trim();
+    let passagensApiBaseUrl = (passagensConfig.baseUrl || 'https://portalmse.com.br/microservices/hub_mse/api_passagens').trim().replace(/\/+$/, '');
+    let passagensLastSync = '';
 
     function defaultMonth() {
       const now = new Date();
@@ -1234,7 +1489,12 @@
         diaristaMonthEntries: [],
         hitachiCollaborators: [],
         hitachiCompanyDocs: [],
-        hitachiRecipients: ''
+        hitachiRecipients: '',
+        passagensRows: [],
+        passagensComplements: [],
+        passagensApiToken: '',
+        passagensApiBaseUrl: passagensApiBaseUrl,
+        passagensLastSync: ''
       };
     }
 
@@ -1279,7 +1539,15 @@
         ),
         hitachiCollaborators: hitachiCollaborators.map(item => ({ ...item })),
         hitachiCompanyDocs: hitachiCompanyDocs.map(item => ({ ...item })),
-        hitachiRecipients
+        hitachiRecipients,
+        passagensRows: passagensRows.map(item => ({ ...item })),
+        passagensComplements: Object.entries(passagensComplements).map(([key, value]) => ({
+          key,
+          ...value
+        })),
+        passagensApiToken,
+        passagensApiBaseUrl,
+        passagensLastSync
       };
     }
 
@@ -1362,6 +1630,25 @@
         status: item.status || 'OK'
       }))));
       hitachiRecipients = payload.hitachiRecipients || '';
+      passagensRows.splice(0, passagensRows.length, ...((payload.passagensRows || payload.passagens_rows || []).map(item => ({ ...item }))));
+      clearObject(passagensComplements);
+      (payload.passagensComplements || payload.passagens_complements || []).forEach(item => {
+        if (!item.key) return;
+        passagensComplements[item.key] = {
+          modalidade: item.modalidade || '',
+          origem: item.origem || '',
+          destino: item.destino || '',
+          horario: item.horario || '',
+          companhia: item.companhia || '',
+          localizador: item.localizador || '',
+          numeroPedido: item.numeroPedido ?? item.numero_pedido ?? '',
+          valorPago: item.valorPago ?? item.valor_pago ?? '',
+          observacaoInterna: item.observacaoInterna ?? item.observacao_interna ?? ''
+        };
+      });
+      passagensApiToken = (payload.passagensApiToken || passagensApiToken || '').trim();
+      passagensApiBaseUrl = (payload.passagensApiBaseUrl || passagensApiBaseUrl || 'https://portalmse.com.br/microservices/hub_mse/api_passagens').trim().replace(/\/+$/, '');
+      passagensLastSync = payload.passagensLastSync || '';
     }
 
     function saveLocalCache() {
@@ -1608,6 +1895,10 @@
 
     function currentHitachiMonth() {
       return hMonthPicker.value || currentMonthKey() || defaultMonth();
+    }
+
+    function currentPassagensMonth() {
+      return pMonthPicker.value || currentMonthKey() || defaultMonth();
     }
 
     function monthIndex(monthKey) {
@@ -2341,6 +2632,18 @@
       return `Prezados,\n\nSegue relacao de pendencias documentais da competencia ${monthLabel(monthKey)}:\n\n${lines.join('\n')}\n\nFavor verificar e retornar com a regularizacao.\n\nAtenciosamente,\nPortal MSE`;
     }
 
+    function normalizeRecipients(raw = '') {
+      return raw
+        .split(/[;,]+/)
+        .map(item => item.trim())
+        .filter(Boolean)
+        .join(';');
+    }
+
+    function setHitachiMailFeedback(message = '') {
+      document.getElementById('hitachiMailFeedback').textContent = message;
+    }
+
     function refreshHitachiPendenciasModal() {
       const monthKey = currentHitachiMonth();
       const pendencias = buildHitachiPendencias(monthKey);
@@ -2348,6 +2651,7 @@
       document.getElementById('hitachiMailBody').value = buildHitachiMailBody(monthKey);
       const recipientsInput = document.getElementById('hitachiRecipients');
       recipientsInput.value = hitachiRecipients;
+      setHitachiMailFeedback('');
       document.getElementById('hitachiPendenciasList').innerHTML = pendencias.length ? pendencias.map(item => `
         <div class="pending-mail-item">
           <b>${item.empresa}</b>
@@ -2517,6 +2821,292 @@
       }
     }
 
+    function formatDate(value) {
+      if (!value || value === '0000-00-00') return '-';
+      const date = new Date(`${value}T00:00:00`);
+      if (Number.isNaN(date.getTime())) return value;
+      return date.toLocaleDateString('pt-BR');
+    }
+
+    function parseMoney(value) {
+      if (value == null || value === '') return null;
+      if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+      const normalized = String(value).replace(/[^\d,.-]/g, '').replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.');
+      const parsed = Number(normalized);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+
+    function passagemKey(item) {
+      return `${item.tabela || 'passagens'}:${item.id}`;
+    }
+
+    function passagemDateField(item) {
+      return item.data_prevista || item.data_proxima || item.data_ida || item.data_chegada || '';
+    }
+
+    function monthKeyFromDate(value) {
+      if (!value || value === '0000-00-00') return '';
+      return String(value).slice(0, 7);
+    }
+
+    function getPassagemComplement(item) {
+      return passagensComplements[passagemKey(item)] || {};
+    }
+
+    function inferPassagemMode(item, complement = getPassagemComplement(item)) {
+      if (complement.modalidade) return complement.modalidade;
+      const hasAir = [item.valor_aereo, item.aprovado_aereo, item.reprovado_aereo, item.id_passagem_ar].some(value => value != null && value !== '');
+      const hasRoad = [item.valor_rodoviario, item.aprovado_rodoviario, item.reprovado_rodoviario].some(value => value != null && value !== '');
+      if (hasAir) return 'Aereo';
+      if (hasRoad) return 'Rodoviario';
+      if (item.tabela === 'passagens') return 'Aereo';
+      if (['folga', 'transferencia_obra', 'desmobilizacao'].includes(item.tabela)) return 'Rodoviario';
+      return 'A definir';
+    }
+
+    function buildPassagemRow(item) {
+      const complement = getPassagemComplement(item);
+      const modalidade = inferPassagemMode(item, complement);
+      const valorApi = parseMoney(item.valor_pago) ?? parseMoney(item.valor_aereo) ?? parseMoney(item.valor_rodoviario) ?? parseMoney(item.valor_referencia);
+      const valorComplemento = parseMoney(complement.valorPago);
+      const valorPago = valorComplemento ?? valorApi;
+      const pedido = complement.numeroPedido || '';
+      const localizador = complement.localizador || '';
+      const companhia = complement.companhia || '';
+      const origem = complement.origem || '';
+      const destino = complement.destino || '';
+      const horario = complement.horario || '';
+      const observacao = complement.observacaoInterna || item.observacao || '';
+      const pending =
+        modalidade === 'A definir' ||
+        !pedido ||
+        (modalidade === 'Aereo' && (!localizador || !companhia)) ||
+        (modalidade === 'Rodoviario' && (!origem || !destino));
+      return {
+        ...item,
+        key: passagemKey(item),
+        modalidade,
+        valorPago,
+        pedido,
+        localizador,
+        companhia,
+        origem,
+        destino,
+        horario,
+        observacao,
+        dataPrincipal: passagemDateField(item),
+        pending
+      };
+    }
+
+    function currentPassagensData() {
+      return passagensRows
+        .filter(item => monthKeyFromDate(passagemDateField(item)) === currentPassagensMonth())
+        .map(buildPassagemRow);
+    }
+
+    function filteredPassagens(rows, target = 'all') {
+      const query = norm(document.getElementById('pq').value);
+      return rows.filter(row => {
+        const modeOk =
+          target === 'all' ||
+          (target === 'air' && row.modalidade === 'Aereo') ||
+          (target === 'road' && row.modalidade === 'Rodoviario');
+        const hay = norm([
+          row.nome_colab || row.nome || '',
+          row.nome_obra || '',
+          row.nome_funcao || '',
+          row.tipo || '',
+          row.modalidade || '',
+          row.pedido || '',
+          row.localizador || '',
+          row.companhia || '',
+          row.origem || '',
+          row.destino || ''
+        ].join(' '));
+        return modeOk && (!query || hay.includes(query));
+      });
+    }
+
+    function renderPassagensTable(targetId, rows, columns) {
+      const body = document.getElementById(targetId);
+      if (!rows.length) {
+        body.innerHTML = `<tr><td colspan="${columns}" ><div class="empty-state"><b>Nenhuma passagem encontrada.</b>Sincronize a API ou ajuste os filtros do mes selecionado.</div></td></tr>`;
+        return;
+      }
+      body.innerHTML = rows.map(row => `
+        <tr>
+          <td><span class="company">${row.nome_colab || row.nome || '-'}</span></td>
+          <td>${row.nome_obra || '-'}</td>
+          <td>${row.nome_funcao || '-'}</td>
+          <td>${row.tipo || '-'}</td>
+          <td>${formatDate(row.dataPrincipal)}</td>
+          <td>${row.companhia || '-'}</td>
+          <td>${row.localizador || '-'}</td>
+          <td class="money">${row.valorPago == null ? '-' : brl(row.valorPago)}</td>
+          <td class="actioncell"><button class="rowact" title="Complementar passagem" aria-label="Complementar passagem" onclick="editPassagem('${row.key}')">${icon('edit')}</button></td>
+        </tr>
+      `).join('');
+      if (targetId === 'pRoadRows') {
+        body.innerHTML = rows.map(row => `
+          <tr>
+            <td><span class="company">${row.nome_colab || row.nome || '-'}</span></td>
+            <td>${row.nome_obra || '-'}</td>
+            <td>${row.nome_funcao || '-'}</td>
+            <td>${row.tipo || '-'}</td>
+            <td>${formatDate(row.dataPrincipal)}</td>
+            <td>${row.origem || '-'}</td>
+            <td>${row.destino || '-'}</td>
+            <td class="money">${row.valorPago == null ? '-' : brl(row.valorPago)}</td>
+            <td class="actioncell"><button class="rowact" title="Complementar passagem" aria-label="Complementar passagem" onclick="editPassagem('${row.key}')">${icon('edit')}</button></td>
+          </tr>
+        `).join('');
+      }
+      if (targetId === 'pRows') {
+        body.innerHTML = rows.map(row => `
+          <tr>
+            <td><span class="company">${row.nome_colab || row.nome || '-'}</span></td>
+            <td>${row.nome_obra || '-'}</td>
+            <td>${row.tipo || '-'}</td>
+            <td><span class="tag ${row.modalidade === 'A definir' ? 'warn' : 'ok'}">${row.modalidade}</span></td>
+            <td>${formatDate(row.dataPrincipal)}</td>
+            <td class="money">${row.valorPago == null ? '-' : brl(row.valorPago)}</td>
+            <td>${row.localizador || '-'}</td>
+            <td>${row.pedido || '<span class="pending">Pendente</span>'}</td>
+            <td class="actioncell"><button class="rowact" title="Complementar passagem" aria-label="Complementar passagem" onclick="editPassagem('${row.key}')">${icon('edit')}</button></td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function renderPassagens() {
+      const rows = currentPassagensData();
+      const filtered = filteredPassagens(rows, 'all');
+      const airRows = filteredPassagens(rows, 'air');
+      const roadRows = filteredPassagens(rows, 'road');
+      const totalPaid = rows.reduce((sum, row) => sum + (row.valorPago || 0), 0);
+      const pending = rows.filter(row => row.pending).length;
+      const byObra = {};
+      const byTipo = {};
+
+      rows.forEach(row => {
+        const obra = row.nome_obra || 'Sem obra';
+        const tipo = row.tipo || 'Nao informado';
+        byObra[obra] = (byObra[obra] || 0) + 1;
+        byTipo[tipo] = (byTipo[tipo] || 0) + 1;
+      });
+
+      pMonthPicker.value = currentPassagensMonth();
+      document.getElementById('pPageTitle').textContent = `Controle de Passagens | ${monthLabel(currentPassagensMonth())}`;
+      document.getElementById('pPageSubtitle').textContent = rows.length
+        ? `Solicitacoes importadas da API para ${monthLabel(currentPassagensMonth())}. Complete localizador, pedido e detalhes finais quando necessario.`
+        : `Nenhuma solicitacao sincronizada para ${monthLabel(currentPassagensMonth())}. Use a configuracao da API e sincronize o mes.`;
+      document.getElementById('pTotal').textContent = rows.length;
+      document.getElementById('pAir').textContent = rows.filter(row => row.modalidade === 'Aereo').length;
+      document.getElementById('pRoad').textContent = rows.filter(row => row.modalidade === 'Rodoviario').length;
+      document.getElementById('pPaid').textContent = brl(totalPaid);
+      document.getElementById('pPending').textContent = pending;
+      document.getElementById('pCountLabel').textContent = `${filtered.length} registros filtrados`;
+      document.getElementById('pFootCount').textContent = `${rows.length} item(ns) no mes`;
+      document.getElementById('pAirCount').textContent = `${airRows.length} registros`;
+      document.getElementById('pRoadCount').textContent = `${roadRows.length} registros`;
+      document.getElementById('pSyncStamp').textContent = passagensLastSync ? `Ultima sync ${passagensLastSync}` : 'Sem sincronizacao ainda';
+
+      const obraEntries = Object.entries(byObra).sort((a, b) => b[1] - a[1]);
+      const obraMax = obraEntries.length ? obraEntries[0][1] : 0;
+      document.getElementById('pBars').innerHTML = obraEntries.length ? obraEntries.map(([obra, count]) => `
+        <div class="baritem">
+          <div class="barlabel"><span>${obra}</span><b>${count} solicitacao(oes)</b></div>
+          <div class="track"><div class="fill" style="width:${obraMax ? (count / obraMax) * 100 : 0}%"></div></div>
+        </div>
+      `).join('') : `<div class="empty-state"><b>Sem obras carregadas.</b>Depois da sincronizacao, a distribuicao por obra aparece aqui.</div>`;
+
+      const tipoEntries = Object.entries(byTipo).sort((a, b) => b[1] - a[1]);
+      document.getElementById('pTypes').innerHTML = tipoEntries.length ? tipoEntries.map(([tipo, count]) => `
+        <div class="li">
+          <div><b class="link">${tipo}</b><div class="lisub">${count} solicitacao(oes)</div></div>
+          <span class="tag neutral">${count}</span>
+        </div>
+      `).join('') : `<div class="empty-state"><b>Nenhum tipo disponivel.</b>A sincronizacao da API vai montar esse resumo automaticamente.</div>`;
+
+      document.getElementById('pChecklist').innerHTML = rows.length ? `
+        <div class="li">
+          <div><b class="link">Token configurado</b><div class="lisub">${passagensApiToken ? 'API pronta para sincronizar' : 'Configure a chave Bearer da API'}</div></div>
+          <span class="tag ${passagensApiToken ? 'ok' : 'warn'}">${passagensApiToken ? 'OK' : 'Pendente'}</span>
+        </div>
+        <div class="li">
+          <div><b class="link">Complementos internos</b><div class="lisub">${pending} passagem(ns) ainda precisam de pedido, localizador ou rota final</div></div>
+          <span class="tag ${pending ? 'warn' : 'ok'}">${pending ? 'Revisar' : 'Completo'}</span>
+        </div>
+        <div class="li">
+          <div><b class="link">Snapshot local</b><div class="lisub">${passagensLastSync ? `Ultima atualizacao em ${passagensLastSync}` : 'Nenhuma sincronizacao salva ainda'}</div></div>
+          <span class="tag ${passagensLastSync ? 'ok' : 'neutral'}">${passagensLastSync ? 'Salvo' : 'Vazio'}</span>
+        </div>
+      ` : `<div class="empty-state"><b>Modulo pronto para uso.</b>Configure a API e sincronize as solicitacoes de passagem para popular o painel.</div>`;
+
+      renderPassagensTable('pRows', filtered, 9);
+      renderPassagensTable('pAirRows', airRows, 9);
+      renderPassagensTable('pRoadRows', roadRows, 9);
+    }
+
+    async function syncPassagensData() {
+      if (!passagensApiBaseUrl) {
+        window.alert('Configure a base da API de passagens antes de sincronizar.');
+        openModalById('passagensConfigModal');
+        return;
+      }
+      if (!passagensApiToken) {
+        window.alert('Configure o token Bearer da API de passagens antes de sincronizar.');
+        openModalById('passagensConfigModal');
+        return;
+      }
+      const button = document.getElementById('syncPassagens');
+      const originalLabel = button.innerHTML;
+      button.disabled = true;
+      button.innerHTML = `${icon('refresh')}Sincronizando...`;
+      try {
+        const response = await fetch(`${passagensApiBaseUrl}/v1/passagens?all=true&order_by=data_viagem&order_dir=DESC`, {
+          headers: {
+            Authorization: `Bearer ${passagensApiToken}`
+          }
+        });
+        if (!response.ok) {
+          throw new Error(`API Passagens respondeu ${response.status}`);
+        }
+        const payload = await response.json();
+        passagensRows.splice(0, passagensRows.length, ...((payload.data || []).map(item => ({ ...item }))));
+        passagensLastSync = new Date().toLocaleTimeString('pt-BR');
+        saveLocalCache();
+        renderPassagens();
+        setSyncStatus(`Passagens sincronizadas da API em ${passagensLastSync}`);
+      } catch (error) {
+        console.error(error);
+        window.alert('Nao foi possivel sincronizar as passagens. Verifique a configuracao da API e tente novamente.');
+      } finally {
+        button.disabled = false;
+        button.innerHTML = originalLabel;
+      }
+    }
+
+    function editPassagem(key) {
+      const item = currentPassagensData().find(row => row.key === key) || passagensRows.map(buildPassagemRow).find(row => row.key === key);
+      if (!item) return;
+      editingPassagemKey = key;
+      const form = document.getElementById('passagensEditForm');
+      form.elements.modalidade.value = item.modalidade === 'A definir' ? 'Aereo' : item.modalidade;
+      form.elements.numeroPedido.value = item.pedido || '';
+      form.elements.origem.value = item.origem || '';
+      form.elements.destino.value = item.destino || '';
+      form.elements.horario.value = item.horario || '';
+      form.elements.companhia.value = item.companhia || '';
+      form.elements.localizador.value = item.localizador || '';
+      form.elements.valorPago.value = item.valorPago == null ? '' : String(item.valorPago).replace('.', ',');
+      form.elements.observacaoInterna.value = item.observacao || '';
+      document.getElementById('passagensEditTitle').textContent = `Complementar passagem | ${item.nome_colab || item.nome || '-'}`;
+      openModalById('passagensEditModal');
+    }
+    window.editPassagem = editPassagem;
+
     function selectRow(id) {
       selectedId = id;
       const row = currentData().find(item => item.id === id);
@@ -2646,6 +3236,8 @@
       renderDiarista();
       if (!hMonthPicker.value) hMonthPicker.value = currentMonthKey();
       renderHitachi();
+      if (!pMonthPicker.value) pMonthPicker.value = currentMonthKey();
+      renderPassagens();
     });
     document.getElementById('dMonthMirror').addEventListener('change', event => {
       if (event.target.value) {
@@ -2657,9 +3249,14 @@
     });
     document.getElementById('dq').addEventListener('input', renderDiarista);
     document.getElementById('hq').addEventListener('input', renderHitachi);
+    document.getElementById('pq').addEventListener('input', renderPassagens);
     hMonthPicker.addEventListener('change', () => {
       if (!hMonthPicker.value) hMonthPicker.value = currentMonthKey();
       renderHitachi();
+    });
+    pMonthPicker.addEventListener('change', () => {
+      if (!pMonthPicker.value) pMonthPicker.value = currentMonthKey();
+      renderPassagens();
     });
 
     document.getElementById('tabLoginForm').addEventListener('submit', event => {
@@ -2688,9 +3285,9 @@
       }
       document.getElementById('dTabAuthError').style.display = 'block';
     });
-    document.querySelectorAll('.seg button').forEach(button => {
+    document.querySelectorAll('.seg button[data-filter]').forEach(button => {
       button.addEventListener('click', () => {
-        document.querySelectorAll('.seg button').forEach(item => item.classList.remove('on'));
+        document.querySelectorAll('.seg button[data-filter]').forEach(item => item.classList.remove('on'));
         button.classList.add('on');
         filter = button.dataset.filter;
         render();
@@ -2954,6 +3551,12 @@
         refreshProtectedViews();
       });
     });
+    document.querySelectorAll('.toplink[data-p-view]').forEach(button => {
+      button.addEventListener('click', () => {
+        openPassagensView(button.dataset.pView);
+        renderPassagens();
+      });
+    });
     document.getElementById('diaristaMonthForm').addEventListener('submit', async event => {
       event.preventDefault();
       const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
@@ -2979,11 +3582,48 @@
     });
     document.getElementById('navInternet').addEventListener('click', () => switchModule('internet'));
     document.getElementById('navDiarista').addEventListener('click', () => switchModule('diarista'));
+    document.getElementById('navPassagens').addEventListener('click', () => switchModule('passagens'));
     document.getElementById('navHitachi').addEventListener('click', () => switchModule('hitachi'));
-    document.getElementById('openHitachiCadastro').addEventListener('click', () => {
-      switchModule('hitachi');
-      openHitachiView('cadastro');
-      refreshProtectedViews();
+    document.getElementById('syncPassagens').addEventListener('click', syncPassagensData);
+    document.getElementById('openPassagensConfig').addEventListener('click', () => {
+      const form = document.getElementById('passagensConfigForm');
+      form.elements.baseUrl.value = passagensApiBaseUrl;
+      form.elements.token.value = passagensApiToken;
+      openModalById('passagensConfigModal');
+    });
+    document.getElementById('closePassagensConfigModal').addEventListener('click', () => closeModalById('passagensConfigModal'));
+    document.getElementById('cancelPassagensConfigModal').addEventListener('click', () => closeModalById('passagensConfigModal'));
+    document.getElementById('closePassagensEditModal').addEventListener('click', () => closeModalById('passagensEditModal'));
+    document.getElementById('cancelPassagensEditModal').addEventListener('click', () => closeModalById('passagensEditModal'));
+    document.getElementById('passagensConfigForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
+      passagensApiBaseUrl = (formData.baseUrl || '').trim().replace(/\/+$/, '');
+      passagensApiToken = (formData.token || '').trim();
+      saveLocalCache();
+      renderPassagens();
+      closeModalById('passagensConfigModal');
+      setSyncStatus('Configuracao da API de passagens atualizada no navegador');
+    });
+    document.getElementById('passagensEditForm').addEventListener('submit', event => {
+      event.preventDefault();
+      if (!editingPassagemKey) return;
+      const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
+      passagensComplements[editingPassagemKey] = {
+        modalidade: formData.modalidade || '',
+        numeroPedido: formData.numeroPedido || '',
+        origem: formData.origem || '',
+        destino: formData.destino || '',
+        horario: formData.horario || '',
+        companhia: formData.companhia || '',
+        localizador: formData.localizador || '',
+        valorPago: formData.valorPago || '',
+        observacaoInterna: formData.observacaoInterna || ''
+      };
+      editingPassagemKey = '';
+      saveLocalCache();
+      renderPassagens();
+      closeModalById('passagensEditModal');
     });
     document.getElementById('resetHitachi').addEventListener('click', async () => {
       const monthKey = currentHitachiMonth();
@@ -3023,18 +3663,53 @@
       openModalById('hitachiPendenciasModal');
     });
     document.getElementById('refreshHitachiPendencias').addEventListener('click', () => {
-      hitachiRecipients = document.getElementById('hitachiRecipients').value.trim();
+      hitachiRecipients = normalizeRecipients(document.getElementById('hitachiRecipients').value.trim());
       saveLocalCache();
       refreshHitachiPendenciasModal();
     });
+    document.getElementById('copyHitachiPendencias').addEventListener('click', async () => {
+      const recipients = normalizeRecipients(document.getElementById('hitachiRecipients').value.trim());
+      const subject = document.getElementById('hitachiMailSubject').value;
+      const body = document.getElementById('hitachiMailBody').value;
+      const fullText = `Para: ${recipients || '-'}\nAssunto: ${subject}\n\n${body}`;
+      try {
+        await navigator.clipboard.writeText(fullText);
+        hitachiRecipients = recipients;
+        saveLocalCache();
+        setHitachiMailFeedback('Texto copiado. Se o e-mail nao abrir no navegador, voce ja pode colar no Outlook.');
+      } catch (error) {
+        console.error(error);
+        setHitachiMailFeedback('Nao foi possivel copiar automaticamente neste navegador.');
+      }
+    });
     document.getElementById('sendHitachiPendencias').addEventListener('click', () => {
-      const recipients = document.getElementById('hitachiRecipients').value.trim();
+      const recipients = normalizeRecipients(document.getElementById('hitachiRecipients').value.trim());
+      if (!recipients) {
+        setHitachiMailFeedback('Preencha ao menos um e-mail destinatario para abrir a mensagem.');
+        return;
+      }
       hitachiRecipients = recipients;
       saveLocalCache();
       const subject = document.getElementById('hitachiMailSubject').value;
       const body = document.getElementById('hitachiMailBody').value;
       const target = `mailto:${recipients}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      window.location.href = target;
+      setHitachiMailFeedback('Tentando abrir o aplicativo de e-mail...');
+      const anchor = document.createElement('a');
+      anchor.href = target;
+      anchor.target = '_top';
+      anchor.rel = 'noopener';
+      anchor.style.display = 'none';
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      try {
+        window.open(target, '_top');
+      } catch (error) {
+        console.error(error);
+      }
+      window.setTimeout(() => {
+        setHitachiMailFeedback('Se o Outlook nao abrir, use "Copiar texto" e cole no seu e-mail manualmente.');
+      }, 900);
     });
     document.getElementById('closeHitachiPendenciasModal').addEventListener('click', () => closeModalById('hitachiPendenciasModal'));
     document.getElementById('closeHitachiEditModal').addEventListener('click', () => closeModalById('hitachiEditModal'));
@@ -3107,6 +3782,7 @@
     async function initializePortal() {
       await bootstrapData();
       hMonthPicker.value = currentMonthKey();
+      pMonthPicker.value = currentMonthKey();
       resetHitachiForm();
       resetHitachiCompanyForm();
       refreshProtectedViews();
@@ -3114,8 +3790,13 @@
       render();
       openDiaristaView('overview');
       renderDiarista();
+      openPassagensView('overview');
+      renderPassagens();
       openHitachiView('overview');
       renderHitachi();
+      if (passagensApiToken && !passagensRows.length) {
+        syncPassagensData().catch(error => console.error(error));
+      }
       switchModule('internet');
     }
 

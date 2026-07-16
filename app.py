@@ -22,7 +22,17 @@ def load_portal_config() -> dict:
         "supabase": {
             "url": st.secrets.get("supabase_url", os.getenv("SUPABASE_URL", "")).strip(),
             "anonKey": st.secrets.get("supabase_anon_key", os.getenv("SUPABASE_ANON_KEY", "")).strip(),
-        }
+        },
+        "passagens": {
+            "baseUrl": st.secrets.get(
+                "passagens_api_base_url",
+                os.getenv(
+                    "PASSAGENS_API_BASE_URL",
+                    "https://portalmse.com.br/microservices/hub_mse/api_passagens",
+                ),
+            ).strip(),
+            "token": st.secrets.get("passagens_api_token", os.getenv("PASSAGENS_API_TOKEN", "")).strip(),
+        },
     }
 
 
