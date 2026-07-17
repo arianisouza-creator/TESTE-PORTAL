@@ -4,6 +4,7 @@ Portal administrativo em Streamlit com interface HTML/CSS customizada para os mo
 
 - `Controle de Telefonia e Internet`
 - `Controle da Diarista`
+- `Controle de Passagens`
 
 ## Como rodar localmente
 
@@ -35,6 +36,10 @@ SUPABASE_ANON_KEY=...
 
 - O layout continua 100% no arquivo HTML.
 - Quando o Supabase estiver configurado, o portal passa a ler e gravar direto nele.
+- O modulo de `Passagens` tambem sincroniza:
+  - linhas importadas da API
+  - complementos manuais
+  - creditos cadastrados
 - Se o Supabase nao estiver configurado ou ficar indisponivel, o portal usa cache local do navegador para nao quebrar a interface.
 - As abas protegidas continuam usando:
   - Usuario: `ADM`

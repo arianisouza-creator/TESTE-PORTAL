@@ -1677,6 +1677,37 @@
       Object.keys(target).forEach(key => delete target[key]);
     }
 
+    function mergeByKey(localItems = [], remoteItems = [], getKey) {
+      const map = new Map();
+      remoteItems.forEach(item => {
+        const key = getKey(item);
+        if (key) map.set(key, item);
+      });
+      localItems.forEach(item => {
+        const key = getKey(item);
+        if (key) map.set(key, item);
+      });
+      return [...map.values()];
+    }
+
+    function mergePassagensPayload(localPayload = {}, remotePayload = {}) {
+      const localRows = localPayload.passagensRows || localPayload.passagens_rows || [];
+      const remoteRows = remotePayload.passagensRows || remotePayload.passagens_rows || [];
+      const localCredits = localPayload.passagensCreditos || localPayload.passagens_creditos || [];
+      const remoteCredits = remotePayload.passagensCreditos || remotePayload.passagens_creditos || [];
+      const localComplements = localPayload.passagensComplements || localPayload.passagens_complements || [];
+      const remoteComplements = remotePayload.passagensComplements || remotePayload.passagens_complements || [];
+      return {
+        ...remotePayload,
+        passagensRows: mergeByKey(localRows, remoteRows, item => `${item.tabela || 'passagens'}:${item.id}`),
+        passagensCreditos: mergeByKey(localCredits, remoteCredits, item => String(item.id || '')),
+        passagensComplements: mergeByKey(localComplements, remoteComplements, item => String(item.key || '')),
+        passagensApiToken: localPayload.passagensApiToken || remotePayload.passagensApiToken || passagensApiToken,
+        passagensApiBaseUrl: localPayload.passagensApiBaseUrl || remotePayload.passagensApiBaseUrl || passagensApiBaseUrl,
+        passagensLastSync: localPayload.passagensLastSync || remotePayload.passagensLastSync || passagensLastSync
+      };
+    }
+
     function setSyncStatus(message) {
       const stamp = document.getElementById('updatedAt');
       if (stamp) stamp.textContent = message;
@@ -1914,14 +1945,17 @@
     }
 
     async function loadRemoteState() {
-      const [remoteContracts, remoteMonthEntries, remoteLines, remoteDiarista, remoteDiaristaEntries, remoteHitachi, remoteHitachiCompanyDocs] = await Promise.all([
+      const [remoteContracts, remoteMonthEntries, remoteLines, remoteDiarista, remoteDiaristaEntries, remoteHitachi, remoteHitachiCompanyDocs, remotePassagensRows, remotePassagensComplements, remotePassagensCreditos] = await Promise.all([
         supabaseRequest('internet_contracts', { query: 'select=*&order=id.asc' }),
         supabaseRequest('internet_month_entries', { query: 'select=*&order=month_key.asc,contract_id.asc' }),
         supabaseRequest('internet_lines', { query: 'select=*&order=month_key.asc,id.asc' }),
         supabaseRequest('diarista_cadastros', { query: 'select=*&order=id.asc' }),
         supabaseRequest('diarista_month_entries', { query: 'select=*&order=month_key.asc,diarista_id.asc' }),
         supabaseRequest('hitachi_collaborators', { query: 'select=*&order=month_key.desc,empresa.asc,colaborador.asc' }),
-        supabaseRequest('hitachi_company_docs', { query: 'select=*&order=month_key.desc,empresa.asc,documento.asc' })
+        supabaseRequest('hitachi_company_docs', { query: 'select=*&order=month_key.desc,empresa.asc,documento.asc' }),
+        supabaseRequest('passagens_rows', { query: 'select=*&order=updated_at.asc' }),
+        supabaseRequest('passagens_complements', { query: 'select=*&order=updated_at.asc' }),
+        supabaseRequest('passagens_creditos', { query: 'select=*&order=updated_at.asc' })
       ]);
       return {
         contracts: remoteContracts,
@@ -1930,27 +1964,39 @@
         diaristaMasters: remoteDiarista,
         diaristaMonthEntries: remoteDiaristaEntries,
         hitachiCollaborators: remoteHitachi,
-        hitachiCompanyDocs: remoteHitachiCompanyDocs
+        hitachiCompanyDocs: remoteHitachiCompanyDocs,
+        passagensRows: remotePassagensRows.map(item => ({ ...(item.item || {}) })),
+        passagensComplements: remotePassagensComplements.map(item => ({ key: item.key, ...(item.data || {}) })),
+        passagensCreditos: remotePassagensCreditos.map(item => ({ id: item.id, ...(item.data || {}) }))
       };
     }
 
     async function bootstrapData() {
       setSyncStatus('Carregando dados do portal...');
+      const localPayload = loadLocalCache();
       if (REMOTE_ENABLED) {
         try {
-          const payload = await loadRemoteState();
+          const remotePayload = await loadRemoteState();
+          const payload = mergePassagensPayload(localPayload, remotePayload);
           hydrateState(payload);
           saveLocalCache();
+          if (
+            (localPayload.passagensRows || localPayload.passagens_rows || []).length ||
+            (localPayload.passagensComplements || localPayload.passagens_complements || []).length ||
+            (localPayload.passagensCreditos || localPayload.passagens_creditos || []).length
+          ) {
+            syncPassagensStorageRemote().catch(error => console.error(error));
+          }
           setSyncStatus('Ultima atualizacao via Supabase');
           return;
         } catch (error) {
           console.error(error);
-          hydrateState(loadLocalCache());
+          hydrateState(localPayload);
           setSyncStatus('Supabase indisponivel. Usando cache local.');
           return;
         }
       }
-      hydrateState(loadLocalCache());
+      hydrateState(localPayload);
       setSyncStatus('Supabase nao configurado. Usando modo local.');
     }
 
@@ -2081,6 +2127,52 @@
           status: item.status || 'OK'
         }]
       });
+    }
+
+    async function upsertPassagemRowRemote(item) {
+      if (!REMOTE_ENABLED) return;
+      await supabaseRequest('passagens_rows', {
+        method: 'POST',
+        prefer: 'resolution=merge-duplicates,return=representation',
+        body: [{
+          key: `${item.tabela || 'passagens'}:${item.id}`,
+          tabela: item.tabela || 'passagens',
+          item
+        }]
+      });
+    }
+
+    async function upsertPassagemComplementRemote(key, data) {
+      if (!REMOTE_ENABLED) return;
+      await supabaseRequest('passagens_complements', {
+        method: 'POST',
+        prefer: 'resolution=merge-duplicates,return=representation',
+        body: [{
+          key,
+          data
+        }]
+      });
+    }
+
+    async function upsertPassagemCreditoRemote(item) {
+      if (!REMOTE_ENABLED) return;
+      await supabaseRequest('passagens_creditos', {
+        method: 'POST',
+        prefer: 'resolution=merge-duplicates,return=representation',
+        body: [{
+          id: String(item.id),
+          data: item
+        }]
+      });
+    }
+
+    async function syncPassagensStorageRemote() {
+      if (!REMOTE_ENABLED) return;
+      await Promise.all([
+        ...passagensRows.map(item => upsertPassagemRowRemote(item)),
+        ...Object.entries(passagensComplements).map(([key, value]) => upsertPassagemComplementRemote(key, value)),
+        ...passagensCreditos.map(item => upsertPassagemCreditoRemote(item))
+      ]);
     }
 
     async function resetRemoteMonth(table, monthKey) {
@@ -3634,6 +3726,7 @@
         passagensRows.splice(0, passagensRows.length, ...((payload.data || []).map(item => ({ ...item }))));
         passagensLastSync = new Date().toLocaleTimeString('pt-BR');
         saveLocalCache();
+        await Promise.all(passagensRows.map(item => upsertPassagemRowRemote(item)));
         renderPassagens();
         setSyncStatus(`Passagens sincronizadas da API em ${passagensLastSync}`);
       } catch (error) {
@@ -4219,11 +4312,17 @@
       };
       event.currentTarget.reset();
       saveLocalCache();
+      try {
+        await upsertPassagemRowRemote(passagensRows[passagensRows.length - 1]);
+        await upsertPassagemComplementRemote(`manual:${manualId}`, passagensComplements[`manual:${manualId}`]);
+      } catch (error) {
+        console.error(error);
+      }
       openPassagensView('overview');
       renderPassagens();
       setSyncStatus('Cadastro manual de passagem salvo para teste');
     });
-    document.getElementById('passagensCreditoForm').addEventListener('submit', event => {
+    document.getElementById('passagensCreditoForm').addEventListener('submit', async event => {
       event.preventDefault();
       const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
       const credito = {
@@ -4243,16 +4342,22 @@
       }
       resetCreditoForm();
       saveLocalCache();
+      try {
+        await upsertPassagemCreditoRemote(credito);
+      } catch (error) {
+        console.error(error);
+      }
       renderPassagens();
       openPassagensView('creditos');
       setSyncStatus('Controle de creditos atualizado');
     });
-    document.getElementById('passagensEditForm').addEventListener('submit', event => {
+    document.getElementById('passagensEditForm').addEventListener('submit', async event => {
       event.preventDefault();
       if (!editingPassagemKey) return;
+      const targetKey = editingPassagemKey;
       const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
-      const currentComplement = passagensComplements[editingPassagemKey] || {};
-      passagensComplements[editingPassagemKey] = {
+      const currentComplement = passagensComplements[targetKey] || {};
+      passagensComplements[targetKey] = {
         ...currentComplement,
         modalidade: formData.modalidade || '',
         dataCompra: formData.dataCompra || '',
@@ -4270,8 +4375,8 @@
         pagoConfirmado: Boolean(formData.pagoConfirmado),
         observacaoInterna: formData.observacaoInterna || ''
       };
-      if (editingPassagemKey.startsWith('manual:')) {
-        const row = passagensRows.find(item => passagemKey(item) === editingPassagemKey);
+      if (targetKey.startsWith('manual:')) {
+        const row = passagensRows.find(item => passagemKey(item) === targetKey);
         if (row) {
           row.data_compra = formData.dataCompra || row.data_compra || '';
           row.data_prevista = formData.dataIda || row.data_prevista || '';
@@ -4282,6 +4387,13 @@
       }
       editingPassagemKey = '';
       saveLocalCache();
+      try {
+        await upsertPassagemComplementRemote(targetKey, passagensComplements[targetKey] || currentComplement);
+        const baseRow = passagensRows.find(item => passagemKey(item) === targetKey);
+        if (baseRow) await upsertPassagemRowRemote(baseRow);
+      } catch (error) {
+        console.error(error);
+      }
       renderPassagens();
       closeModalById('passagensEditModal');
     });

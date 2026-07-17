@@ -84,6 +84,25 @@ create table if not exists public.hitachi_company_docs (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.passagens_rows (
+  key text primary key,
+  tabela text not null default 'passagens',
+  item jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.passagens_complements (
+  key text primary key,
+  data jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.passagens_creditos (
+  id text primary key,
+  data jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
 alter table public.internet_contracts enable row level security;
 alter table public.internet_month_entries enable row level security;
 alter table public.internet_lines enable row level security;
@@ -91,6 +110,9 @@ alter table public.diarista_cadastros enable row level security;
 alter table public.diarista_month_entries enable row level security;
 alter table public.hitachi_collaborators enable row level security;
 alter table public.hitachi_company_docs enable row level security;
+alter table public.passagens_rows enable row level security;
+alter table public.passagens_complements enable row level security;
+alter table public.passagens_creditos enable row level security;
 
 drop policy if exists "anon_full_internet_contracts" on public.internet_contracts;
 create policy "anon_full_internet_contracts"
@@ -143,6 +165,30 @@ with check (true);
 drop policy if exists "anon_full_hitachi_company_docs" on public.hitachi_company_docs;
 create policy "anon_full_hitachi_company_docs"
 on public.hitachi_company_docs
+for all
+to anon
+using (true)
+with check (true);
+
+drop policy if exists "anon_full_passagens_rows" on public.passagens_rows;
+create policy "anon_full_passagens_rows"
+on public.passagens_rows
+for all
+to anon
+using (true)
+with check (true);
+
+drop policy if exists "anon_full_passagens_complements" on public.passagens_complements;
+create policy "anon_full_passagens_complements"
+on public.passagens_complements
+for all
+to anon
+using (true)
+with check (true);
+
+drop policy if exists "anon_full_passagens_creditos" on public.passagens_creditos;
+create policy "anon_full_passagens_creditos"
+on public.passagens_creditos
 for all
 to anon
 using (true)
