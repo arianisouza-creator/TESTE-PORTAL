@@ -179,6 +179,10 @@
     .line-grid{display:grid;gap:10px;margin-top:12px}
     .line-row{display:grid;grid-template-columns:1.2fr 1fr 1fr .8fr auto;gap:10px;align-items:end}
     .pending{color:var(--red);font-weight:700}
+    .paid-row td{background:#eefaf3}
+    .paid-row:hover td{background:#e5f6ed}
+    .checklabel{display:flex;align-items:center;gap:10px;padding-top:24px;font:600 11px "IBM Plex Mono",monospace;text-transform:uppercase;color:var(--mut)}
+    .checklabel input[type="checkbox"]{width:18px;height:18px;min-width:auto;padding:0;border:1px solid var(--line);border-radius:6px}
     .auth-card{max-width:420px;margin:10px auto 0;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:22px}
     .auth-card h3{margin:0 0 8px;color:#17356c;font-size:24px}
     .auth-card p{margin:0 0 14px;color:#667085}
@@ -667,6 +671,7 @@
           <button class="toplink" data-p-view="air">Aereo</button>
           <button class="toplink" data-p-view="road">Rodoviario</button>
           <button class="toplink" data-p-view="cadastro">Cadastro</button>
+          <button class="toplink" data-p-view="creditos">Creditos</button>
         </div>
 
         <div class="view on" id="pview-overview">
@@ -888,6 +893,7 @@
               <label>Numero do pedido<input name="numeroPedido" placeholder="Ex.: 110766"></label>
               <label>Valor aprovado<input name="valorAprovado" placeholder="Ex.: 18000,00"></label>
               <label>Valor pago<input name="valorPago" placeholder="Ex.: 16451,16"></label>
+              <label class="checklabel"><input name="pagoConfirmado" type="checkbox">Pago</label>
               <label style="grid-column:1 / -1">Observacao<input name="observacao" placeholder="Ex.: compra concluida no portal"></label>
               <footer style="grid-column:1 / -1">
                 <button class="primary" type="submit"><span data-icon="plus"></span>Salvar cadastro manual</button>
@@ -912,6 +918,76 @@
                   </tr>
                 </thead>
                 <tbody id="pCadastroRows"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div class="view" id="pview-creditos">
+          <div class="hero">
+            <h1>Controle de Creditos</h1>
+            <p>Cadastre, acompanhe e edite os creditos gerados nas passagens com localizador, validade e status de utilizacao.</p>
+          </div>
+          <section class="card pad">
+            <div class="chead"><span class="ti2">Novo credito</span><span class="eyebrow">Campos editaveis</span></div>
+            <form id="passagensCreditoForm" class="formgrid">
+              <label>Nome<input name="nome" required placeholder="Nome do colaborador ou referencia"></label>
+              <label>Localizador<input name="localizador" required placeholder="Ex.: ZHVOGT"></label>
+              <label>Valor<input name="valor" placeholder="Ex.: 850,00" required></label>
+              <label>Validade<input name="validade" type="date"></label>
+              <label>Status
+                <select name="status" required>
+                  <option value="Aguardando utilizacao">Aguardando utilizacao</option>
+                  <option value="Ja utilizado">Ja utilizado</option>
+                </select>
+              </label>
+              <label style="grid-column:1 / -1">Observacao<input name="observacao" placeholder="Ex.: credito gerado por remarcacao ou cancelamento"></label>
+              <footer style="grid-column:1 / -1">
+                <button class="ghost" type="button" id="cancelCreditoEdit" style="display:none">Cancelar edicao</button>
+                <button class="primary" type="submit" id="saveCreditoBtn"><span data-icon="plus"></span>Salvar credito</button>
+              </footer>
+            </form>
+          </section>
+          <section class="kpis" style="grid-template-columns:repeat(4,1fr);margin-top:14px">
+            <div class="kpi">
+              <div class="ktop"><div class="kicon blue" data-icon="wallet"></div><div class="klabel">Creditos</div></div>
+              <div class="kvalue" id="pCreditCount">0</div>
+              <div class="kmeta">Registros cadastrados</div>
+            </div>
+            <div class="kpi">
+              <div class="ktop"><div class="kicon green" data-icon="clock3"></div><div class="klabel">Aguardando</div></div>
+              <div class="kvalue" id="pCreditWaiting">0</div>
+              <div class="kmeta">Disponiveis para uso</div>
+            </div>
+            <div class="kpi">
+              <div class="ktop"><div class="kicon slate" data-icon="checkCircle"></div><div class="klabel">Utilizados</div></div>
+              <div class="kvalue" id="pCreditUsed">0</div>
+              <div class="kmeta">Ja baixados</div>
+            </div>
+            <div class="kpi">
+              <div class="ktop"><div class="kicon blue" data-icon="coins"></div><div class="klabel">Valor total</div></div>
+              <div class="kvalue" id="pCreditTotal">R$ 0,00</div>
+              <div class="kmeta">Somatorio dos creditos</div>
+            </div>
+          </section>
+          <section class="card table-card" style="margin-top:14px">
+            <div class="pad">
+              <div class="chead"><span class="ti2">Lista de creditos</span><span class="eyebrow" id="pCreditLabel">0 registros</span></div>
+            </div>
+            <div style="overflow:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>Localizador</th>
+                    <th>Valor</th>
+                    <th>Validade</th>
+                    <th>Status</th>
+                    <th>Observacao</th>
+                    <th>Acoes</th>
+                  </tr>
+                </thead>
+                <tbody id="pCreditRows"></tbody>
               </table>
             </div>
           </section>
@@ -1403,6 +1479,7 @@
         <label>Localizador<input name="localizador" placeholder="Ex.: ZHVOGT"></label>
         <label>Valor aprovado<input name="valorAprovado" placeholder="Ex.: 18000,00"></label>
         <label>Valor pago<input name="valorPago" placeholder="Ex.: 16451,16"></label>
+        <label class="checklabel"><input name="pagoConfirmado" type="checkbox">Pago</label>
         <label style="grid-column:1 / -1">Observacao interna<input name="observacaoInterna" placeholder="Ex.: emitida, remarcada, retorno aguardando..."></label>
         <footer style="grid-column:1 / -1">
           <button class="ghost" type="button" id="cancelPassagensEditModal">Cancelar</button>
@@ -1574,6 +1651,7 @@
     const hMonthPicker = document.getElementById('hMonthPicker');
     const pMonthPicker = document.getElementById('pMonthPicker');
     const passagensRows = [];
+    const passagensCreditos = [];
     const passagensComplements = {};
     const pAirStart = document.getElementById('pAirStart');
     const pAirEnd = document.getElementById('pAirEnd');
@@ -1582,6 +1660,7 @@
     let passagensApiToken = (passagensConfig.token || '').trim();
     let passagensApiBaseUrl = (passagensConfig.baseUrl || 'https://portalmse.com.br/microservices/hub_mse/api_passagens').trim().replace(/\/+$/, '');
     let passagensLastSync = '';
+    let editingCreditoId = null;
 
     function defaultMonth() {
       const now = new Date();
@@ -1614,6 +1693,7 @@
         hitachiCompanyDocs: [],
         hitachiRecipients: '',
         passagensRows: [],
+        passagensCreditos: [],
         passagensComplements: [],
         passagensApiToken: '',
         passagensApiBaseUrl: passagensApiBaseUrl,
@@ -1664,6 +1744,7 @@
         hitachiCompanyDocs: hitachiCompanyDocs.map(item => ({ ...item })),
         hitachiRecipients,
         passagensRows: passagensRows.map(item => ({ ...item })),
+        passagensCreditos: passagensCreditos.map(item => ({ ...item })),
         passagensComplements: Object.entries(passagensComplements).map(([key, value]) => ({
           key,
           ...value
@@ -1754,6 +1835,15 @@
       }))));
       hitachiRecipients = payload.hitachiRecipients || '';
       passagensRows.splice(0, passagensRows.length, ...((payload.passagensRows || payload.passagens_rows || []).map(item => ({ ...item }))));
+      passagensCreditos.splice(0, passagensCreditos.length, ...((payload.passagensCreditos || payload.passagens_creditos || []).map(item => ({
+        id: item.id || createId(),
+        nome: item.nome || '',
+        localizador: item.localizador || '',
+        valor: item.valor ?? '',
+        validade: item.validade || '',
+        status: item.status || 'Aguardando utilizacao',
+        observacao: item.observacao || ''
+      }))));
       clearObject(passagensComplements);
       (payload.passagensComplements || payload.passagens_complements || []).forEach(item => {
         if (!item.key) return;
@@ -1771,6 +1861,7 @@
           numeroPedido: item.numeroPedido ?? item.numero_pedido ?? '',
           valorAprovado: item.valorAprovado ?? item.valor_aprovado ?? '',
           valorPago: item.valorPago ?? item.valor_pago ?? '',
+          pagoConfirmado: parseBool(item.pagoConfirmado ?? item.pago_confirmado ?? false),
           observacaoInterna: item.observacaoInterna ?? item.observacao_interna ?? ''
         };
       });
@@ -2986,6 +3077,10 @@
       return String(value).slice(0, 10);
     }
 
+    function parseBool(value) {
+      return value === true || value === 'true' || value === '1' || value === 1 || value === 'Sim' || value === 'sim' || value === 'on';
+    }
+
     function getPassagemComplement(item) {
       return passagensComplements[passagemKey(item)] || {};
     }
@@ -3020,6 +3115,7 @@
       const dataVolta = normalizeDateValue(complement.dataVolta || item.data_ida_volta || item.data_chegada || '');
       const horarioIda = complement.horarioIda || '';
       const horarioVolta = complement.horarioVolta || '';
+      const pagoConfirmado = parseBool(complement.pagoConfirmado);
       const observacao = complement.observacaoInterna || item.observacao || '';
       const economia = valorAprovado != null && valorPago != null && valorPago < valorAprovado ? valorAprovado - valorPago : 0;
       const pending =
@@ -3044,6 +3140,7 @@
         dataVolta,
         horarioIda,
         horarioVolta,
+        pagoConfirmado,
         observacao,
         dataPrincipal: passagemDateField(item),
         economia,
@@ -3156,7 +3253,7 @@
       const periodLabel = passagensRangeLabel(start, end);
       const generatedAt = new Date().toLocaleString('pt-BR');
       const tableRows = rows.map(row => `
-        <tr>
+        <tr class="${row.pagoConfirmado ? 'paid-row' : ''}">
           <td>${row.nome_colab || row.nome || '-'}</td>
           <td>${row.nome_obra || '-'}</td>
           <td>${row.nome_funcao || '-'}</td>
@@ -3283,6 +3380,55 @@
       }, 400);
     }
 
+    function resetCreditoForm() {
+      editingCreditoId = null;
+      const form = document.getElementById('passagensCreditoForm');
+      form.reset();
+      form.elements.status.value = 'Aguardando utilizacao';
+      document.getElementById('saveCreditoBtn').innerHTML = `${icon('plus')}Salvar credito`;
+      document.getElementById('cancelCreditoEdit').style.display = 'none';
+    }
+
+    function editCredito(id) {
+      const credito = passagensCreditos.find(item => item.id === id);
+      if (!credito) return;
+      editingCreditoId = id;
+      const form = document.getElementById('passagensCreditoForm');
+      form.elements.nome.value = credito.nome || '';
+      form.elements.localizador.value = credito.localizador || '';
+      form.elements.valor.value = credito.valor != null ? String(credito.valor).replace('.', ',') : '';
+      form.elements.validade.value = credito.validade || '';
+      form.elements.status.value = credito.status || 'Aguardando utilizacao';
+      form.elements.observacao.value = credito.observacao || '';
+      document.getElementById('saveCreditoBtn').innerHTML = `${icon('edit')}Salvar credito`;
+      document.getElementById('cancelCreditoEdit').style.display = 'inline-flex';
+      openPassagensView('creditos');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    window.editCredito = editCredito;
+
+    function renderPassagensCreditos() {
+      const total = passagensCreditos.reduce((sum, item) => sum + (parseMoney(item.valor) || 0), 0);
+      const waiting = passagensCreditos.filter(item => item.status === 'Aguardando utilizacao').length;
+      const used = passagensCreditos.filter(item => item.status === 'Ja utilizado').length;
+      document.getElementById('pCreditCount').textContent = passagensCreditos.length;
+      document.getElementById('pCreditWaiting').textContent = waiting;
+      document.getElementById('pCreditUsed').textContent = used;
+      document.getElementById('pCreditTotal').textContent = brl(total);
+      document.getElementById('pCreditLabel').textContent = `${passagensCreditos.length} registros`;
+      document.getElementById('pCreditRows').innerHTML = passagensCreditos.length ? passagensCreditos.map(item => `
+        <tr>
+          <td><span class="company">${item.nome || '-'}</span></td>
+          <td>${item.localizador || '-'}</td>
+          <td class="money">${parseMoney(item.valor) != null ? brl(parseMoney(item.valor)) : '-'}</td>
+          <td>${formatDate(item.validade)}</td>
+          <td><span class="tag ${item.status === 'Ja utilizado' ? 'neutral' : 'ok'}">${item.status}</span></td>
+          <td>${item.observacao || '-'}</td>
+          <td class="actioncell"><button class="rowact" title="Editar credito" aria-label="Editar credito" onclick="editCredito('${item.id}')">${icon('edit')}</button></td>
+        </tr>
+      `).join('') : `<tr><td colspan="7"><div class="empty-state"><b>Nenhum credito cadastrado.</b>Cadastre nome, localizador, valor, validade e status para acompanhar aqui.</div></td></tr>`;
+    }
+
     function renderPassagensTable(targetId, rows, columns) {
       const body = document.getElementById(targetId);
       if (!rows.length) {
@@ -3305,7 +3451,7 @@
       `).join('');
       if (targetId === 'pRoadRows') {
         body.innerHTML = rows.map(row => `
-          <tr>
+          <tr class="${row.pagoConfirmado ? 'paid-row' : ''}">
             <td><span class="company">${row.nome_colab || row.nome || '-'}</span></td>
             <td>${row.nome_obra || '-'}</td>
             <td>${row.nome_funcao || '-'}</td>
@@ -3327,7 +3473,7 @@
       }
       if (targetId === 'pAirRows') {
         body.innerHTML = rows.map(row => `
-          <tr>
+          <tr class="${row.pagoConfirmado ? 'paid-row' : ''}">
             <td><span class="company">${row.nome_colab || row.nome || '-'}</span></td>
             <td>${row.nome_obra || '-'}</td>
             <td>${row.nome_funcao || '-'}</td>
@@ -3350,7 +3496,7 @@
       }
       if (targetId === 'pRows') {
         body.innerHTML = rows.map(row => `
-          <tr>
+          <tr class="${row.pagoConfirmado ? 'paid-row' : ''}">
             <td><span class="company">${row.nome_colab || row.nome || '-'}</span></td>
             <td>${row.nome_obra || '-'}</td>
             <td>${row.tipo || '-'}</td>
@@ -3447,7 +3593,7 @@
       const cadastroRows = rows.filter(row => row.tabela === 'manual' || row.key.startsWith('manual:'));
       document.getElementById('pCadastroCount').textContent = `${cadastroRows.length} registros`;
       document.getElementById('pCadastroRows').innerHTML = cadastroRows.length ? cadastroRows.map(row => `
-        <tr>
+        <tr class="${row.pagoConfirmado ? 'paid-row' : ''}">
           <td>${formatDate(row.dataCompra)}</td>
           <td><span class="company">${row.nome_colab || row.nome || '-'}</span></td>
           <td>${row.nome_obra || '-'}</td>
@@ -3457,6 +3603,7 @@
           <td class="actioncell"><button class="rowact" title="Editar cadastro manual" aria-label="Editar cadastro manual" onclick="editPassagem('${row.key}')">${icon('edit')}</button></td>
         </tr>
       `).join('') : `<tr><td colspan="7"><div class="empty-state"><b>Nenhum cadastro manual neste mes.</b>Use esta aba para testar enquanto a API ainda nao devolve a data da compra.</div></td></tr>`;
+      renderPassagensCreditos();
     }
 
     async function syncPassagensData() {
@@ -3516,6 +3663,7 @@
       form.elements.localizador.value = item.localizador || '';
       form.elements.valorAprovado.value = item.valorAprovado == null ? '' : String(item.valorAprovado).replace('.', ',');
       form.elements.valorPago.value = item.valorPago == null ? '' : String(item.valorPago).replace('.', ',');
+      form.elements.pagoConfirmado.checked = Boolean(item.pagoConfirmado);
       form.elements.observacaoInterna.value = item.observacao || '';
       document.getElementById('passagensEditTitle').textContent = `Complementar passagem | ${item.nome_colab || item.nome || '-'}`;
       openModalById('passagensEditModal');
@@ -4023,6 +4171,7 @@
     document.getElementById('cancelPassagensConfigModal').addEventListener('click', () => closeModalById('passagensConfigModal'));
     document.getElementById('closePassagensEditModal').addEventListener('click', () => closeModalById('passagensEditModal'));
     document.getElementById('cancelPassagensEditModal').addEventListener('click', () => closeModalById('passagensEditModal'));
+    document.getElementById('cancelCreditoEdit').addEventListener('click', resetCreditoForm);
     document.getElementById('passagensConfigForm').addEventListener('submit', event => {
       event.preventDefault();
       const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
@@ -4065,6 +4214,7 @@
         numeroPedido: formData.numeroPedido || '',
         valorAprovado: formData.valorAprovado || '',
         valorPago: formData.valorPago || '',
+        pagoConfirmado: Boolean(formData.pagoConfirmado),
         observacaoInterna: formData.observacao || ''
       };
       event.currentTarget.reset();
@@ -4072,6 +4222,30 @@
       openPassagensView('overview');
       renderPassagens();
       setSyncStatus('Cadastro manual de passagem salvo para teste');
+    });
+    document.getElementById('passagensCreditoForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
+      const credito = {
+        id: editingCreditoId || createId(),
+        nome: formData.nome || '',
+        localizador: formData.localizador || '',
+        valor: formData.valor || '',
+        validade: formData.validade || '',
+        status: formData.status || 'Aguardando utilizacao',
+        observacao: formData.observacao || ''
+      };
+      if (editingCreditoId) {
+        const index = passagensCreditos.findIndex(item => item.id === editingCreditoId);
+        if (index >= 0) passagensCreditos[index] = credito;
+      } else {
+        passagensCreditos.push(credito);
+      }
+      resetCreditoForm();
+      saveLocalCache();
+      renderPassagens();
+      openPassagensView('creditos');
+      setSyncStatus('Controle de creditos atualizado');
     });
     document.getElementById('passagensEditForm').addEventListener('submit', event => {
       event.preventDefault();
@@ -4093,6 +4267,7 @@
         localizador: formData.localizador || '',
         valorAprovado: formData.valorAprovado || '',
         valorPago: formData.valorPago || '',
+        pagoConfirmado: Boolean(formData.pagoConfirmado),
         observacaoInterna: formData.observacaoInterna || ''
       };
       if (editingPassagemKey.startsWith('manual:')) {
