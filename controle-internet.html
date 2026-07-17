@@ -3178,8 +3178,8 @@
       const obraRows = summary.obraEntries.map(item => `
         <tr>
           <td>${item.obra}</td>
-          <td>${item.names.join(', ')}</td>
           <td>${brl(item.total)}</td>
+          <td>${summary.totalPaid > 0 ? `${((item.total / summary.totalPaid) * 100).toFixed(2).replace('.', ',')}%` : '0,00%'}</td>
         </tr>
       `).join('');
       return `<!DOCTYPE html>
@@ -3215,7 +3215,7 @@
     <div class="card"><div class="label">Registros</div><div class="value">${rows.length}</div></div>
     <div class="card"><div class="label">Total gasto</div><div class="value">${brl(summary.totalPaid)}</div></div>
     <div class="card"><div class="label">Economia</div><div class="value">${brl(summary.totalSavings)}</div></div>
-    <div class="card"><div class="label">Competencia</div><div class="value">${monthLabel(currentPassagensMonth())}</div></div>
+    <div class="card"><div class="label">Competencia</div><div class="value">${periodLabel}</div></div>
   </div>
   <div class="section">
     <div class="label">Resumo por obra</div>
@@ -3223,8 +3223,8 @@
       <thead>
         <tr>
           <th>Obra</th>
-          <th>Nomes</th>
           <th>Total gasto</th>
+          <th>% do total</th>
         </tr>
       </thead>
       <tbody>${obraRows || '<tr><td colspan="3">Nenhuma obra no periodo.</td></tr>'}</tbody>
