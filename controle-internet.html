@@ -1655,6 +1655,7 @@
     const SUPABASE_URL = (supabaseConfig.url || '').replace(/\/+$/, '');
     const SUPABASE_ANON_KEY = supabaseConfig.anonKey || '';
     const REMOTE_ENABLED = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
+    const PASSAGENS_API_ONLY = passagensConfig.useApiOnly !== false;
     const LOCAL_CACHE_KEY = 'portal-mse-cache-v2';
     const monthPicker = document.getElementById('monthPicker');
     const monthOverrides = {};
@@ -1970,9 +1971,9 @@
         supabaseRequest('diarista_month_entries', { query: 'select=*&order=month_key.asc,diarista_id.asc' }),
         supabaseRequest('hitachi_collaborators', { query: 'select=*&order=month_key.desc,empresa.asc,colaborador.asc' }),
         supabaseRequest('hitachi_company_docs', { query: 'select=*&order=month_key.desc,empresa.asc,documento.asc' }),
-        supabaseRequest('passagens_rows', { query: 'select=*&order=updated_at.asc' }),
-        supabaseRequest('passagens_complements', { query: 'select=*&order=updated_at.asc' }),
-        supabaseRequest('passagens_creditos', { query: 'select=*&order=updated_at.asc' })
+        PASSAGENS_API_ONLY ? Promise.resolve([]) : supabaseRequest('passagens_rows', { query: 'select=*&order=updated_at.asc' }),
+        PASSAGENS_API_ONLY ? Promise.resolve([]) : supabaseRequest('passagens_complements', { query: 'select=*&order=updated_at.asc' }),
+        PASSAGENS_API_ONLY ? Promise.resolve([]) : supabaseRequest('passagens_creditos', { query: 'select=*&order=updated_at.asc' })
       ]);
       return {
         contracts: remoteContracts,
@@ -1997,24 +1998,24 @@
           const payload = mergePassagensPayload(localPayload, remotePayload);
           hydrateState(payload);
           saveLocalCache();
-          if (
+          if (!PASSAGENS_API_ONLY && (
             (localPayload.passagensRows || localPayload.passagens_rows || []).length ||
             (localPayload.passagensComplements || localPayload.passagens_complements || []).length ||
             (localPayload.passagensCreditos || localPayload.passagens_creditos || []).length
-          ) {
+          )) {
             syncPassagensStorageRemote().catch(error => console.error(error));
           }
-          setSyncStatus('Ultima atualizacao via Supabase');
+          setSyncStatus(PASSAGENS_API_ONLY ? 'Portal carregado. Passagens em modo API.' : 'Ultima atualizacao via Supabase');
           return;
         } catch (error) {
           console.error(error);
           hydrateState(localPayload);
-          setSyncStatus('Supabase indisponivel. Usando cache local.');
+          setSyncStatus(PASSAGENS_API_ONLY ? 'API/local em uso. Banco ignorado para Passagens.' : 'Supabase indisponivel. Usando cache local.');
           return;
         }
       }
       hydrateState(localPayload);
-      setSyncStatus('Supabase nao configurado. Usando modo local.');
+      setSyncStatus(PASSAGENS_API_ONLY ? 'Passagens em modo API/local.' : 'Supabase nao configurado. Usando modo local.');
     }
 
     async function upsertContractRemote(contract) {
@@ -2147,7 +2148,7 @@
     }
 
     async function upsertPassagemRowRemote(item) {
-      if (!REMOTE_ENABLED) return;
+      if (!REMOTE_ENABLED || PASSAGENS_API_ONLY) return;
       await supabaseRequest('passagens_rows', {
         method: 'POST',
         prefer: 'resolution=merge-duplicates,return=representation',
@@ -2160,7 +2161,7 @@
     }
 
     async function upsertPassagemComplementRemote(key, data) {
-      if (!REMOTE_ENABLED) return;
+      if (!REMOTE_ENABLED || PASSAGENS_API_ONLY) return;
       await supabaseRequest('passagens_complements', {
         method: 'POST',
         prefer: 'resolution=merge-duplicates,return=representation',
@@ -2172,7 +2173,7 @@
     }
 
     async function upsertPassagemCreditoRemote(item) {
-      if (!REMOTE_ENABLED) return;
+      if (!REMOTE_ENABLED || PASSAGENS_API_ONLY) return;
       await supabaseRequest('passagens_creditos', {
         method: 'POST',
         prefer: 'resolution=merge-duplicates,return=representation',
@@ -2184,7 +2185,7 @@
     }
 
     async function deletePassagemRemote(key) {
-      if (!REMOTE_ENABLED) return;
+      if (!REMOTE_ENABLED || PASSAGENS_API_ONLY) return;
       await Promise.all([
         apiRequest('passagens_rows', {
           method: 'DELETE',
@@ -2198,7 +2199,7 @@
     }
 
     async function syncPassagensStorageRemote() {
-      if (!REMOTE_ENABLED) return;
+      if (!REMOTE_ENABLED || PASSAGENS_API_ONLY) return;
       await Promise.all([
         ...passagensRows.map(item => upsertPassagemRowRemote(item)),
         ...Object.entries(passagensComplements).map(([key, value]) => upsertPassagemComplementRemote(key, value)),
@@ -3754,10 +3755,10 @@
           throw new Error(`API Passagens respondeu ${response.status}`);
         }
         const payload = await response.json();
-        passagensRows.splice(0, passagensRows.length, ...((payload.data || []).map(item => ({ ...item }))));
+        const manualRows = passagensRows.filter(item => String(item.tabela || '').toLowerCase() === 'manual');
+        passagensRows.splice(0, passagensRows.length, ...((payload.data || []).map(item => ({ ...item }))), ...manualRows);
         passagensLastSync = new Date().toLocaleTimeString('pt-BR');
         saveLocalCache();
-        await Promise.all(passagensRows.map(item => upsertPassagemRowRemote(item)));
         renderPassagens();
         setSyncStatus(`Passagens sincronizadas da API em ${passagensLastSync}`);
       } catch (error) {
@@ -4646,7 +4647,9 @@
       renderPassagens();
       openHitachiView('overview');
       renderHitachi();
-      if (passagensApiToken && !passagensRows.length) {
+      if (passagensApiToken && PASSAGENS_API_ONLY) {
+        syncPassagensData().catch(error => console.error(error));
+      } else if (passagensApiToken && !passagensRows.length) {
         syncPassagensData().catch(error => console.error(error));
       }
       switchModule('internet');

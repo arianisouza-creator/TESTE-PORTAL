@@ -32,6 +32,7 @@ def load_portal_config() -> dict:
                 ),
             ).strip(),
             "token": st.secrets.get("passagens_api_token", os.getenv("PASSAGENS_API_TOKEN", "")).strip(),
+            "useApiOnly": True,
         },
     }
 
