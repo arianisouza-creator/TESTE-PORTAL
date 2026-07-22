@@ -1489,6 +1489,22 @@
     </div>
   </div>
 
+  <div class="modal" id="passagensDeleteModal" role="dialog" aria-modal="true" aria-labelledby="passagensDeleteTitle">
+    <div class="dialog">
+      <div class="chead"><span class="ti2" id="passagensDeleteTitle">Excluir passagem</span><button class="rowact" type="button" id="closePassagensDeleteModal" aria-label="Fechar" data-icon="close"></button></div>
+      <form id="passagensDeleteForm" class="formgrid">
+        <div class="helper" id="passagensDeleteSummary" style="grid-column:1 / -1">Confirme a exclusao com motivo e senha.</div>
+        <label style="grid-column:1 / -1">Motivo da exclusao<input name="motivo" placeholder="Descreva por que esta passagem esta sendo excluida" required></label>
+        <label style="grid-column:1 / -1">Senha de autorizacao<input name="senha" type="password" placeholder="Digite a senha" required></label>
+        <div class="helper" id="passagensDeleteError" style="grid-column:1 / -1;color:#d84b4b;display:none">Senha invalida.</div>
+        <footer style="grid-column:1 / -1">
+          <button class="ghost" type="button" id="cancelPassagensDeleteModal">Cancelar</button>
+          <button class="danger" type="submit"><span data-icon="trash"></span>Excluir passagem</button>
+        </footer>
+      </form>
+    </div>
+  </div>
+
   <script>
     const ICONS = {
       bell:'M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0',
@@ -1661,6 +1677,7 @@
     let passagensApiBaseUrl = (passagensConfig.baseUrl || 'https://portalmse.com.br/microservices/hub_mse/api_passagens').trim().replace(/\/+$/, '');
     let passagensLastSync = '';
     let editingCreditoId = null;
+    let deletingPassagemKey = '';
 
     function defaultMonth() {
       const now = new Date();
@@ -2164,6 +2181,20 @@
           data: item
         }]
       });
+    }
+
+    async function deletePassagemRemote(key) {
+      if (!REMOTE_ENABLED) return;
+      await Promise.all([
+        apiRequest('passagens_rows', {
+          method: 'DELETE',
+          query: `key=eq.${encodeURIComponent(key)}`
+        }),
+        apiRequest('passagens_complements', {
+          method: 'DELETE',
+          query: `key=eq.${encodeURIComponent(key)}`
+        })
+      ]);
     }
 
     async function syncPassagensStorageRemote() {
@@ -3482,9 +3513,9 @@
     }
 
     function editCredito(id) {
-      const credito = passagensCreditos.find(item => item.id === id);
+      const credito = passagensCreditos.find(item => String(item.id) === String(id));
       if (!credito) return;
-      editingCreditoId = id;
+      editingCreditoId = credito.id;
       const form = document.getElementById('passagensCreditoForm');
       form.elements.nome.value = credito.nome || '';
       form.elements.localizador.value = credito.localizador || '';
@@ -3538,7 +3569,7 @@
           <td>${row.localizador || '-'}</td>
           <td class="money">${row.valorAprovado == null ? '-' : brl(row.valorAprovado)}</td>
           <td class="money">${row.valorPago == null ? '-' : brl(row.valorPago)}</td>
-          <td class="actioncell"><button class="rowact" title="Complementar passagem" aria-label="Complementar passagem" onclick="editPassagem('${row.key}')">${icon('edit')}</button></td>
+          <td class="actioncell"><button class="rowact" title="Complementar passagem" aria-label="Complementar passagem" onclick="editPassagem('${row.key}')">${icon('edit')}</button><button class="rowact" title="Excluir passagem" aria-label="Excluir passagem" onclick="requestDeletePassagem('${row.key}')">${icon('trash')}</button></td>
         </tr>
       `).join('');
       if (targetId === 'pRoadRows') {
@@ -3559,7 +3590,7 @@
             <td>${row.pedido || '<span class="pending">Pendente</span>'}</td>
             <td class="money">${row.valorAprovado == null ? '-' : brl(row.valorAprovado)}</td>
             <td class="money">${row.valorPago == null ? '-' : brl(row.valorPago)}</td>
-            <td class="actioncell"><button class="rowact" title="Complementar passagem" aria-label="Complementar passagem" onclick="editPassagem('${row.key}')">${icon('edit')}</button></td>
+            <td class="actioncell"><button class="rowact" title="Complementar passagem" aria-label="Complementar passagem" onclick="editPassagem('${row.key}')">${icon('edit')}</button><button class="rowact" title="Excluir passagem" aria-label="Excluir passagem" onclick="requestDeletePassagem('${row.key}')">${icon('trash')}</button></td>
           </tr>
         `).join('');
       }
@@ -3582,7 +3613,7 @@
             <td>${row.pedido || '<span class="pending">Pendente</span>'}</td>
             <td class="money">${row.valorAprovado == null ? '-' : brl(row.valorAprovado)}</td>
             <td class="money">${row.valorPago == null ? '-' : brl(row.valorPago)}</td>
-            <td class="actioncell"><button class="rowact" title="Complementar passagem" aria-label="Complementar passagem" onclick="editPassagem('${row.key}')">${icon('edit')}</button></td>
+            <td class="actioncell"><button class="rowact" title="Complementar passagem" aria-label="Complementar passagem" onclick="editPassagem('${row.key}')">${icon('edit')}</button><button class="rowact" title="Excluir passagem" aria-label="Excluir passagem" onclick="requestDeletePassagem('${row.key}')">${icon('trash')}</button></td>
           </tr>
         `).join('');
       }
@@ -3598,7 +3629,7 @@
             <td class="money">${row.valorPago == null ? '-' : brl(row.valorPago)}</td>
             <td>${row.localizador || '-'}</td>
             <td>${row.pedido || '<span class="pending">Pendente</span>'}</td>
-            <td class="actioncell"><button class="rowact" title="Complementar passagem" aria-label="Complementar passagem" onclick="editPassagem('${row.key}')">${icon('edit')}</button></td>
+            <td class="actioncell"><button class="rowact" title="Complementar passagem" aria-label="Complementar passagem" onclick="editPassagem('${row.key}')">${icon('edit')}</button><button class="rowact" title="Excluir passagem" aria-label="Excluir passagem" onclick="requestDeletePassagem('${row.key}')">${icon('trash')}</button></td>
           </tr>
         `).join('');
       }
@@ -3762,6 +3793,18 @@
       openModalById('passagensEditModal');
     }
     window.editPassagem = editPassagem;
+
+    function requestDeletePassagem(key) {
+      const item = currentPassagensData().find(row => row.key === key) || passagensRows.map(buildPassagemRow).find(row => row.key === key);
+      if (!item) return;
+      deletingPassagemKey = key;
+      const form = document.getElementById('passagensDeleteForm');
+      form.reset();
+      document.getElementById('passagensDeleteError').style.display = 'none';
+      document.getElementById('passagensDeleteSummary').textContent = `${item.nome_colab || item.nome || '-'} | ${item.nome_obra || 'Sem obra'} | ${item.modalidade || 'A definir'}`;
+      openModalById('passagensDeleteModal');
+    }
+    window.requestDeletePassagem = requestDeletePassagem;
 
     function selectRow(id) {
       selectedId = id;
@@ -4264,6 +4307,8 @@
     document.getElementById('cancelPassagensConfigModal').addEventListener('click', () => closeModalById('passagensConfigModal'));
     document.getElementById('closePassagensEditModal').addEventListener('click', () => closeModalById('passagensEditModal'));
     document.getElementById('cancelPassagensEditModal').addEventListener('click', () => closeModalById('passagensEditModal'));
+    document.getElementById('closePassagensDeleteModal').addEventListener('click', () => closeModalById('passagensDeleteModal'));
+    document.getElementById('cancelPassagensDeleteModal').addEventListener('click', () => closeModalById('passagensDeleteModal'));
     document.getElementById('cancelCreditoEdit').addEventListener('click', resetCreditoForm);
     document.getElementById('passagensConfigForm').addEventListener('submit', event => {
       event.preventDefault();
@@ -4335,7 +4380,7 @@
         observacao: formData.observacao || ''
       };
       if (editingCreditoId) {
-        const index = passagensCreditos.findIndex(item => item.id === editingCreditoId);
+        const index = passagensCreditos.findIndex(item => String(item.id) === String(editingCreditoId));
         if (index >= 0) passagensCreditos[index] = credito;
       } else {
         passagensCreditos.push(credito);
@@ -4396,6 +4441,41 @@
       }
       renderPassagens();
       closeModalById('passagensEditModal');
+    });
+    document.getElementById('passagensDeleteForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      if (!deletingPassagemKey) return;
+      const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
+      const motivo = (formData.motivo || '').trim();
+      const senha = (formData.senha || '').trim();
+      const errorBox = document.getElementById('passagensDeleteError');
+      if (!motivo) {
+        errorBox.textContent = 'Informe o motivo da exclusao.';
+        errorBox.style.display = 'block';
+        return;
+      }
+      if (senha !== PROTECTED_PASS) {
+        errorBox.textContent = 'Senha invalida.';
+        errorBox.style.display = 'block';
+        return;
+      }
+      const targetKey = deletingPassagemKey;
+      const rowIndex = passagensRows.findIndex(item => passagemKey(item) === targetKey);
+      if (rowIndex >= 0) passagensRows.splice(rowIndex, 1);
+      delete passagensComplements[targetKey];
+      deletingPassagemKey = '';
+      event.currentTarget.reset();
+      errorBox.style.display = 'none';
+      saveLocalCache();
+      renderPassagens();
+      closeModalById('passagensDeleteModal');
+      try {
+        await deletePassagemRemote(targetKey);
+        setSyncStatus(`Passagem excluida com sucesso. Motivo registrado: ${motivo}`);
+      } catch (error) {
+        console.error(error);
+        setSyncStatus(`Passagem excluida no navegador. Falha ao remover no banco.`);
+      }
     });
     document.getElementById('resetHitachi').addEventListener('click', async () => {
       const monthKey = currentHitachiMonth();
