@@ -3194,6 +3194,17 @@
       );
     }
 
+    function passagemCompraMoment(item, complement = getPassagemComplement(item)) {
+      return String(
+        complement.dataCompra ||
+        item.data_compra ||
+        item.dataCompra ||
+        item.data_cadastro_pci ||
+        item.data_cadastro ||
+        ''
+      ).trim();
+    }
+
     function passagemDateField(item) {
       return item.data_prevista || item.data_proxima || item.data_ida || item.data_chegada || '';
     }
@@ -3265,6 +3276,7 @@
         key: passagemKey(item),
         modalidade,
         dataCompra,
+        dataCompraMoment: passagemCompraMoment(item, complement),
         valorAprovado,
         valorPago,
         pedido,
@@ -3287,7 +3299,20 @@
     function currentPassagensData() {
       return passagensRows
         .filter(item => monthKeyFromDate(passagemCompraDate(item)) === currentPassagensMonth())
-        .map(buildPassagemRow);
+        .map(buildPassagemRow)
+        .sort((left, right) => {
+          const leftMoment = String(left.dataCompraMoment || '');
+          const rightMoment = String(right.dataCompraMoment || '');
+          if (leftMoment && rightMoment && leftMoment !== rightMoment) return rightMoment.localeCompare(leftMoment);
+          if (leftMoment && !rightMoment) return -1;
+          if (!leftMoment && rightMoment) return 1;
+          const leftDate = normalizeDateValue(left.dataCompra || '');
+          const rightDate = normalizeDateValue(right.dataCompra || '');
+          if (leftDate && rightDate && leftDate !== rightDate) return rightDate.localeCompare(leftDate);
+          if (leftDate && !rightDate) return -1;
+          if (!leftDate && rightDate) return 1;
+          return String(right.key || '').localeCompare(String(left.key || ''));
+        });
     }
 
     function filteredPassagens(rows, target = 'all') {
@@ -3331,17 +3356,15 @@
       const obraMap = {};
       rows.forEach(row => {
         const obra = row.nome_obra || 'Sem obra';
-        if (!obraMap[obra]) obraMap[obra] = { total: 0, names: [] };
+        if (!obraMap[obra]) obraMap[obra] = { total: 0 };
         obraMap[obra].total += row.valorPago || 0;
-        obraMap[obra].names.push(row.nome_colab || row.nome || '-');
       });
       return {
         totalPaid,
         totalSavings,
         obraEntries: Object.entries(obraMap).map(([obra, info]) => ({
           obra,
-          total: info.total,
-          names: [...new Set(info.names)].sort((a, b) => a.localeCompare(b, 'pt-BR'))
+          total: info.total
         })).sort((a, b) => b.total - a.total)
       };
     }
@@ -3354,7 +3377,6 @@
         <div class="baritem">
           <div class="barlabel"><span>${item.obra}</span><b>${brl(item.total)}</b></div>
           <div class="track"><div class="fill" style="width:${max ? (item.total / max) * 100 : 0}%"></div></div>
-          <div class="lisub">${item.names.join(', ')}</div>
         </div>
       `).join('') : `<div class="empty-state"><b>${emptyMessage}</b>Ajuste o intervalo de datas para consultar outro periodo.</div>`;
     }
