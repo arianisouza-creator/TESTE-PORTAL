@@ -3165,7 +3165,8 @@
 
     function formatDate(value) {
       if (!value || value === '0000-00-00') return '-';
-      const date = new Date(`${value}T00:00:00`);
+      const normalized = normalizeDateValue(value);
+      const date = new Date(`${normalized}T00:00:00`);
       if (Number.isNaN(date.getTime())) return value;
       return date.toLocaleDateString('pt-BR');
     }
@@ -3183,7 +3184,14 @@
     }
 
     function passagemCompraDate(item, complement = getPassagemComplement(item)) {
-      return complement.dataCompra || item.data_compra || item.dataCompra || '';
+      return normalizeDateValue(
+        complement.dataCompra ||
+        item.data_compra ||
+        item.dataCompra ||
+        item.data_cadastro_pci ||
+        item.data_cadastro ||
+        ''
+      );
     }
 
     function passagemDateField(item) {
@@ -3210,6 +3218,10 @@
 
     function inferPassagemMode(item, complement = getPassagemComplement(item)) {
       if (complement.modalidade) return complement.modalidade;
+      const compra = item.compra || {};
+      const tipoViagem = norm(compra.tipo_viagem || '');
+      if (tipoViagem.includes('avio')) return 'Aereo';
+      if (tipoViagem.includes('rodovi')) return 'Rodoviario';
       const hasAir = [item.valor_aereo, item.aprovado_aereo, item.reprovado_aereo, item.id_passagem_ar].some(value => value != null && value !== '');
       const hasRoad = [item.valor_rodoviario, item.aprovado_rodoviario, item.reprovado_rodoviario].some(value => value != null && value !== '');
       if (hasAir) return 'Aereo';
@@ -3221,23 +3233,24 @@
 
     function buildPassagemRow(item) {
       const complement = getPassagemComplement(item);
+      const compra = item.compra || {};
       const modalidade = inferPassagemMode(item, complement);
       const valorApi = parseMoney(item.valor_pago) ?? parseMoney(item.valor_aereo) ?? parseMoney(item.valor_rodoviario) ?? parseMoney(item.valor_referencia);
-      const valorAprovadoApi = parseMoney(item.valor_aprovado) ?? parseMoney(item.valor_referencia);
+      const valorAprovadoApi = parseMoney(item.valor_aprovado) ?? parseMoney(item.valor_aprovado_rafael) ?? parseMoney(compra.valor_aprovado_rafael) ?? parseMoney(item.valor_referencia);
       const valorAprovadoComplemento = parseMoney(complement.valorAprovado);
       const valorAprovado = valorAprovadoComplemento ?? valorAprovadoApi;
       const valorComplemento = parseMoney(complement.valorPago);
       const valorPago = valorComplemento ?? valorApi;
       const dataCompra = passagemCompraDate(item, complement);
-      const pedido = complement.numeroPedido || '';
-      const localizador = complement.localizador || '';
-      const companhia = complement.companhia || '';
-      const origem = complement.origem || '';
-      const destino = complement.destino || '';
-      const dataIda = normalizeDateValue(complement.dataIda || item.data_ida || item.data_prevista || item.data_proxima || '');
+      const pedido = complement.numeroPedido || item.numero_pedido || compra.numero_pedido || '';
+      const localizador = complement.localizador || compra.localizador || '';
+      const companhia = complement.companhia || compra.companhia || '';
+      const origem = complement.origem || compra.origem || '';
+      const destino = complement.destino || compra.destino || '';
+      const dataIda = normalizeDateValue(complement.dataIda || item.data_ida || item.data_prevista || item.data_proxima || compra.data_viagem || '');
       const dataVolta = normalizeDateValue(complement.dataVolta || item.data_ida_volta || item.data_chegada || '');
-      const horarioIda = complement.horarioIda || '';
-      const horarioVolta = complement.horarioVolta || '';
+      const horarioIda = complement.horarioIda || compra.horario_trajeto_inicio || '';
+      const horarioVolta = complement.horarioVolta || compra.horario_trajeto_fim || '';
       const pagoConfirmado = parseBool(complement.pagoConfirmado);
       const observacao = complement.observacaoInterna || item.observacao || '';
       const economia = valorAprovado != null && valorPago != null && valorPago < valorAprovado ? valorAprovado - valorPago : 0;
@@ -3772,21 +3785,32 @@
       button.disabled = true;
       button.innerHTML = `${icon('refresh')}Sincronizando...`;
       try {
-        const response = await fetch(`${passagensApiBaseUrl}/v1/passagens?all=true&order_by=data_viagem&order_dir=DESC`, {
-          headers: {
-            Authorization: `Bearer ${passagensApiToken}`
+        const headers = {
+          Authorization: `Bearer ${passagensApiToken}`
+        };
+        const rows = [];
+        let page = 1;
+        let totalPages = 1;
+        do {
+          const response = await fetch(`${passagensApiBaseUrl}/v1/passagens?per_page=200&page=${page}&order_by=data_viagem&order_dir=DESC`, { headers });
+          if (!response.ok) {
+            throw new Error(`API Passagens respondeu ${response.status}`);
           }
-        });
-        if (!response.ok) {
-          throw new Error(`API Passagens respondeu ${response.status}`);
+          const payload = await response.json();
+          rows.push(...(payload.data || []).map(item => ({ ...item })));
+          totalPages = Number(payload.total_pages || 1);
+          page += 1;
+        } while (page <= totalPages);
+
+        if (!rows.length) {
+          throw new Error('API Passagens nao retornou registros.');
         }
-        const payload = await response.json();
         const manualRows = passagensRows.filter(item => String(item.tabela || '').toLowerCase() === 'manual');
-        passagensRows.splice(0, passagensRows.length, ...((payload.data || []).map(item => ({ ...item }))), ...manualRows);
+        passagensRows.splice(0, passagensRows.length, ...rows, ...manualRows);
         passagensLastSync = new Date().toLocaleTimeString('pt-BR');
         saveLocalCache();
         renderPassagens();
-        setSyncStatus(`Passagens sincronizadas da API em ${passagensLastSync}`);
+        setSyncStatus(`Passagens sincronizadas da API em ${passagensLastSync} (${rows.length} registros)`);
       } catch (error) {
         console.error(error);
         window.alert('Nao foi possivel sincronizar as passagens. Verifique a configuracao da API e tente novamente.');
