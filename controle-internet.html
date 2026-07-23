@@ -736,7 +736,6 @@
                     <th>Tipo</th>
                     <th>Modalidade</th>
                     <th>Data da compra</th>
-                    <th>Valor aprovado</th>
                     <th>Valor pago</th>
                     <th>Localizador</th>
                     <th>Pedido</th>
@@ -3531,6 +3530,34 @@
     }
     window.editCredito = editCredito;
 
+    async function deleteCreditoRemote(id) {
+      if (!REMOTE_ENABLED || PASSAGENS_API_ONLY) return;
+      await supabaseRequest('passagens_creditos', {
+        method: 'DELETE',
+        query: `id=eq.${encodeURIComponent(String(id))}`
+      });
+    }
+
+    async function deleteCredito(id) {
+      const credito = passagensCreditos.find(item => String(item.id) === String(id));
+      if (!credito) return;
+      if (!window.confirm(`Deseja excluir o credito de ${credito.nome || 'registro selecionado'}?`)) return;
+      const index = passagensCreditos.findIndex(item => String(item.id) === String(id));
+      if (index < 0) return;
+      passagensCreditos.splice(index, 1);
+      if (String(editingCreditoId) === String(id)) resetCreditoForm();
+      saveLocalCache();
+      try {
+        await deleteCreditoRemote(id);
+      } catch (error) {
+        console.error(error);
+      }
+      renderPassagens();
+      openPassagensView('creditos');
+      setSyncStatus('Credito excluido com sucesso');
+    }
+    window.deleteCredito = deleteCredito;
+
     function renderPassagensCreditos() {
       const total = passagensCreditos.reduce((sum, item) => sum + (parseMoney(item.valor) || 0), 0);
       const waiting = passagensCreditos.filter(item => item.status === 'Aguardando utilizacao').length;
@@ -3548,7 +3575,7 @@
           <td>${formatDate(item.validade)}</td>
           <td><span class="tag ${item.status === 'Ja utilizado' ? 'neutral' : 'ok'}">${item.status}</span></td>
           <td>${item.observacao || '-'}</td>
-          <td class="actioncell"><button class="rowact" title="Editar credito" aria-label="Editar credito" onclick="editCredito('${item.id}')">${icon('edit')}</button></td>
+          <td class="actioncell"><button class="rowact" title="Editar credito" aria-label="Editar credito" onclick="editCredito('${item.id}')">${icon('edit')}</button><button class="rowact" title="Excluir credito" aria-label="Excluir credito" onclick="deleteCredito('${item.id}')">${icon('trash')}</button></td>
         </tr>
       `).join('') : `<tr><td colspan="7"><div class="empty-state"><b>Nenhum credito cadastrado.</b>Cadastre nome, localizador, valor, validade e status para acompanhar aqui.</div></td></tr>`;
     }
@@ -3626,7 +3653,6 @@
             <td>${row.tipo || '-'}</td>
             <td><span class="tag ${row.modalidade === 'A definir' ? 'warn' : 'ok'}">${row.modalidade}</span></td>
             <td>${formatDate(row.dataCompra)}</td>
-            <td class="money">${row.valorAprovado == null ? '-' : brl(row.valorAprovado)}</td>
             <td class="money">${row.valorPago == null ? '-' : brl(row.valorPago)}</td>
             <td>${row.localizador || '-'}</td>
             <td>${row.pedido || '<span class="pending">Pendente</span>'}</td>
@@ -3707,7 +3733,7 @@
         </div>
       `).join('') : `<div class="empty-state"><b>Sem economia neste mes.</b>Esse quadro mostra apenas passagens com valor pago abaixo do aprovado.</div>`;
 
-      renderPassagensTable('pRows', filtered, 10);
+      renderPassagensTable('pRows', filtered, 9);
       renderPassagensTable('pAirRows', airRangeRows, 17);
       renderPassagensTable('pRoadRows', roadRangeRows, 16);
       renderPassagensRangeSummary('pAirSummary', 'pAirRangeLabel', airRangeRows, pAirStart.value, pAirEnd.value);
