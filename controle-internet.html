@@ -2540,6 +2540,51 @@
       return entries;
     }
 
+    function pageFlatText(text) {
+      return ' '.join(stripAccents(text || '').split(/\s+/)).trim();
+    }
+
+    function detectHitachiCostCenter(flatText) {
+      const match = flatText.match(/C\.Custo\:\s*(\d+)\s*\-\s*([^:]+)/i);
+      if (!match) return null;
+      const code = match[1];
+      const label = (match[2] || '').toUpperCase();
+      if (label.includes('HITACHI') || label.includes('CP022')) {
+        return code;
+      }
+      return null;
+    }
+
+    function extractHitachiSectionText(pages) {
+      const selected = [];
+      let activeCostCenter = null;
+
+      pages.forEach(page => {
+        const flat = pageFlatText(page.text);
+        const hitachiCostCenter = detectHitachiCostCenter(flat);
+        const hasAnyCostCenterHeader = /C\.Custo\:\s*\d+\s*\-/i.test(flat);
+
+        if (hitachiCostCenter) {
+          activeCostCenter = hitachiCostCenter;
+          selected.push(flat);
+          return;
+        }
+
+        if (activeCostCenter) {
+          if (hasAnyCostCenterHeader && !flat.includes(`CC:${activeCostCenter}`) && !flat.includes(`CC: ${activeCostCenter}`)) {
+            activeCostCenter = null;
+            return;
+          }
+
+          if (flat.includes(`CC:${activeCostCenter}`) || flat.includes(`CC: ${activeCostCenter}`) || flat.includes(`Depto: 5042`) || flat.includes(`Depto:5042`)) {
+            selected.push(flat);
+          }
+        }
+      });
+
+      return selected.join(' ');
+    }
+
     async function readPdfText(file) {
       if (!window.pdfjsLib) throw new Error('Leitor de PDF indisponivel no navegador.');
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -2761,14 +2806,16 @@
 
       summaryBox.textContent = 'Lendo a folha e comparando os colaboradores...';
       try {
-        const text = await readPdfText(file);
+        const pages = await readPdfPages(file);
+        const text = pages.map(page => page.text).join('\n');
+        const hitachiText = extractHitachiSectionText(pages);
         const detectedMonth = extractPayrollMonthKey(text);
         const targetMonth = monthInput.value || detectedMonth || currentHitachiMonth();
         const empresa = companyInput.value === 'AUTO' ? inferHitachiCompanyFromText(text) : companyInput.value;
-        const currentEntries = extractHitachiPayrollEntries(text);
+        const currentEntries = extractHitachiPayrollEntries(hitachiText || text);
 
         if (!currentEntries.length) {
-          summaryBox.textContent = 'Nao encontrei nomes da folha nesse PDF. Confira se o arquivo e um extrato mensal de folha.';
+          summaryBox.textContent = 'Nao encontrei colaboradores da Hitachi nesse PDF. Confira se a folha contem o bloco C.Custo da Hitachi e tente novamente.';
           return;
         }
 
