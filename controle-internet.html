@@ -1164,6 +1164,7 @@
                 </label>
                 <label>Folha mensal (PDF)<input id="hitachiPayrollFile" type="file" accept="application/pdf"></label>
                 <button class="soft" type="button" id="hitachiPayrollImport"><span data-icon="folder"></span>Importar folha</button>
+                <button class="ghost" type="button" id="hitachiManualSeed"><span data-icon="users"></span>Carregar lista manual</button>
               </div>
               <div class="import-help">
                 <b>O que essa importacao faz</b>
@@ -1722,6 +1723,48 @@
     const diaristaMonthOverrides = {};
     const hitachiCollaborators = [];
     const hitachiCompanyDocs = [];
+    const HITACHI_MANUAL_SERVICE_NAMES = [
+      'ALBERT VICENTE ZAMBELLO',
+      'ALESSANDRA DA SILVA ASSEN',
+      'AMAURI BARROSO DE MOURA',
+      'AMAURI JUNIOR DA ROCHA',
+      'ANTONIO CLAUDIO CORREA ORNELAS',
+      'ANTONIO JOSE SILVA DE SOUSA',
+      'ANTONIO REGISON DE AMORIM MOURAO',
+      'BRUNO SALES CASTRO',
+      'CARLOS RAFAEL BARBOSA',
+      'CELIO ROBERTO DA SILVA',
+      'DARLAN DE OLIVEIRA SOUSA',
+      'FABIO FERREIRA DE SOUZA',
+      'FERNANDO LUIS DE LIMA',
+      'FRANCISCO CARLOS FONSECA SALAZAR',
+      'GEOVANE COSTA DA CONCEICAO',
+      'GLEISON ALVES CARVALHO DE SOUZA',
+      'GUILHERME MELO SILVA',
+      'IGOR SANTOS PEDROSA',
+      'JACSON DA SILVA DE CARVALHO',
+      'JALSON COSTA DE BARROS',
+      'JENILSON MARQUES LEITE',
+      'JEOVANE OLIVEIRA DO NASCIMENTO',
+      'JERRI PEREIRA DA SILVA',
+      'JOAQUIM SIMAO NETO',
+      'JORGE LUIZ CHAGAS RIBEIRO',
+      'JOSE DOMINGOS SAMPAIO',
+      'JOSIAS RIBEIRO SOARES',
+      'JOSIMAR DE SOUSA SILVA',
+      'KERCY JHONY FERREIRA',
+      'LEANDRO CONCEICAO DE OLIVEIRA',
+      'LUCAS KENNEDY DA SILVA CAETANO',
+      'LUCAS VASCONCELOS OLIVEIRA',
+      'LUIS ALBERTO SILVA',
+      'MARCELO BRASIL',
+      'MARCIO FERREIRA TEIXEIRA',
+      'MAYCON FERREIRA DOS SANTOS',
+      'NERIALDO MACIEL RODRIGUES',
+      'RAFAEL DE ALMEIDA RIBEIRO',
+      'RAUL NASCIMENTO REZENDE',
+      'SAMOEL SANTANA GARCIA'
+    ];
     const hMonthPicker = document.getElementById('hMonthPicker');
     const pMonthPicker = document.getElementById('pMonthPicker');
     const passagensRows = [];
@@ -2727,7 +2770,15 @@
 
     function extractPagamentoName(text) {
       const normalized = stripAccents(text || '');
-      const match = normalized.match(/Nome\:\s*([A-Z0-9'`.\- ]{6,})/i);
+      const lineMatch = normalized.match(/Nome\:\s*([^\n\r]+)/i);
+      if (lineMatch && lineMatch[1]) {
+        return lineMatch[1]
+          .replace(/\s+(Ag\S+ncia|Conta corrente|Valor)\:.*$/i, '')
+          .replace(/\s+/g, ' ')
+          .trim();
+      }
+      const flat = normalized.replace(/\s+/g, ' ');
+      const match = flat.match(/Nome\:\s*([A-Z\s'`.\-]{6,}?)\s+(Ag\S+ncia|Conta corrente|Valor)\:/i);
       if (!match) return '';
       return (match[1] || '').replace(/\s+/g, ' ').trim();
     }
@@ -2993,6 +3044,39 @@
         console.error(error);
         summaryBox.textContent = `Nao foi possivel ler a folha agora. ${error && error.message ? error.message : 'Confira o PDF e tente novamente.'}`;
       }
+    }
+
+    async function seedHitachiManualServiceList() {
+      const monthInput = document.getElementById('hitachiPayrollMonth');
+      const companyInput = document.getElementById('hitachiPayrollCompany');
+      const summaryBox = document.getElementById('hitachiPayrollSummary');
+      const targetMonth = monthInput.value || currentHitachiMonth();
+      const empresa = companyInput.value === 'AUTO' ? 'MSE SERVICE' : companyInput.value;
+      const currentRows = hitachiRowsForMonth(targetMonth).filter(row => row.empresa === empresa);
+      const currentMap = new Map(currentRows.map(row => [normalizePersonName(row.colaborador), row]));
+      const payloads = HITACHI_MANUAL_SERVICE_NAMES.map(colaborador => {
+        const key = normalizePersonName(colaborador);
+        const existing = currentMap.get(key);
+        return {
+          id: existing?.id || createId(),
+          monthKey: targetMonth,
+          empresa,
+          colaborador,
+          situacao: existing?.situacao || 'Ativo',
+          holerite: existing?.holerite || 'PENDENTE',
+          comprovantePagamento: existing?.comprovantePagamento || 'PENDENTE',
+          comprovanteAdiantamento: existing?.comprovanteAdiantamento || 'N/A',
+          kitRescisao: existing?.kitRescisao || 'N/A',
+          holeriteArquivo: existing?.holeriteArquivo || '',
+          comprovantePagamentoArquivo: existing?.comprovantePagamentoArquivo || '',
+          comprovanteAdiantamentoArquivo: existing?.comprovanteAdiantamentoArquivo || ''
+        };
+      });
+
+      monthInput.value = targetMonth;
+      hMonthPicker.value = targetMonth;
+      await saveHitachiCollaboratorsBatch(payloads);
+      summaryBox.textContent = `Lista manual carregada para ${monthLabel(targetMonth)} em ${empresa}: ${payloads.length} colaborador(es) prontos para conferencia de documentos.`;
     }
 
     function hitachiDocStatuses(row) {
@@ -5221,6 +5305,7 @@
     document.getElementById('cancelHitachiEdit').addEventListener('click', resetHitachiForm);
     document.getElementById('cancelHitachiCompanyEdit').addEventListener('click', resetHitachiCompanyForm);
     document.getElementById('hitachiPayrollImport').addEventListener('click', importHitachiPayrollFile);
+    document.getElementById('hitachiManualSeed').addEventListener('click', seedHitachiManualServiceList);
     document.getElementById('hitachiDocsImport').addEventListener('click', importHitachiDocumentFiles);
     document.getElementById('openHitachiPendencias').addEventListener('click', () => {
       refreshHitachiPendenciasModal();
