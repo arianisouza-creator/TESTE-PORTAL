@@ -2528,16 +2528,33 @@
     function extractHitachiPayrollEntries(text) {
       const entries = [];
       const seen = new Set();
+      const lines = String(text || '')
+        .split(/\n+/)
+        .map(line => stripAccents(line).replace(/\s+/g, ' ').trim())
+        .filter(Boolean);
+
+      lines.forEach(line => {
+        if (!/Empr\.\:/i.test(line) || !/CPF\s*\:/i.test(line)) return;
+        const match = line.match(/Empr\.\:\s*\d+\s*([A-Z][A-Z\s'`.\-]+?)\s+Situa[^:]{0,20}\:\s*([A-Za-z\s'`.\-]+?)\s+CPF\s*\:/i);
+        if (!match) return;
+        const colaborador = (match[1] || '').replace(/\s+/g, ' ').trim();
+        const situacaoFolha = (match[2] || '').replace(/\s+/g, ' ').trim();
+        const key = normalizePersonName(colaborador);
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+        entries.push({ colaborador, situacaoFolha });
+      });
+
+      if (entries.length) {
+        return entries;
+      }
+
       const normalized = stripAccents(text || '').split(/\s+/).join(' ').trim();
-      const regex = /Empr\.\:\s*\d+\s*([\s\S]*?)\s+CPF\s*\:/gi;
+      const regex = /Empr\.\:\s*\d+\s*([A-Z][A-Z\s'`.\-]+?)\s+Situa[^:]{0,20}\:\s*([A-Za-z\s'`.\-]+?)\s+CPF\s*\:/gi;
       let match;
       while ((match = regex.exec(normalized)) !== null) {
-        const rawBlock = (match[1] || '').replace(/\s+/g, ' ').trim();
-        if (!rawBlock) continue;
-        const situacaoMatch = rawBlock.match(/\bSitua[^:]{0,20}\:\s*(.+)$/i);
-        const situacaoFolha = situacaoMatch ? situacaoMatch[1].replace(/\s+/g, ' ').trim() : '';
-        let colaborador = situacaoMatch ? rawBlock.slice(0, situacaoMatch.index).trim() : rawBlock;
-        colaborador = colaborador.split(/\bAdm\s*\:/i)[0].replace(/\s+/g, ' ').trim();
+        const colaborador = (match[1] || '').replace(/\s+/g, ' ').trim();
+        const situacaoFolha = (match[2] || '').replace(/\s+/g, ' ').trim();
         const key = normalizePersonName(colaborador);
         if (!key || seen.has(key)) continue;
         seen.add(key);
@@ -2548,6 +2565,31 @@
 
     function pageFlatText(text) {
       return stripAccents(text || '').split(/\s+/).join(' ').trim();
+    }
+
+    function extractPdfPageLines(content) {
+      const items = (content.items || [])
+        .filter(item => item && item.str && item.str.trim())
+        .map(item => ({
+          text: item.str.trim(),
+          x: Number(item.transform && item.transform[4]) || 0,
+          y: Number(item.transform && item.transform[5]) || 0
+        }))
+        .sort((a, b) => (Math.abs(b.y - a.y) > 2 ? b.y - a.y : a.x - b.x));
+
+      const rows = [];
+      items.forEach(item => {
+        const current = rows[rows.length - 1];
+        if (!current || Math.abs(current.y - item.y) > 2) {
+          rows.push({ y: item.y, items: [item] });
+          return;
+        }
+        current.items.push(item);
+      });
+
+      return rows
+        .map(row => row.items.sort((a, b) => a.x - b.x).map(item => item.text).join(' ').replace(/\s+/g, ' ').trim())
+        .filter(Boolean);
     }
 
     function detectHitachiCostCenter(flatText) {
@@ -2619,7 +2661,7 @@
       for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
         const page = await pdf.getPage(pageNumber);
         const content = await page.getTextContent();
-        const pageText = content.items.map(item => item.str).join(' ');
+        const pageText = extractPdfPageLines(content).join('\n');
         const flat = pageFlatText(pageText);
 
         if (pageNumber <= 3) metaChunks.push(flat);
