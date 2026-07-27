@@ -2517,7 +2517,7 @@
     }
 
     function extractPayrollMonthKey(text) {
-      const normalized = stripAccents(text || '');
+      const normalized = ' '.join(stripAccents(text || '').split(/\s+/)).trim();
       const match = normalized.match(/Competencia\:\s*(\d{2})\/(\d{4})/i);
       if (!match) return '';
       return `${match[2]}-${match[1]}`;
@@ -2526,7 +2526,7 @@
     function extractHitachiPayrollEntries(text) {
       const entries = [];
       const seen = new Set();
-      const normalized = stripAccents(text || '');
+      const normalized = ' '.join(stripAccents(text || '').split(/\s+/)).trim();
       const regex = /Empr\.\:\s*\d+\s*([A-Za-z'`.\- ]+?)\s+Situacao\:\s*([A-Za-z'`.\- ]+?)\s+CPF\:/g;
       let match;
       while ((match = regex.exec(normalized)) !== null) {
