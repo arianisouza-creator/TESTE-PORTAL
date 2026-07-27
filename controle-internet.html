@@ -2600,6 +2600,59 @@
       return chunks.join('\n');
     }
 
+    async function readHitachiPayrollSection(file) {
+      if (!window.pdfjsLib) throw new Error('Leitor de PDF indisponivel no navegador.');
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      const buffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+      const selected = [];
+      const metaChunks = [];
+      let activeCostCenter = null;
+      let foundHitachi = false;
+
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+        const page = await pdf.getPage(pageNumber);
+        const content = await page.getTextContent();
+        const pageText = content.items.map(item => item.str).join(' ');
+        const flat = pageFlatText(pageText);
+
+        if (pageNumber <= 3) metaChunks.push(flat);
+
+        const hitachiCostCenter = detectHitachiCostCenter(flat);
+        const hasAnyCostCenterHeader = /C\.Custo\:\s*\d+\s*\-/i.test(flat);
+
+        if (hitachiCostCenter) {
+          activeCostCenter = hitachiCostCenter;
+          foundHitachi = true;
+          selected.push(flat);
+          continue;
+        }
+
+        if (!activeCostCenter) continue;
+
+        const sameCostCenter =
+          flat.includes(`CC:${activeCostCenter}`) ||
+          flat.includes(`CC: ${activeCostCenter}`) ||
+          flat.includes(`Depto:5042`) ||
+          flat.includes(`Depto: 5042`);
+
+        if (sameCostCenter) {
+          selected.push(flat);
+          continue;
+        }
+
+        if (foundHitachi && hasAnyCostCenterHeader) {
+          break;
+        }
+      }
+
+      return {
+        metaText: metaChunks.join(' '),
+        hitachiText: selected.join(' '),
+        foundHitachi
+      };
+    }
+
     async function readPdfPages(file) {
       if (!window.pdfjsLib) throw new Error('Leitor de PDF indisponivel no navegador.');
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -2806,16 +2859,20 @@
 
       summaryBox.textContent = 'Lendo a folha e comparando os colaboradores...';
       try {
-        const pages = await readPdfPages(file);
-        const text = pages.map(page => page.text).join('\n');
-        const hitachiText = extractHitachiSectionText(pages);
-        const detectedMonth = extractPayrollMonthKey(text);
+        const { metaText, hitachiText, foundHitachi } = await readHitachiPayrollSection(file);
+        const baseText = hitachiText || metaText;
+        const detectedMonth = extractPayrollMonthKey(baseText);
         const targetMonth = monthInput.value || detectedMonth || currentHitachiMonth();
-        const empresa = companyInput.value === 'AUTO' ? inferHitachiCompanyFromText(text) : companyInput.value;
-        const currentEntries = extractHitachiPayrollEntries(hitachiText || text);
+        const empresa = companyInput.value === 'AUTO' ? inferHitachiCompanyFromText(baseText) : companyInput.value;
+        const currentEntries = extractHitachiPayrollEntries(hitachiText);
+
+        if (!foundHitachi || !hitachiText) {
+          summaryBox.textContent = 'Nao encontrei o bloco da Hitachi nesse PDF. Confira se a folha contem o C.Custo da Hitachi e tente novamente.';
+          return;
+        }
 
         if (!currentEntries.length) {
-          summaryBox.textContent = 'Nao encontrei colaboradores da Hitachi nesse PDF. Confira se a folha contem o bloco C.Custo da Hitachi e tente novamente.';
+          summaryBox.textContent = 'Encontrei a secao da Hitachi, mas nao consegui montar a lista de colaboradores. Vou ajustar esse parser se voce me mandar o proximo print.';
           return;
         }
 
@@ -2886,7 +2943,7 @@
         fileInput.value = '';
       } catch (error) {
         console.error(error);
-        summaryBox.textContent = 'Nao foi possivel ler a folha agora. Confira o PDF e tente novamente.';
+        summaryBox.textContent = `Nao foi possivel ler a folha agora. ${error && error.message ? error.message : 'Confira o PDF e tente novamente.'}`;
       }
     }
 
