@@ -296,7 +296,7 @@
         </div>
       </div>
       <div class="grp">Disciplinas</div>
-      <div class="navblock" id="docsBlock" style="margin-top:10px">
+      <div class="navblock open" id="docsBlock" style="margin-top:10px">
         <button class="nv" id="docsToggle" type="button">
           <span class="ni" data-icon="folder"></span>
           <span class="nl">Gestao documental</span>
@@ -1662,7 +1662,9 @@
       document.getElementById('adminToggle').classList.toggle('on', isAdminModule);
       document.getElementById('docsToggle').classList.toggle('on', moduleName === 'hitachi');
       document.getElementById('adminBlock').classList.toggle('open', isAdminModule);
-      document.getElementById('docsBlock').classList.toggle('open', moduleName === 'hitachi');
+      if (moduleName === 'hitachi') {
+        document.getElementById('docsBlock').classList.add('open');
+      }
       document.getElementById('dMonthMirror').value = currentMonthKey();
     }
     function refreshProtectedViews() {
