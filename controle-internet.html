@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
     :root{
       --bg:#e8eaee; --card:#fff; --line:#e4e7ec; --line-2:#eef0f3;
@@ -94,10 +96,11 @@
     .toplink.locked::after{content:'Protegido';margin-left:8px;font:600 9px "IBM Plex Mono",monospace;color:#c07a00;text-transform:uppercase}
     .search,.selectbox{height:42px;border:1px solid var(--line);border-radius:12px;background:#fff;display:flex;align-items:center;gap:9px;padding:0 12px;box-shadow:var(--shadow)}
     .search input,.selectbox input,.selectbox select{border:0;background:transparent;width:100%;outline:0;color:var(--ink)}
-    .ghost,.primary,.danger{min-height:42px;border-radius:12px;padding:0 14px;font-weight:700;border:0;display:flex;align-items:center;gap:8px;justify-content:center}
+    .ghost,.primary,.danger,.soft{min-height:42px;border-radius:12px;padding:0 14px;font-weight:700;border:0;display:flex;align-items:center;gap:8px;justify-content:center}
     .primary{background:var(--blue);color:#fff}
     .ghost{background:#fff;color:var(--body);border:1px solid var(--line)}
     .danger{background:#fff5f5;color:var(--red);border:1px solid rgba(210,59,59,.16)}
+    .soft{background:#eef4ff;color:#1d4ed8;border:1px solid #d7e3ff}
     .hero h1{margin:0;font-size:18px;color:#183975}
     .hero p{margin:4px 0 0;color:#617087}
     .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin:14px 0 16px}
@@ -146,10 +149,16 @@
     td{padding:12px;border-bottom:1px solid var(--line-2);color:var(--body)}
     tbody tr:hover{background:#fbfcff}
     .company,.money,b.link{color:var(--ink);font-weight:700}
+    .docmeta{display:grid;gap:4px;margin-top:6px}
+    .docmeta small{font-size:10px;color:var(--mut);line-height:1.35}
     .tag{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 9px;font:600 10px "IBM Plex Mono",monospace;text-transform:uppercase}
     .ok{background:rgba(31,157,87,.10);color:#197a45}
     .warn{background:rgba(217,145,26,.12);color:#b8780f}
     .neutral{background:#eef0f3;color:#667085}
+    .cell-select{width:100%;min-width:132px;height:30px;border:1px solid var(--line);border-radius:999px;padding:0 30px 0 12px;background:#fff;color:var(--ink);font:600 11px "IBM Plex Sans",system-ui,sans-serif;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center}
+    .cell-select.ok{background:rgba(31,157,87,.10);border-color:rgba(31,157,87,.18);color:#197a45}
+    .cell-select.warn{background:rgba(217,145,26,.12);border-color:rgba(217,145,26,.20);color:#b8780f}
+    .cell-select.neutral{background:#eef0f3;border-color:#dde2e8;color:#667085}
     .bullet{width:7px;height:7px;border-radius:999px;background:currentColor}
     .actioncell{text-align:right}
     .detail-grid{display:grid;grid-template-columns:1fr 300px;gap:14px}
@@ -176,6 +185,11 @@
     .contract-stack{display:grid;gap:14px;margin-top:14px}
     .mini-form{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-items:end}
     .mini-form .primary{min-height:40px}
+    .import-grid{display:grid;grid-template-columns:1fr 1fr 1.2fr auto;gap:10px;align-items:end}
+    .import-help{margin-top:12px;padding:12px 14px;border:1px dashed #d7dfeb;border-radius:12px;background:#f8fbff;color:#5c6b80;font-size:12px}
+    .import-help b{display:block;color:#1b3974;margin-bottom:4px}
+    .upload-note{margin-top:10px;font-size:12px;color:var(--body)}
+    .import-doc-grid{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end}
     .line-grid{display:grid;gap:10px;margin-top:12px}
     .line-row{display:grid;grid-template-columns:1.2fr 1fr 1fr .8fr auto;gap:10px;align-items:end}
     .pending{color:var(--red);font-weight:700}
@@ -203,7 +217,7 @@
     svg{width:18px;height:18px;stroke-width:1.8}
     @media (max-width:1280px){.kpis{grid-template-columns:repeat(3,1fr)}.dashgrid{grid-template-columns:1fr 1fr}.detail-grid,.cred-grid{grid-template-columns:1fr}}
     @media (max-width:980px){.shell{padding:0 20px}.side{display:none}.main{padding-left:0}.monthbar,.toolbar{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.detail-grid{grid-template-columns:1fr}.hinner{padding:14px}.clock,.tecto,.user{display:none}.uinner{padding:0 20px}.trow{padding:0 20px}}
-    @media (max-width:640px){.trow{height:auto;display:grid;grid-template-columns:1fr;gap:8px;padding:12px 20px}.tscroll{display:grid;mask-image:none;-webkit-mask-image:none}.ti{padding:8px 0;border-left:0;border-top:1px solid var(--line-2)}.greet{padding-right:0}.kpis{grid-template-columns:1fr}.dashgrid{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.donut-wrap,.cred-grid{grid-template-columns:1fr}.uinner{overflow:auto}}
+    @media (max-width:640px){.trow{height:auto;display:grid;grid-template-columns:1fr;gap:8px;padding:12px 20px}.tscroll{display:grid;mask-image:none;-webkit-mask-image:none}.ti{padding:8px 0;border-left:0;border-top:1px solid var(--line-2)}.greet{padding-right:0}.kpis{grid-template-columns:1fr}.dashgrid{grid-template-columns:1fr}.formgrid,.import-grid{grid-template-columns:1fr}.donut-wrap,.cred-grid{grid-template-columns:1fr}.uinner{overflow:auto}}
     .pending-mail-list{display:grid;gap:12px;max-height:340px;overflow:auto;padding-right:4px}
     .pending-mail-item{border:1px solid var(--line);border-radius:12px;background:#fbfcff;padding:12px}
     .pending-mail-item b{display:block;color:#17356c;margin-bottom:6px}
@@ -1137,6 +1151,46 @@
               <p>Cadastre os colaboradores, situacoes especiais e documentos mensais que alimentam o dashboard do cliente.</p>
             </div>
 
+            <section class="card pad" style="margin-bottom:14px">
+              <div class="chead"><span class="ti2">Importar folha de pagamento</span><span class="eyebrow">Comparativo mensal</span></div>
+              <div class="import-grid">
+                <label>Competencia da folha<input id="hitachiPayrollMonth" type="month"></label>
+                <label>Empresa
+                  <select id="hitachiPayrollCompany">
+                    <option value="AUTO">Detectar pelo PDF</option>
+                    <option value="MSE ENGENHARIA">MSE ENGENHARIA</option>
+                    <option value="MSE SERVICE">MSE SERVICE</option>
+                  </select>
+                </label>
+                <label>Folha mensal (PDF)<input id="hitachiPayrollFile" type="file" accept="application/pdf"></label>
+                <button class="soft" type="button" id="hitachiPayrollImport"><span data-icon="folder"></span>Importar folha</button>
+              </div>
+              <div class="import-help">
+                <b>O que essa importacao faz</b>
+                Le os nomes da folha, compara com o mes anterior e grava o mes atual como <b>Ativo</b> para quem aparece na folha. Quem estava no mes anterior e nao aparece neste PDF entra como <b>Inativo</b>.
+              </div>
+              <div class="upload-note" id="hitachiPayrollSummary">Selecione a competencia e o PDF da folha para atualizar os colaboradores do KPI Hitachi.</div>
+            </section>
+
+            <section class="card pad" style="margin-bottom:14px">
+              <div class="chead"><span class="ti2">Importar documentos dos colaboradores</span><span class="eyebrow">Vinculo automatico</span></div>
+              <div class="import-doc-grid">
+                <label>Arquivo holerite (ZIP)<input id="hitachiDocsZip" type="file" accept=".zip,application/zip"></label>
+                <label>Comprovantes de pagamento (PDF)
+                  <input id="hitachiDocsPagamento" type="file" accept="application/pdf" multiple>
+                </label>
+                <label>Comprovantes de adiantamento (PDF)
+                  <input id="hitachiDocsAdiantamento" type="file" accept="application/pdf" multiple>
+                </label>
+                <button class="soft" type="button" id="hitachiDocsImport"><span data-icon="folder"></span>Importar documentos</button>
+              </div>
+              <div class="import-help">
+                <b>Como o portal vai conferir</b>
+                O ZIP de holerites sera cruzado pelo nome do colaborador e o sistema vai verificar se o PDF tem assinatura digital. Os comprovantes em PDF serao lidos por pagina para localizar o nome de cada colaborador e atualizar os status automaticamente.
+              </div>
+              <div class="upload-note" id="hitachiDocsSummary">Carregue o ZIP de holerites e os PDFs de comprovantes para atualizar os status do mes selecionado.</div>
+            </section>
+
             <section class="card pad">
               <div class="chead"><span class="ti2">Novo colaborador</span><span class="eyebrow">Competencia mensal</span></div>
               <form id="hitachiForm" class="formgrid">
@@ -1151,6 +1205,7 @@
                 <label>Situacao
                   <select name="situacao">
                     <option value="Ativo">Ativo</option>
+                    <option value="Inativo">Inativo</option>
                     <option value="Rescindido">Rescindido</option>
                     <option value="Demitido">Demitido</option>
                     <option value="Transferido">Transferido</option>
@@ -1339,6 +1394,7 @@
         <label>Situacao
           <select name="situacao">
             <option value="Ativo">Ativo</option>
+            <option value="Inativo">Inativo</option>
             <option value="Rescindido">Rescindido</option>
             <option value="Demitido">Demitido</option>
             <option value="Transferido">Transferido</option>
@@ -1714,8 +1770,11 @@
       const remoteCredits = remotePayload.passagensCreditos || remotePayload.passagens_creditos || [];
       const localComplements = localPayload.passagensComplements || localPayload.passagens_complements || [];
       const remoteComplements = remotePayload.passagensComplements || remotePayload.passagens_complements || [];
+      const localHitachi = localPayload.hitachiCollaborators || [];
+      const remoteHitachi = remotePayload.hitachiCollaborators || [];
       return {
         ...remotePayload,
+        hitachiCollaborators: mergeByKey(localHitachi, remoteHitachi, item => `${item.monthKey || item.month_key || ''}|${item.empresa || ''}|${normalizePersonName(item.colaborador || '')}`),
         passagensRows: mergeByKey(localRows, remoteRows, item => `${item.tabela || 'passagens'}:${item.id}`),
         passagensCreditos: mergeByKey(localCredits, remoteCredits, item => String(item.id || '')),
         passagensComplements: mergeByKey(localComplements, remoteComplements, item => String(item.key || '')),
@@ -1871,7 +1930,10 @@
         holerite: item.holerite || 'OK',
         comprovantePagamento: item.comprovantePagamento ?? item.comprovante_pagamento ?? 'OK',
         comprovanteAdiantamento: item.comprovanteAdiantamento ?? item.comprovante_adiantamento ?? 'OK',
-        kitRescisao: item.kitRescisao ?? item.kit_rescisao ?? 'N/A'
+        kitRescisao: item.kitRescisao ?? item.kit_rescisao ?? 'N/A',
+        holeriteArquivo: item.holeriteArquivo || '',
+        comprovantePagamentoArquivo: item.comprovantePagamentoArquivo || '',
+        comprovanteAdiantamentoArquivo: item.comprovanteAdiantamentoArquivo || ''
       }))));
 
       hitachiCompanyDocs.splice(0, hitachiCompanyDocs.length, ...((payload.hitachiCompanyDocs || []).map(item => ({
@@ -2407,10 +2469,378 @@
       return new Date(Number(year), Number(month) - 1, 1).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }).replace('.', '');
     }
 
+    function previousMonthKey(monthKey) {
+      if (!monthKey) return defaultMonth();
+      const [year, month] = monthKey.split('-').map(Number);
+      const date = new Date(year, month - 2, 1);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    function stripAccents(value) {
+      return (value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function normalizePersonName(value) {
+      return stripAccents(value || '')
+        .replace(/\s+/g, ' ')
+        .replace(/[^A-Za-z0-9\s]/g, '')
+        .trim()
+        .toUpperCase();
+    }
+
+    function mapPayrollSituation(rawValue) {
+      const value = normalizePersonName(rawValue || '');
+      if (!value) return 'Ativo';
+      if (value.includes('DEMIT')) return 'Demitido';
+      if (value.includes('RESCIND')) return 'Rescindido';
+      if (value.includes('TRANSFER')) return 'Transferido';
+      return 'Ativo';
+    }
+
+    function hitachiSituationTone(value) {
+      if (value === 'Ativo') return 'ok';
+      if (value === 'Inativo') return 'neutral';
+      return 'warn';
+    }
+
     function statusTone(value) {
       if (value === 'OK') return 'ok';
       if (value === 'PENDENTE') return 'warn';
       return 'neutral';
+    }
+
+    function inferHitachiCompanyFromText(text) {
+      const normalized = normalizePersonName(text || '');
+      if (normalized.includes('MSE SERVICE')) return 'MSE SERVICE';
+      if (normalized.includes('MSE ENGENHARIA')) return 'MSE ENGENHARIA';
+      return 'MSE SERVICE';
+    }
+
+    function extractPayrollMonthKey(text) {
+      const normalized = stripAccents(text || '');
+      const match = normalized.match(/Competencia\:\s*(\d{2})\/(\d{4})/i);
+      if (!match) return '';
+      return `${match[2]}-${match[1]}`;
+    }
+
+    function extractHitachiPayrollEntries(text) {
+      const entries = [];
+      const seen = new Set();
+      const normalized = stripAccents(text || '');
+      const regex = /Empr\.\:\s*\d+\s*([A-Za-z'`.\- ]+?)\s+Situacao\:\s*([A-Za-z'`.\- ]+?)\s+CPF\:/g;
+      let match;
+      while ((match = regex.exec(normalized)) !== null) {
+        const colaborador = (match[1] || '').replace(/\s+/g, ' ').trim();
+        const situacaoFolha = (match[2] || '').replace(/\s+/g, ' ').trim();
+        const key = normalizePersonName(colaborador);
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        entries.push({ colaborador, situacaoFolha });
+      }
+      return entries;
+    }
+
+    async function readPdfText(file) {
+      if (!window.pdfjsLib) throw new Error('Leitor de PDF indisponivel no navegador.');
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      const buffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+      const chunks = [];
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+        const page = await pdf.getPage(pageNumber);
+        const content = await page.getTextContent();
+        const pageText = content.items.map(item => item.str).join(' ');
+        chunks.push(pageText);
+      }
+      return chunks.join('\n');
+    }
+
+    async function readPdfPages(file) {
+      if (!window.pdfjsLib) throw new Error('Leitor de PDF indisponivel no navegador.');
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      const buffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+      const pages = [];
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+        const page = await pdf.getPage(pageNumber);
+        const content = await page.getTextContent();
+        const text = content.items.map(item => item.str).join('\n');
+        pages.push({ pageNumber, text });
+      }
+      return pages;
+    }
+
+    function binaryPdfText(buffer) {
+      return new TextDecoder('latin1').decode(buffer);
+    }
+
+    function pdfHasDigitalSignature(buffer) {
+      const text = binaryPdfText(buffer);
+      return /\/FT\s*\/Sig|\/Type\s*\/Sig|Assinatura Digital/i.test(text);
+    }
+
+    function extractPagamentoName(text) {
+      const normalized = stripAccents(text || '');
+      const match = normalized.match(/Nome\:\s*([A-Z0-9'`.\- ]{6,})/i);
+      if (!match) return '';
+      return (match[1] || '').replace(/\s+/g, ' ').trim();
+    }
+
+    function extractAdiantamentoName(text) {
+      const normalized = stripAccents(text || '');
+      const direct = normalized.match(/Nome do Funcionario[\s\S]{0,120}?\n?(\d+\s+)?([A-Z][A-Z\s'`.\-]{6,})\s+\d{5,}/i);
+      if (direct && direct[2]) return direct[2].replace(/\s+/g, ' ').trim();
+      const fallback = normalized.match(/Mensalista[\s\S]{0,120}?(\d{3,5})\s+([A-Z][A-Z\s'`.\-]{6,})\s+\d{5,}/i);
+      if (fallback && fallback[2]) return fallback[2].replace(/\s+/g, ' ').trim();
+      return '';
+    }
+
+    async function saveHitachiDocsBatch(items) {
+      if (!items.length) return;
+      items.forEach(payload => {
+        const index = hitachiCollaborators.findIndex(item => item.id === payload.id);
+        if (index >= 0) {
+          hitachiCollaborators[index] = payload;
+        } else {
+          hitachiCollaborators.push(payload);
+        }
+      });
+      saveLocalCache();
+      renderHitachi();
+      try {
+        await Promise.all(items.map(item => upsertHitachiRemote(item)));
+        setSyncStatus(`Documentos do KPI Hitachi sincronizados para ${items.length} colaborador(es)`);
+      } catch (error) {
+        console.error(error);
+        setSyncStatus('Falha ao sincronizar os documentos do KPI Hitachi. Cache local mantido.');
+      }
+    }
+
+    async function importHitachiDocumentFiles() {
+      const zipInput = document.getElementById('hitachiDocsZip');
+      const pagamentoInput = document.getElementById('hitachiDocsPagamento');
+      const adiantamentoInput = document.getElementById('hitachiDocsAdiantamento');
+      const summaryBox = document.getElementById('hitachiDocsSummary');
+      const monthKey = currentHitachiMonth();
+      const rows = hitachiRowsForMonth(monthKey);
+
+      if (!rows.length) {
+        summaryBox.textContent = 'Nao ha colaboradores cadastrados nesse mes para vincular os documentos.';
+        return;
+      }
+
+      const holeriteZip = zipInput.files && zipInput.files[0];
+      const pagamentoFiles = [...(pagamentoInput.files || [])];
+      const adiantamentoFiles = [...(adiantamentoInput.files || [])];
+
+      if (!holeriteZip && !pagamentoFiles.length && !adiantamentoFiles.length) {
+        summaryBox.textContent = 'Selecione ao menos um ZIP ou PDF para importar os documentos.';
+        return;
+      }
+
+      summaryBox.textContent = 'Lendo documentos e localizando os colaboradores...';
+      try {
+        const docsByName = new Map();
+        const ensureDocEntry = key => {
+          if (!docsByName.has(key)) {
+            docsByName.set(key, {
+              holerite: null,
+              comprovantePagamento: null,
+              comprovanteAdiantamento: null
+            });
+          }
+          return docsByName.get(key);
+        };
+
+        if (holeriteZip) {
+          if (!window.JSZip) throw new Error('Leitor de ZIP indisponivel no navegador.');
+          const zip = await JSZip.loadAsync(await holeriteZip.arrayBuffer());
+          const pdfEntries = Object.values(zip.files).filter(entry => !entry.dir && entry.name.toLowerCase().endsWith('.pdf') && entry.name.toLowerCase().includes('holerite'));
+          for (const entry of pdfEntries) {
+            const folderName = entry.name.split('/')[0] || '';
+            const collaboratorName = folderName.trim();
+            const key = normalizePersonName(collaboratorName);
+            if (!key) continue;
+            const buffer = await entry.async('uint8array');
+            const signed = pdfHasDigitalSignature(buffer);
+            ensureDocEntry(key).holerite = {
+              status: signed ? 'OK' : 'PENDENTE',
+              label: `${entry.name}${signed ? ' | assinado' : ' | sem assinatura digital'}`
+            };
+          }
+        }
+
+        for (const file of pagamentoFiles) {
+          const pages = await readPdfPages(file);
+          pages.forEach(page => {
+            const collaboratorName = extractPagamentoName(page.text);
+            const key = normalizePersonName(collaboratorName);
+            if (!key) return;
+            ensureDocEntry(key).comprovantePagamento = {
+              status: 'OK',
+              label: `${file.name} | pagina ${page.pageNumber}`
+            };
+          });
+        }
+
+        for (const file of adiantamentoFiles) {
+          const pages = await readPdfPages(file);
+          pages.forEach(page => {
+            const collaboratorName = extractAdiantamentoName(page.text);
+            const key = normalizePersonName(collaboratorName);
+            if (!key) return;
+            ensureDocEntry(key).comprovanteAdiantamento = {
+              status: 'OK',
+              label: `${file.name} | pagina ${page.pageNumber}`
+            };
+          });
+        }
+
+        const payloads = rows.map(row => {
+          const key = normalizePersonName(row.colaborador);
+          const docs = docsByName.get(key) || {};
+          return {
+            ...row,
+            holerite: docs.holerite ? docs.holerite.status : 'PENDENTE',
+            comprovantePagamento: docs.comprovantePagamento ? docs.comprovantePagamento.status : 'PENDENTE',
+            comprovanteAdiantamento: docs.comprovanteAdiantamento ? docs.comprovanteAdiantamento.status : 'PENDENTE',
+            holeriteArquivo: docs.holerite ? docs.holerite.label : '',
+            comprovantePagamentoArquivo: docs.comprovantePagamento ? docs.comprovantePagamento.label : '',
+            comprovanteAdiantamentoArquivo: docs.comprovanteAdiantamento ? docs.comprovanteAdiantamento.label : ''
+          };
+        });
+
+        await saveHitachiDocsBatch(payloads);
+        const okHolerite = payloads.filter(item => item.holerite === 'OK').length;
+        const okPagamento = payloads.filter(item => item.comprovantePagamento === 'OK').length;
+        const okAdiantamento = payloads.filter(item => item.comprovanteAdiantamento === 'OK').length;
+        summaryBox.textContent = `Documentos processados em ${monthLabel(monthKey)}: ${okHolerite}/${payloads.length} holerite(s) OK, ${okPagamento}/${payloads.length} comprovante(s) de pagamento OK e ${okAdiantamento}/${payloads.length} comprovante(s) de adiantamento OK.`;
+        zipInput.value = '';
+        pagamentoInput.value = '';
+        adiantamentoInput.value = '';
+      } catch (error) {
+        console.error(error);
+        summaryBox.textContent = 'Nao foi possivel processar os documentos agora. Confira os arquivos e tente novamente.';
+      }
+    }
+
+    async function saveHitachiCollaboratorsBatch(items) {
+      if (!items.length) return;
+      const syncLabels = [];
+      items.forEach(payload => {
+        const index = hitachiCollaborators.findIndex(item => item.id === payload.id);
+        if (index >= 0) {
+          hitachiCollaborators[index] = payload;
+        } else {
+          hitachiCollaborators.push(payload);
+        }
+        syncLabels.push(payload.colaborador);
+      });
+      hMonthPicker.value = items[0].monthKey;
+      saveLocalCache();
+      renderHitachi();
+      try {
+        await Promise.all(items.map(item => upsertHitachiRemote(item)));
+        setSyncStatus(`Folha sincronizada no KPI Hitachi para ${syncLabels.length} colaborador(es)`);
+      } catch (error) {
+        console.error(error);
+        setSyncStatus('Falha ao sincronizar parte da folha. Cache local mantido.');
+      }
+    }
+
+    async function importHitachiPayrollFile() {
+      const fileInput = document.getElementById('hitachiPayrollFile');
+      const monthInput = document.getElementById('hitachiPayrollMonth');
+      const companyInput = document.getElementById('hitachiPayrollCompany');
+      const summaryBox = document.getElementById('hitachiPayrollSummary');
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) {
+        summaryBox.textContent = 'Selecione o PDF da folha para importar.';
+        return;
+      }
+
+      summaryBox.textContent = 'Lendo a folha e comparando os colaboradores...';
+      try {
+        const text = await readPdfText(file);
+        const detectedMonth = extractPayrollMonthKey(text);
+        const targetMonth = monthInput.value || detectedMonth || currentHitachiMonth();
+        const empresa = companyInput.value === 'AUTO' ? inferHitachiCompanyFromText(text) : companyInput.value;
+        const currentEntries = extractHitachiPayrollEntries(text);
+
+        if (!currentEntries.length) {
+          summaryBox.textContent = 'Nao encontrei nomes da folha nesse PDF. Confira se o arquivo e um extrato mensal de folha.';
+          return;
+        }
+
+        monthInput.value = targetMonth;
+        hMonthPicker.value = targetMonth;
+        const previousRows = hitachiRowsForMonth(previousMonthKey(targetMonth)).filter(row => row.empresa === empresa);
+        const currentRows = hitachiRowsForMonth(targetMonth).filter(row => row.empresa === empresa);
+        const previousMap = new Map(previousRows.map(row => [normalizePersonName(row.colaborador), row]));
+        const currentMap = new Map(currentRows.map(row => [normalizePersonName(row.colaborador), row]));
+        const importedMap = new Map(currentEntries.map(entry => [normalizePersonName(entry.colaborador), entry]));
+        const payloads = [];
+
+        currentEntries.forEach(entry => {
+          const key = normalizePersonName(entry.colaborador);
+          const existing = currentMap.get(key);
+          const previous = previousMap.get(key);
+          const situacao = mapPayrollSituation(entry.situacaoFolha);
+          payloads.push({
+            id: existing?.id || createId(),
+            monthKey: targetMonth,
+            empresa,
+            colaborador: entry.colaborador,
+            situacao,
+            holerite: 'OK',
+            comprovantePagamento: existing?.comprovantePagamento || previous?.comprovantePagamento || 'PENDENTE',
+            comprovanteAdiantamento: existing?.comprovanteAdiantamento || previous?.comprovanteAdiantamento || 'N/A',
+            kitRescisao: situacao === 'Ativo' ? (existing?.kitRescisao || previous?.kitRescisao || 'N/A') : (existing?.kitRescisao || previous?.kitRescisao || 'PENDENTE'),
+            holeriteArquivo: existing?.holeriteArquivo || previous?.holeriteArquivo || '',
+            comprovantePagamentoArquivo: existing?.comprovantePagamentoArquivo || previous?.comprovantePagamentoArquivo || '',
+            comprovanteAdiantamentoArquivo: existing?.comprovanteAdiantamentoArquivo || previous?.comprovanteAdiantamentoArquivo || ''
+          });
+        });
+
+        previousRows.forEach(previous => {
+          const key = normalizePersonName(previous.colaborador);
+          if (importedMap.has(key)) return;
+          const existing = currentMap.get(key);
+          payloads.push({
+            id: existing?.id || createId(),
+            monthKey: targetMonth,
+            empresa,
+            colaborador: previous.colaborador,
+            situacao: 'Inativo',
+            holerite: 'N/A',
+            comprovantePagamento: existing?.comprovantePagamento || 'N/A',
+            comprovanteAdiantamento: existing?.comprovanteAdiantamento || 'N/A',
+            kitRescisao: existing?.kitRescisao || previous.kitRescisao || 'N/A',
+            holeriteArquivo: existing?.holeriteArquivo || previous?.holeriteArquivo || '',
+            comprovantePagamentoArquivo: existing?.comprovantePagamentoArquivo || previous?.comprovantePagamentoArquivo || '',
+            comprovanteAdiantamentoArquivo: existing?.comprovanteAdiantamentoArquivo || previous?.comprovanteAdiantamentoArquivo || ''
+          });
+        });
+
+        await saveHitachiCollaboratorsBatch(payloads);
+        const companyDoc = hitachiCompanyDocs.find(item => item.monthKey === targetMonth && item.empresa === empresa && item.documento === 'FOLHA DE PAGAMENTO');
+        await saveHitachiCompanyDoc({
+          id: companyDoc?.id || createId(),
+          monthKey: targetMonth,
+          empresa,
+          documento: 'FOLHA DE PAGAMENTO',
+          status: 'OK'
+        });
+
+        const inactiveCount = payloads.filter(item => item.situacao === 'Inativo').length;
+        const activeCount = payloads.filter(item => item.situacao === 'Ativo').length;
+        const specialCount = payloads.length - inactiveCount - activeCount;
+        summaryBox.textContent = `Folha importada para ${monthLabel(targetMonth)} em ${empresa}: ${payloads.length} colaborador(es), ${activeCount} ativo(s), ${inactiveCount} inativo(s) e ${specialCount} situacao(oes) especiais.`;
+        fileInput.value = '';
+      } catch (error) {
+        console.error(error);
+        summaryBox.textContent = 'Nao foi possivel ler a folha agora. Confira o PDF e tente novamente.';
+      }
     }
 
     function hitachiDocStatuses(row) {
@@ -2864,6 +3294,7 @@
       form.elements.comprovantePagamento.value = 'OK';
       form.elements.comprovanteAdiantamento.value = 'OK';
       form.elements.kitRescisao.value = 'N/A';
+      document.getElementById('hitachiPayrollMonth').value = currentHitachiMonth();
       document.getElementById('saveHitachiBtn').innerHTML = `${icon('plus')}Salvar colaborador`;
       document.getElementById('cancelHitachiEdit').style.display = 'none';
     }
@@ -2909,7 +3340,7 @@
     async function saveHitachiCollaborator(payload) {
       const index = hitachiCollaborators.findIndex(item => item.id === payload.id);
       if (index >= 0) {
-        hitachiCollaborators[index] = payload;
+        hitachiCollaborators[index] = { ...hitachiCollaborators[index], ...payload };
       } else {
         hitachiCollaborators.push(payload);
       }
@@ -3023,6 +3454,20 @@
     }
     window.editHitachiCompanyDoc = editHitachiCompanyDoc;
 
+    async function updateHitachiInline(id, field, value) {
+      const item = hitachiCollaborators.find(entry => entry.id === id);
+      if (!item) return;
+      const payload = { ...item, [field]: value };
+      if (field === 'situacao' && value === 'Ativo' && payload.kitRescisao === 'PENDENTE') {
+        payload.kitRescisao = 'N/A';
+      }
+      if (field === 'situacao' && value === 'Inativo') {
+        payload.holerite = payload.holerite === 'OK' ? 'N/A' : payload.holerite;
+      }
+      await saveHitachiCollaborator(payload);
+    }
+    window.updateHitachiInline = updateHitachiInline;
+
     function renderHitachi() {
       const monthKey = currentHitachiMonth();
       const summary = hitachiMonthlySummary(monthKey);
@@ -3111,13 +3556,52 @@
       const rowsBody = document.getElementById('hRows');
       rowsBody.innerHTML = filteredRows.length ? filteredRows.map(row => `
         <tr>
-          <td><span class="company">${row.colaborador}</span></td>
+          <td>
+            <span class="company">${row.colaborador}</span>
+            <div class="docmeta">
+              ${row.holeriteArquivo ? `<small>Holerite: ${row.holeriteArquivo}</small>` : ''}
+              ${row.comprovantePagamentoArquivo ? `<small>Comprovante pgto: ${row.comprovantePagamentoArquivo}</small>` : ''}
+              ${row.comprovanteAdiantamentoArquivo ? `<small>Comprovante adiant.: ${row.comprovanteAdiantamentoArquivo}</small>` : ''}
+            </div>
+          </td>
           <td>${row.empresa}</td>
-          <td><span class="tag ${row.situacao === 'Ativo' ? 'ok' : 'warn'}">${row.situacao}</span></td>
-          <td><span class="tag ${statusTone(row.holerite)}">${row.holerite}</span></td>
-          <td><span class="tag ${statusTone(row.comprovantePagamento)}">${row.comprovantePagamento}</span></td>
-          <td><span class="tag ${statusTone(row.comprovanteAdiantamento)}">${row.comprovanteAdiantamento}</span></td>
-          <td><span class="tag ${statusTone(row.kitRescisao)}">${row.kitRescisao}</span></td>
+          <td>
+            <select class="cell-select ${hitachiSituationTone(row.situacao)}" onchange="updateHitachiInline(${row.id}, 'situacao', this.value)">
+              <option value="Ativo" ${row.situacao === 'Ativo' ? 'selected' : ''}>Ativo</option>
+              <option value="Inativo" ${row.situacao === 'Inativo' ? 'selected' : ''}>Inativo</option>
+              <option value="Rescindido" ${row.situacao === 'Rescindido' ? 'selected' : ''}>Rescindido</option>
+              <option value="Demitido" ${row.situacao === 'Demitido' ? 'selected' : ''}>Demitido</option>
+              <option value="Transferido" ${row.situacao === 'Transferido' ? 'selected' : ''}>Transferido</option>
+            </select>
+          </td>
+          <td>
+            <select class="cell-select ${statusTone(row.holerite)}" onchange="updateHitachiInline(${row.id}, 'holerite', this.value)">
+              <option value="OK" ${row.holerite === 'OK' ? 'selected' : ''}>OK</option>
+              <option value="PENDENTE" ${row.holerite === 'PENDENTE' ? 'selected' : ''}>PENDENTE</option>
+              <option value="N/A" ${row.holerite === 'N/A' ? 'selected' : ''}>N/A</option>
+            </select>
+          </td>
+          <td>
+            <select class="cell-select ${statusTone(row.comprovantePagamento)}" onchange="updateHitachiInline(${row.id}, 'comprovantePagamento', this.value)">
+              <option value="OK" ${row.comprovantePagamento === 'OK' ? 'selected' : ''}>OK</option>
+              <option value="PENDENTE" ${row.comprovantePagamento === 'PENDENTE' ? 'selected' : ''}>PENDENTE</option>
+              <option value="N/A" ${row.comprovantePagamento === 'N/A' ? 'selected' : ''}>N/A</option>
+            </select>
+          </td>
+          <td>
+            <select class="cell-select ${statusTone(row.comprovanteAdiantamento)}" onchange="updateHitachiInline(${row.id}, 'comprovanteAdiantamento', this.value)">
+              <option value="OK" ${row.comprovanteAdiantamento === 'OK' ? 'selected' : ''}>OK</option>
+              <option value="PENDENTE" ${row.comprovanteAdiantamento === 'PENDENTE' ? 'selected' : ''}>PENDENTE</option>
+              <option value="N/A" ${row.comprovanteAdiantamento === 'N/A' ? 'selected' : ''}>N/A</option>
+            </select>
+          </td>
+          <td>
+            <select class="cell-select ${statusTone(row.kitRescisao)}" onchange="updateHitachiInline(${row.id}, 'kitRescisao', this.value)">
+              <option value="N/A" ${row.kitRescisao === 'N/A' ? 'selected' : ''}>N/A</option>
+              <option value="OK" ${row.kitRescisao === 'OK' ? 'selected' : ''}>OK</option>
+              <option value="PENDENTE" ${row.kitRescisao === 'PENDENTE' ? 'selected' : ''}>PENDENTE</option>
+            </select>
+          </td>
           <td class="actioncell"><button class="rowact" title="Editar colaborador" aria-label="Editar colaborador" onclick="editHitachiRow(${row.id})">${icon('edit')}</button></td>
         </tr>
       `).join('') : `<tr><td colspan="8"><div class="empty-state"><b>Nenhum colaborador encontrado.</b>Ajuste os filtros ou cadastre o mes.</div></td></tr>`;
@@ -4037,6 +4521,7 @@
     document.getElementById('pRoadPdf').addEventListener('click', () => openPassagensPdf('road'));
     hMonthPicker.addEventListener('change', () => {
       if (!hMonthPicker.value) hMonthPicker.value = currentMonthKey();
+      document.getElementById('hitachiPayrollMonth').value = hMonthPicker.value;
       renderHitachi();
     });
     pMonthPicker.addEventListener('change', () => {
@@ -4583,6 +5068,8 @@
     });
     document.getElementById('cancelHitachiEdit').addEventListener('click', resetHitachiForm);
     document.getElementById('cancelHitachiCompanyEdit').addEventListener('click', resetHitachiCompanyForm);
+    document.getElementById('hitachiPayrollImport').addEventListener('click', importHitachiPayrollFile);
+    document.getElementById('hitachiDocsImport').addEventListener('click', importHitachiDocumentFiles);
     document.getElementById('openHitachiPendencias').addEventListener('click', () => {
       refreshHitachiPendenciasModal();
       openModalById('hitachiPendenciasModal');
@@ -4708,6 +5195,7 @@
       await bootstrapData();
       hMonthPicker.value = currentMonthKey();
       pMonthPicker.value = currentMonthKey();
+      document.getElementById('hitachiPayrollMonth').value = currentMonthKey();
       resetHitachiForm();
       resetHitachiCompanyForm();
       refreshProtectedViews();
