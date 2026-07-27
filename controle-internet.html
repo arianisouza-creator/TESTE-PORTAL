@@ -2527,16 +2527,17 @@
       const entries = [];
       const seen = new Set();
       const normalized = stripAccents(text || '').split(/\s+/).join(' ').trim();
-      const regex = /Empr\.\:\s*\d+\s*([A-Za-z'`.\- ]+?)\s+Situacao\:\s*([A-Za-z'`.\- ]+?)\s+CPF\:/g;
-      let match;
-      while ((match = regex.exec(normalized)) !== null) {
+      const blocks = normalized.split(/Empr\.\:\s*\d+/i).slice(1);
+      blocks.forEach(block => {
+        const match = block.match(/^(.*?)\s+Situa[^:]*\:\s*(.*?)\s+CPF\:/i);
+        if (!match) return;
         const colaborador = (match[1] || '').replace(/\s+/g, ' ').trim();
         const situacaoFolha = (match[2] || '').replace(/\s+/g, ' ').trim();
         const key = normalizePersonName(colaborador);
         if (!key || seen.has(key)) continue;
         seen.add(key);
         entries.push({ colaborador, situacaoFolha });
-      }
+      });
       return entries;
     }
 
