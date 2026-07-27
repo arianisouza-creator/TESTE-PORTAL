@@ -60,8 +60,8 @@
     .ti.ok svg{color:var(--green)}
     .cta{margin-left:auto;background:#eef3fe;border:1px solid #d8e3fb;border-radius:8px;padding:7px 12px;color:var(--blue);font-size:10.5px;letter-spacing:.8px;text-transform:uppercase}
     .shell{max-width:var(--maxw);margin:auto;display:flex;gap:0;padding:0 28px}
-    .side{width:272px;position:sticky;top:14px;max-height:calc(100vh - 28px);overflow-y:auto;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);margin-top:20px;padding:12px;transition:width .22s,opacity .18s,margin .22s,padding .22s,border-width .22s}
-    .main{flex:1;min-width:0;padding:20px 0 70px 28px}
+    .side{width:272px;flex:0 0 272px;position:sticky;top:14px;z-index:5;max-height:calc(100vh - 28px);overflow-y:auto;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);margin-top:20px;padding:12px;transition:width .22s,opacity .18s,margin .22s,padding .22s,border-width .22s}
+    .main{flex:1;min-width:0;position:relative;z-index:1;padding:20px 0 70px 28px}
     .ssearch{height:42px;border:0;border-radius:999px;background:#eef0f3;display:flex;align-items:center;gap:10px;color:var(--mut-2);padding:0 14px;margin-bottom:8px}
     .ssearch .pl,.navlabel{font-size:13.5px;color:var(--mut-2)}
     .ssearch kbd{margin-left:auto;font:400 10px "IBM Plex Mono",monospace;color:var(--mut);background:#fff;border:1px solid var(--line);border-radius:5px;padding:3px 5px}
