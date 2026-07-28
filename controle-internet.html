@@ -149,8 +149,15 @@
     td{padding:12px;border-bottom:1px solid var(--line-2);color:var(--body)}
     tbody tr:hover{background:#fbfcff}
     .company,.money,b.link{color:var(--ink);font-weight:700}
-    .docmeta{display:grid;gap:4px;margin-top:6px}
+    .docmeta{display:grid;gap:8px;margin-top:8px}
+    .docline{display:grid;gap:6px}
     .docmeta small{font-size:10px;color:var(--mut);line-height:1.35}
+    .doc-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .doc-open{display:inline-flex}
+    .doc-open-btn{border:1px solid #d7e3ff;background:#eef4ff;color:#1d4ed8;border-radius:999px;padding:6px 12px;font-size:11px;font-weight:700;line-height:1;box-shadow:0 1px 2px rgba(29,78,216,.08)}
+    .doc-open-btn:hover{background:#e2edff;border-color:#bfd2ff}
+    .doc-delete-btn{border:1px solid rgba(210,59,59,.18);background:#fff5f5;color:var(--red);border-radius:999px;padding:6px 12px;font-size:11px;font-weight:700;line-height:1;box-shadow:0 1px 2px rgba(210,59,59,.05)}
+    .doc-delete-btn:hover{background:#ffeceb;border-color:rgba(210,59,59,.28)}
     .tag{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 9px;font:600 10px "IBM Plex Mono",monospace;text-transform:uppercase}
     .ok{background:rgba(31,157,87,.10);color:#197a45}
     .warn{background:rgba(217,145,26,.12);color:#b8780f}
@@ -2872,6 +2879,26 @@ AMAURI BARROSO DE MOURA"></textarea>
       if (direct && direct[2]) return direct[2].replace(/\s+/g, ' ').trim();
       const fallback = normalized.match(/Mensalista[\s\S]{0,120}?(\d{3,5})\s+([A-Z][A-Z\s'`.\-]{6,})\s+\d{5,}/i);
       if (fallback && fallback[2]) return fallback[2].replace(/\s+/g, ' ').trim();
+      const lineMatch = normalized.match(/Nome(?:\s+do\s+Funcionario)?\s*[:\-]\s*([^\n\r]+)/i);
+      if (lineMatch && lineMatch[1]) {
+        return lineMatch[1]
+          .replace(/\s+(Matricula|CPF|Setor|Departamento|Conta|Agencia)\b.*$/i, '')
+          .replace(/\s+/g, ' ')
+          .trim();
+      }
+      return '';
+    }
+
+    function detectCollaboratorFromPageText(text, rows) {
+      const normalizedText = norm((text || '').replace(/\s+/g, ' '));
+      if (!normalizedText) return '';
+      const candidates = rows
+        .map(row => row.colaborador)
+        .filter(Boolean)
+        .sort((a, b) => norm(b).length - norm(a).length);
+      for (const name of candidates) {
+        if (normalizedText.includes(norm(name))) return name;
+      }
       return '';
     }
 
@@ -2971,7 +2998,7 @@ AMAURI BARROSO DE MOURA"></textarea>
           const storageKey = await ensureUploadedPdfStorage(file);
           const pages = await readPdfPages(file);
           pages.forEach(page => {
-            const collaboratorName = extractPagamentoName(page.text);
+            const collaboratorName = extractPagamentoName(page.text) || detectCollaboratorFromPageText(page.text, rows);
             const key = normalizePersonName(collaboratorName);
             if (!key) return;
             ensureDocEntry(key).comprovantePagamento = {
@@ -2987,7 +3014,7 @@ AMAURI BARROSO DE MOURA"></textarea>
           const storageKey = await ensureUploadedPdfStorage(file);
           const pages = await readPdfPages(file);
           pages.forEach(page => {
-            const collaboratorName = extractAdiantamentoName(page.text);
+            const collaboratorName = extractAdiantamentoName(page.text) || detectCollaboratorFromPageText(page.text, rows);
             const key = normalizePersonName(collaboratorName);
             if (!key) return;
             ensureDocEntry(key).comprovanteAdiantamento = {
@@ -3004,17 +3031,17 @@ AMAURI BARROSO DE MOURA"></textarea>
           const docs = docsByName.get(key) || {};
           return {
             ...row,
-            holerite: docs.holerite ? docs.holerite.status : 'PENDENTE',
-            comprovantePagamento: docs.comprovantePagamento ? docs.comprovantePagamento.status : 'PENDENTE',
-            comprovanteAdiantamento: docs.comprovanteAdiantamento ? docs.comprovanteAdiantamento.status : 'PENDENTE',
-            holeriteArquivo: docs.holerite ? docs.holerite.label : '',
-            comprovantePagamentoArquivo: docs.comprovantePagamento ? docs.comprovantePagamento.label : '',
-            comprovanteAdiantamentoArquivo: docs.comprovanteAdiantamento ? docs.comprovanteAdiantamento.label : '',
-            holeriteStorageKey: docs.holerite && docs.holerite.status === 'OK' ? (docs.holerite.storageKey || '') : '',
-            comprovantePagamentoStorageKey: docs.comprovantePagamento ? (docs.comprovantePagamento.storageKey || '') : '',
-            comprovantePagamentoPage: docs.comprovantePagamento ? (docs.comprovantePagamento.pageNumber ?? null) : null,
-            comprovanteAdiantamentoStorageKey: docs.comprovanteAdiantamento ? (docs.comprovanteAdiantamento.storageKey || '') : '',
-            comprovanteAdiantamentoPage: docs.comprovanteAdiantamento ? (docs.comprovanteAdiantamento.pageNumber ?? null) : null
+            holerite: docs.holerite ? docs.holerite.status : (row.holerite || 'PENDENTE'),
+            comprovantePagamento: docs.comprovantePagamento ? docs.comprovantePagamento.status : (row.comprovantePagamento || 'PENDENTE'),
+            comprovanteAdiantamento: docs.comprovanteAdiantamento ? docs.comprovanteAdiantamento.status : (row.comprovanteAdiantamento || 'PENDENTE'),
+            holeriteArquivo: docs.holerite ? docs.holerite.label : (row.holeriteArquivo || ''),
+            comprovantePagamentoArquivo: docs.comprovantePagamento ? docs.comprovantePagamento.label : (row.comprovantePagamentoArquivo || ''),
+            comprovanteAdiantamentoArquivo: docs.comprovanteAdiantamento ? docs.comprovanteAdiantamento.label : (row.comprovanteAdiantamentoArquivo || ''),
+            holeriteStorageKey: docs.holerite && docs.holerite.status === 'OK' ? (docs.holerite.storageKey || '') : (row.holeriteStorageKey || ''),
+            comprovantePagamentoStorageKey: docs.comprovantePagamento ? (docs.comprovantePagamento.storageKey || '') : (row.comprovantePagamentoStorageKey || ''),
+            comprovantePagamentoPage: docs.comprovantePagamento ? (docs.comprovantePagamento.pageNumber ?? null) : (row.comprovantePagamentoPage ?? null),
+            comprovanteAdiantamentoStorageKey: docs.comprovanteAdiantamento ? (docs.comprovanteAdiantamento.storageKey || '') : (row.comprovanteAdiantamentoStorageKey || ''),
+            comprovanteAdiantamentoPage: docs.comprovanteAdiantamento ? (docs.comprovanteAdiantamento.pageNumber ?? null) : (row.comprovanteAdiantamentoPage ?? null)
           };
         });
 
@@ -3837,11 +3864,19 @@ AMAURI BARROSO DE MOURA"></textarea>
       if (!fileLabel) return '';
       const requireOk = !!options.requireOk;
       const status = options.status || '';
+      const rowId = options.rowId;
+      const docType = options.docType || '';
       const canOpen = !!storageKey && (!requireOk || status === 'OK');
       const openButton = canOpen
-        ? `<button class="inline-btn" type="button" onclick='openStoredHitachiDocument(${JSON.stringify(storageKey)}, ${pageNumber == null ? 'null' : Number(pageNumber)})'>Abrir documento</button>`
+        ? `<button class="doc-open-btn" type="button" onclick='openStoredHitachiDocument(${JSON.stringify(storageKey)}, ${pageNumber == null ? 'null' : Number(pageNumber)})'>Abrir documento</button>`
         : '';
-      return `<small>${label}: ${fileLabel}${openButton ? ` <span class="doc-open">${openButton}</span>` : ''}</small>`;
+      const deleteButton = rowId && docType
+        ? `<button class="doc-delete-btn" type="button" onclick="removeHitachiDocument(${Number(rowId)}, '${docType}')">Excluir documento</button>`
+        : '';
+      const actions = openButton || deleteButton
+        ? `<span class="doc-actions">${openButton ? `<span class="doc-open">${openButton}</span>` : ''}${deleteButton}</span>`
+        : '';
+      return `<div class="docline"><small>${label}: ${fileLabel}</small>${actions}</div>`;
     }
 
     async function updateHitachiInline(id, field, value) {
@@ -3857,6 +3892,40 @@ AMAURI BARROSO DE MOURA"></textarea>
       await saveHitachiCollaborator(payload);
     }
     window.updateHitachiInline = updateHitachiInline;
+
+    async function removeHitachiDocument(id, docType) {
+      const item = hitachiCollaborators.find(entry => entry.id === id);
+      if (!item) return;
+      const labels = {
+        holerite: 'holerite',
+        comprovantePagamento: 'comprovante de pagamento',
+        comprovanteAdiantamento: 'comprovante de adiantamento'
+      };
+      const confirmed = window.confirm(`Excluir o ${labels[docType] || 'documento'} vinculado apenas deste colaborador?`);
+      if (!confirmed) return;
+
+      const payload = { ...item };
+      if (docType === 'holerite') {
+        payload.holerite = payload.situacao === 'Ativo' ? 'PENDENTE' : 'N/A';
+        payload.holeriteArquivo = '';
+        payload.holeriteStorageKey = '';
+      }
+      if (docType === 'comprovantePagamento') {
+        payload.comprovantePagamento = 'PENDENTE';
+        payload.comprovantePagamentoArquivo = '';
+        payload.comprovantePagamentoStorageKey = '';
+        payload.comprovantePagamentoPage = null;
+      }
+      if (docType === 'comprovanteAdiantamento') {
+        payload.comprovanteAdiantamento = 'PENDENTE';
+        payload.comprovanteAdiantamentoArquivo = '';
+        payload.comprovanteAdiantamentoStorageKey = '';
+        payload.comprovanteAdiantamentoPage = null;
+      }
+
+      await saveHitachiCollaborator(payload);
+    }
+    window.removeHitachiDocument = removeHitachiDocument;
 
     function renderHitachi() {
       const monthKey = currentHitachiMonth();
@@ -3959,9 +4028,9 @@ AMAURI BARROSO DE MOURA"></textarea>
           <td>
             <span class="company">${row.colaborador}</span>
             <div class="docmeta">
-              ${renderHitachiDocumentLine('Holerite', row.holeriteArquivo, row.holeriteStorageKey, null, { requireOk: true, status: row.holerite })}
-              ${renderHitachiDocumentLine('Comprovante pgto', row.comprovantePagamentoArquivo, row.comprovantePagamentoStorageKey, row.comprovantePagamentoPage)}
-              ${renderHitachiDocumentLine('Comprovante adiant.', row.comprovanteAdiantamentoArquivo, row.comprovanteAdiantamentoStorageKey, row.comprovanteAdiantamentoPage)}
+              ${renderHitachiDocumentLine('Holerite', row.holeriteArquivo, row.holeriteStorageKey, null, { requireOk: true, status: row.holerite, rowId: row.id, docType: 'holerite' })}
+              ${renderHitachiDocumentLine('Comprovante pgto', row.comprovantePagamentoArquivo, row.comprovantePagamentoStorageKey, row.comprovantePagamentoPage, { rowId: row.id, docType: 'comprovantePagamento' })}
+              ${renderHitachiDocumentLine('Comprovante adiant.', row.comprovanteAdiantamentoArquivo, row.comprovanteAdiantamentoStorageKey, row.comprovanteAdiantamentoPage, { rowId: row.id, docType: 'comprovanteAdiantamento' })}
             </div>
           </td>
           <td>${row.empresa}</td>
