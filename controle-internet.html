@@ -2120,6 +2120,19 @@ AMAURI BARROSO DE MOURA"></textarea>
       return Date.now() + Math.floor(Math.random() * 1000);
     }
 
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function safeDomId(value) {
+      return String(value ?? '').replace(/[^a-zA-Z0-9_-]/g, '_');
+    }
+
     function clearObject(target) {
       Object.keys(target).forEach(key => delete target[key]);
     }
@@ -4921,6 +4934,34 @@ AMAURI BARROSO DE MOURA"></textarea>
     }
 
     function detailPassagemGrid(row) {
+      if (editingPassagemKey === row.key) {
+        const formId = `inline-passagem-${safeDomId(row.key)}`;
+        return `
+          <div class="detail-box">
+            <form id="${formId}" class="detail-grid-passagem">
+              <div class="ditem"><span>Data da compra</span><input name="dataCompra" type="date" value="${escapeHtml(row.dataCompra || '')}"></div>
+              <div class="ditem"><span>Modalidade</span><select name="modalidade"><option value="Aereo" ${row.modalidade === 'Aereo' ? 'selected' : ''}>Aereo</option><option value="Rodoviario" ${row.modalidade === 'Rodoviario' ? 'selected' : ''}>Rodoviario</option></select></div>
+              <div class="ditem"><span>Numero do pedido</span><input name="numeroPedido" value="${escapeHtml(row.pedido || '')}"></div>
+              <div class="ditem"><span>Origem</span><input name="origem" value="${escapeHtml(row.origem || '')}"></div>
+              <div class="ditem"><span>Destino</span><input name="destino" value="${escapeHtml(row.destino || '')}"></div>
+              <div class="ditem"><span>Data de ida</span><input name="dataIda" type="date" value="${escapeHtml(row.dataIda || '')}"></div>
+              <div class="ditem"><span>Data de volta</span><input name="dataVolta" type="date" value="${escapeHtml(row.dataVolta || '')}"></div>
+              <div class="ditem"><span>Horario de ida</span><input name="horarioIda" value="${escapeHtml(row.horarioIda || '')}"></div>
+              <div class="ditem"><span>Horario de volta</span><input name="horarioVolta" value="${escapeHtml(row.horarioVolta || '')}"></div>
+              <div class="ditem"><span>Companhia</span><input name="companhia" value="${escapeHtml(row.companhia || '')}"></div>
+              <div class="ditem"><span>Localizador</span><input name="localizador" value="${escapeHtml(row.localizador || '')}"></div>
+              <div class="ditem"><span>Valor pago</span><input name="valorPago" value="${escapeHtml(row.valorPago == null ? '' : String(row.valorPago).replace('.', ','))}"></div>
+              <div class="ditem"><span>Valor aprovado</span><input name="valorAprovado" value="${escapeHtml(row.valorAprovado == null ? '' : String(row.valorAprovado).replace('.', ','))}"></div>
+              <div class="ditem"><span>Pago</span><label><input name="pagoConfirmado" type="checkbox" ${row.pagoConfirmado ? 'checked' : ''}> Confirmado</label></div>
+              <div class="ditem" style="grid-column:1 / -1"><span>Observacao interna</span><input name="observacaoInterna" value="${escapeHtml(row.observacao || '')}"></div>
+            </form>
+            <div class="detail-actions">
+              <button class="ghost" type="button" onclick="cancelInlinePassagemEdit()">Cancelar</button>
+              <button class="primary" type="button" onclick="saveInlinePassagemEdit('${row.key}', '${formId}')">${icon('save')}Salvar</button>
+            </div>
+          </div>
+        `;
+      }
       return `
         <div class="detail-box">
           <div class="detail-grid-passagem">
@@ -4942,6 +4983,35 @@ AMAURI BARROSO DE MOURA"></textarea>
     }
 
     function detailHospedagemGrid(item) {
+      if (String(editingHospedagemId) === String(item.id)) {
+        const formId = `inline-hosp-${safeDomId(item.id)}`;
+        return `
+          <div class="detail-box">
+            <form id="${formId}" class="detail-grid-passagem">
+              <div class="ditem"><span>Cartao / faturado</span><input name="cartaoOuFaturado" value="${escapeHtml(item.cartaoOuFaturado || '')}"></div>
+              <div class="ditem"><span>Obra</span><input name="obra" value="${escapeHtml(item.obra || '')}"></div>
+              <div class="ditem"><span>Nome</span><input name="nome" value="${escapeHtml(item.nome || '')}"></div>
+              <div class="ditem"><span>Hotel</span><input name="hotel" value="${escapeHtml(item.hotel || '')}"></div>
+              <div class="ditem"><span>Cidade</span><input name="cidade" value="${escapeHtml(item.cidade || '')}"></div>
+              <div class="ditem"><span>Check in</span><input name="checkIn" type="date" value="${escapeHtml(item.checkIn || '')}"></div>
+              <div class="ditem"><span>Check out</span><input name="checkOut" type="date" value="${escapeHtml(item.checkOut || '')}"></div>
+              <div class="ditem"><span>Numero de diarias</span><input name="numeroDiarias" value="${escapeHtml(item.numeroDiarias || '')}"></div>
+              <div class="ditem"><span>Valor diaria</span><input name="valorDiaria" value="${escapeHtml(item.valorDiaria || '')}"></div>
+              <div class="ditem"><span>Total diarias</span><input name="valorTotalDiarias" value="${escapeHtml(item.valorTotalDiarias || '')}"></div>
+              <div class="ditem"><span>Valor total</span><input name="valorTotal" value="${escapeHtml(item.valorTotal || '')}"></div>
+              <div class="ditem"><span>Itinerario</span><input name="itinerario" value="${escapeHtml(item.itinerario || '')}"></div>
+              <div class="ditem"><span>Motivo</span><input name="motivo" value="${escapeHtml(item.motivo || '')}"></div>
+              <div class="ditem"><span>Pedido</span><input name="numeroPedido" value="${escapeHtml(item.numeroPedido || '')}"></div>
+              <div class="ditem"><span>Pago</span><label><input name="pago" type="checkbox" ${item.pago ? 'checked' : ''}> Confirmado</label></div>
+              <div class="ditem" style="grid-column:1 / -1"><span>Observacao</span><input name="observacao" value="${escapeHtml(item.observacao || '')}"></div>
+            </form>
+            <div class="detail-actions">
+              <button class="ghost" type="button" onclick="cancelInlineHospedagemEdit()">Cancelar</button>
+              <button class="primary" type="button" onclick="saveInlineHospedagemEdit('${item.id}', '${formId}')">${icon('save')}Salvar</button>
+            </div>
+          </div>
+        `;
+      }
       return `
         <div class="detail-box">
           <div class="detail-grid-passagem">
@@ -4965,6 +5035,31 @@ AMAURI BARROSO DE MOURA"></textarea>
     }
 
     function detailCarroGrid(item) {
+      if (String(editingCarroId) === String(item.id)) {
+        const formId = `inline-car-${safeDomId(item.id)}`;
+        return `
+          <div class="detail-box">
+            <form id="${formId}" class="detail-grid-passagem">
+              <div class="ditem"><span>Obra</span><input name="obra" value="${escapeHtml(item.obra || '')}"></div>
+              <div class="ditem"><span>Motorista / colaborador</span><input name="motorista" value="${escapeHtml(item.motorista || '')}"></div>
+              <div class="ditem"><span>Cidade</span><input name="cidade" value="${escapeHtml(item.cidade || '')}"></div>
+              <div class="ditem"><span>Retirada</span><input name="retirada" type="date" value="${escapeHtml(item.retirada || '')}"></div>
+              <div class="ditem"><span>Devolucao</span><input name="devolucao" type="date" value="${escapeHtml(item.devolucao || '')}"></div>
+              <div class="ditem"><span>Numero de diarias</span><input name="numeroDiarias" value="${escapeHtml(item.numeroDiarias || '')}"></div>
+              <div class="ditem"><span>Valor total</span><input name="valorTotal" value="${escapeHtml(item.valorTotal || '')}"></div>
+              <div class="ditem"><span>Numero da reserva</span><input name="numeroReserva" value="${escapeHtml(item.numeroReserva || '')}"></div>
+              <div class="ditem"><span>Motivo</span><input name="motivo" value="${escapeHtml(item.motivo || '')}"></div>
+              <div class="ditem"><span>Pedido</span><input name="numeroPedido" value="${escapeHtml(item.numeroPedido || '')}"></div>
+              <div class="ditem"><span>Pago</span><label><input name="pago" type="checkbox" ${item.pago ? 'checked' : ''}> Confirmado</label></div>
+              <div class="ditem" style="grid-column:1 / -1"><span>Observacao</span><input name="observacao" value="${escapeHtml(item.observacao || '')}"></div>
+            </form>
+            <div class="detail-actions">
+              <button class="ghost" type="button" onclick="cancelInlineCarroEdit()">Cancelar</button>
+              <button class="primary" type="button" onclick="saveInlineCarroEdit('${item.id}', '${formId}')">${icon('save')}Salvar</button>
+            </div>
+          </div>
+        `;
+      }
       return `
         <div class="detail-box">
           <div class="detail-grid-passagem">
@@ -5267,25 +5362,9 @@ AMAURI BARROSO DE MOURA"></textarea>
       if (!item) return;
       if (!requestProtectedEdit('esta hospedagem')) return;
       editingHospedagemId = item.id;
-      const form = document.getElementById('passagensHospedagemForm');
-      form.elements.cartaoOuFaturado.value = item.cartaoOuFaturado || '';
-      form.elements.obra.value = item.obra || '';
-      form.elements.nome.value = item.nome || '';
-      form.elements.hotel.value = item.hotel || '';
-      form.elements.cidade.value = item.cidade || '';
-      form.elements.checkIn.value = item.checkIn || '';
-      form.elements.checkOut.value = item.checkOut || '';
-      form.elements.numeroDiarias.value = item.numeroDiarias || '';
-      form.elements.valorDiaria.value = item.valorDiaria || '';
-      form.elements.valorTotalDiarias.value = item.valorTotalDiarias || '';
-      form.elements.valorTotal.value = item.valorTotal || '';
-      form.elements.itinerario.value = item.itinerario || '';
-      form.elements.motivo.value = item.motivo || '';
-      form.elements.numeroPedido.value = item.numeroPedido || '';
-      form.elements.observacao.value = item.observacao || '';
-      form.elements.pago.checked = Boolean(item.pago);
-      document.getElementById('passagensHospedagemTitle').textContent = `Editar hospedagem | ${item.nome || '-'}`;
-      openModalById('passagensHospedagemModal');
+      const key = expandedEntityKey('hosp', item.id);
+      if (!expandedPassagemKeys.has(key)) expandedPassagemKeys.add(key);
+      renderPassagens();
     }
     window.editHospedagem = editHospedagem;
 
@@ -5294,21 +5373,9 @@ AMAURI BARROSO DE MOURA"></textarea>
       if (!item) return;
       if (!requestProtectedEdit('este carro')) return;
       editingCarroId = item.id;
-      const form = document.getElementById('passagensCarroForm');
-      form.elements.obra.value = item.obra || '';
-      form.elements.motorista.value = item.motorista || '';
-      form.elements.cidade.value = item.cidade || '';
-      form.elements.retirada.value = item.retirada || '';
-      form.elements.devolucao.value = item.devolucao || '';
-      form.elements.numeroDiarias.value = item.numeroDiarias || '';
-      form.elements.valorTotal.value = item.valorTotal || '';
-      form.elements.numeroReserva.value = item.numeroReserva || '';
-      form.elements.motivo.value = item.motivo || '';
-      form.elements.numeroPedido.value = item.numeroPedido || '';
-      form.elements.observacao.value = item.observacao || '';
-      form.elements.pago.checked = Boolean(item.pago);
-      document.getElementById('passagensCarroTitle').textContent = `Editar carro | ${item.motorista || '-'}`;
-      openModalById('passagensCarroModal');
+      const key = expandedEntityKey('car', item.id);
+      if (!expandedPassagemKeys.has(key)) expandedPassagemKeys.add(key);
+      renderPassagens();
     }
     window.editCarro = editCarro;
 
@@ -5759,26 +5826,143 @@ AMAURI BARROSO DE MOURA"></textarea>
       if (!item) return;
       if (!requestProtectedEdit('esta passagem')) return;
       editingPassagemKey = key;
-      const form = document.getElementById('passagensEditForm');
-      form.elements.dataCompra.value = item.dataCompra || '';
-      form.elements.modalidade.value = item.modalidade === 'A definir' ? 'Aereo' : item.modalidade;
-      form.elements.numeroPedido.value = item.pedido || '';
-      form.elements.origem.value = item.origem || '';
-      form.elements.destino.value = item.destino || '';
-      form.elements.dataIda.value = item.dataIda || '';
-      form.elements.dataVolta.value = item.dataVolta || '';
-      form.elements.horarioIda.value = item.horarioIda || '';
-      form.elements.horarioVolta.value = item.horarioVolta || '';
-      form.elements.companhia.value = item.companhia || '';
-      form.elements.localizador.value = item.localizador || '';
-      form.elements.valorAprovado.value = item.valorAprovado == null ? '' : String(item.valorAprovado).replace('.', ',');
-      form.elements.valorPago.value = item.valorPago == null ? '' : String(item.valorPago).replace('.', ',');
-      form.elements.pagoConfirmado.checked = Boolean(item.pagoConfirmado);
-      form.elements.observacaoInterna.value = item.observacao || '';
-      document.getElementById('passagensEditTitle').textContent = `Complementar passagem | ${item.nome_colab || item.nome || '-'}`;
-      openModalById('passagensEditModal');
+      if (!expandedPassagemKeys.has(key)) expandedPassagemKeys.add(key);
+      renderPassagens();
     }
     window.editPassagem = editPassagem;
+
+    function cancelInlinePassagemEdit() {
+      editingPassagemKey = '';
+      renderPassagens();
+    }
+    window.cancelInlinePassagemEdit = cancelInlinePassagemEdit;
+
+    function cancelInlineHospedagemEdit() {
+      editingHospedagemId = null;
+      renderPassagens();
+    }
+    window.cancelInlineHospedagemEdit = cancelInlineHospedagemEdit;
+
+    function cancelInlineCarroEdit() {
+      editingCarroId = null;
+      renderPassagens();
+    }
+    window.cancelInlineCarroEdit = cancelInlineCarroEdit;
+
+    function applyPassagemEdit(targetKey, formData) {
+      const currentComplement = passagensComplements[targetKey] || {};
+      passagensComplements[targetKey] = {
+        ...currentComplement,
+        modalidade: formData.modalidade || '',
+        dataCompra: formData.dataCompra || '',
+        numeroPedido: formData.numeroPedido || '',
+        origem: formData.origem || '',
+        destino: formData.destino || '',
+        dataIda: formData.dataIda || '',
+        dataVolta: formData.dataVolta || '',
+        horarioIda: formData.horarioIda || '',
+        horarioVolta: formData.horarioVolta || '',
+        companhia: formData.companhia || '',
+        localizador: formData.localizador || '',
+        valorAprovado: formData.valorAprovado || '',
+        valorPago: formData.valorPago || '',
+        pagoConfirmado: Boolean(formData.pagoConfirmado),
+        observacaoInterna: formData.observacaoInterna || ''
+      };
+      if (targetKey.startsWith('manual:')) {
+        const row = passagensRows.find(item => passagemKey(item) === targetKey);
+        if (row) {
+          row.data_compra = formData.dataCompra || row.data_compra || '';
+          row.data_prevista = formData.dataIda || row.data_prevista || '';
+          row.data_ida = formData.dataIda || row.data_ida || '';
+          row.data_ida_volta = formData.dataVolta || row.data_ida_volta || '';
+          row.observacao = formData.observacaoInterna || row.observacao || '';
+        }
+      }
+      return currentComplement;
+    }
+
+    async function saveInlinePassagemEdit(targetKey, formId) {
+      const form = document.getElementById(formId);
+      if (!form) return;
+      const formData = Object.fromEntries(new FormData(form).entries());
+      const currentComplement = applyPassagemEdit(targetKey, formData);
+      editingPassagemKey = '';
+      saveLocalCache();
+      try {
+        await upsertPassagemComplementRemote(targetKey, passagensComplements[targetKey] || currentComplement);
+        const baseRow = passagensRows.find(item => passagemKey(item) === targetKey);
+        if (baseRow) await upsertPassagemRowRemote(baseRow);
+      } catch (error) {
+        console.error(error);
+      }
+      renderPassagens();
+    }
+    window.saveInlinePassagemEdit = saveInlinePassagemEdit;
+
+    function applyHospedagemEdit(item, formData) {
+      const numeroDiarias = Number(formData.numeroDiarias || countDiarias(formData.checkIn, formData.checkOut));
+      const valorDiaria = parseMoney(formData.valorDiaria);
+      Object.assign(item, {
+        cartaoOuFaturado: formData.cartaoOuFaturado || '',
+        obra: formData.obra || '',
+        nome: formData.nome || '',
+        hotel: formData.hotel || '',
+        cidade: formData.cidade || '',
+        checkIn: formData.checkIn || '',
+        checkOut: formData.checkOut || '',
+        numeroDiarias,
+        valorDiaria: formData.valorDiaria || '',
+        valorTotalDiarias: formData.valorTotalDiarias || (valorDiaria != null ? brl(valorDiaria * (numeroDiarias || 1)) : ''),
+        valorTotal: formData.valorTotal || '',
+        itinerario: formData.itinerario || '',
+        motivo: formData.motivo || '',
+        numeroPedido: formData.numeroPedido || '',
+        observacao: formData.observacao || '',
+        pago: Boolean(formData.pago)
+      });
+    }
+
+    function saveInlineHospedagemEdit(id, formId) {
+      const form = document.getElementById(formId);
+      const item = passagensHospedagens.find(entry => String(entry.id) === String(id));
+      if (!form || !item) return;
+      const formData = Object.fromEntries(new FormData(form).entries());
+      applyHospedagemEdit(item, formData);
+      editingHospedagemId = null;
+      saveLocalCache();
+      renderPassagens();
+    }
+    window.saveInlineHospedagemEdit = saveInlineHospedagemEdit;
+
+    function applyCarroEdit(item, formData) {
+      Object.assign(item, {
+        obra: formData.obra || '',
+        motorista: formData.motorista || '',
+        cidade: formData.cidade || '',
+        retirada: formData.retirada || '',
+        devolucao: formData.devolucao || '',
+        numeroDiarias: formData.numeroDiarias || '',
+        valorTotal: formData.valorTotal || '',
+        numeroReserva: formData.numeroReserva || '',
+        motivo: formData.motivo || '',
+        numeroPedido: formData.numeroPedido || '',
+        observacao: formData.observacao || '',
+        pago: Boolean(formData.pago)
+      });
+    }
+
+    function saveInlineCarroEdit(id, formId) {
+      const form = document.getElementById(formId);
+      const item = passagensCarros.find(entry => String(entry.id) === String(id));
+      if (!form || !item) return;
+      const formData = Object.fromEntries(new FormData(form).entries());
+      applyCarroEdit(item, formData);
+      editingCarroId = null;
+      saveLocalCache();
+      renderPassagens();
+    }
+    window.saveInlineCarroEdit = saveInlineCarroEdit;
 
     function requestDeletePassagem(key) {
       const item = currentPassagensData().find(row => row.key === key) || passagensRows.map(buildPassagemRow).find(row => row.key === key);
