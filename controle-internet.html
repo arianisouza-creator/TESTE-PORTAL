@@ -90,10 +90,29 @@
     .lab b{display:block;font-size:11px;color:var(--ink);letter-spacing:2px;text-transform:uppercase}
     .lab small{display:block;font-size:10px;text-transform:uppercase;color:var(--mut);margin-top:3px;letter-spacing:1.4px}
     .monthbar{display:grid;grid-template-columns:1fr auto auto auto;gap:10px;margin-bottom:16px}
-    .topmenu{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:6px 0 18px}
+    .topmenu{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:6px 0 18px;flex-wrap:wrap}
     .toplink{padding:12px 16px;background:transparent;border:0;border-bottom:2px solid transparent;color:#456191;font-size:12px;font-weight:600}
     .toplink.on{color:var(--blue);border-bottom-color:var(--blue)}
     .toplink.locked::after{content:'Protegido';margin-left:8px;font:600 9px "IBM Plex Mono",monospace;color:#c07a00;text-transform:uppercase}
+    .subtabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+    .subtab{min-height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:#fff;color:#456191;font:600 11px "IBM Plex Mono",monospace;text-transform:uppercase;display:inline-flex;align-items:center;gap:8px}
+    .subtab.on{background:#e9f1fe;border-color:#d7e3ff;color:#1a4fd6}
+    .collapse-btn{width:28px;height:28px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--mut);display:grid;place-items:center}
+    .collapse-btn:hover{background:#f5f7fa;color:var(--blue)}
+    .collapsed-panel .collapse-body{display:none}
+    .bulkbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px}
+    .bulk-meta{font:600 10px "IBM Plex Mono",monospace;text-transform:uppercase;color:var(--mut);letter-spacing:1px}
+    .actionstack{display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-wrap:wrap}
+    .rowflag{width:34px;height:34px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--body);display:grid;place-items:center}
+    .rowflag:hover{background:#f1f3f5}
+    .rowflag.active{border-color:#cfe0ff;background:#eef4ff;color:#1d4ed8}
+    .rowflag.active.green{border-color:rgba(31,157,87,.2);background:rgba(31,157,87,.1);color:#197a45}
+    .rowcheck{width:16px;height:16px}
+    .rowcheck-wrap{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid var(--line);border-radius:9px;background:#fff}
+    .rowcheck-wrap.active{border-color:#cfe0ff;background:#eef4ff}
+    .section-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+    .table-compact table{min-width:1240px}
+    .hidden{display:none!important}
     .search,.selectbox{height:42px;border:1px solid var(--line);border-radius:12px;background:#fff;display:flex;align-items:center;gap:9px;padding:0 12px;box-shadow:var(--shadow)}
     .search input,.selectbox input,.selectbox select{border:0;background:transparent;width:100%;outline:0;color:var(--ink)}
     .ghost,.primary,.danger,.soft{min-height:42px;border-radius:12px;padding:0 14px;font-weight:700;border:0;display:flex;align-items:center;gap:8px;justify-content:center}
@@ -691,6 +710,8 @@
           <button class="toplink on" data-p-view="overview">Visao Geral</button>
           <button class="toplink" data-p-view="air">Aereo</button>
           <button class="toplink" data-p-view="road">Rodoviario</button>
+          <button class="toplink" data-p-view="hospedagem">Hospedagem</button>
+          <button class="toplink" data-p-view="carros">Carros</button>
           <button class="toplink" data-p-view="cadastro">Cadastro</button>
           <button class="toplink" data-p-view="creditos">Creditos</button>
         </div>
@@ -730,17 +751,41 @@
           </section>
 
           <section class="dashgrid" style="grid-template-columns:1.05fr 1.05fr .9fr">
-            <article class="card pad">
-              <div class="chead"><span class="ti2">Gasto por obra</span><span class="eyebrow" id="pSyncStamp">Aguardando sincronizacao</span></div>
-              <div class="bars" id="pBars"></div>
+            <article class="card pad" id="pCardBars">
+              <div class="chead">
+                <span class="ti2">Gasto por obra</span>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="eyebrow" id="pSyncStamp">Aguardando sincronizacao</span>
+                  <button class="collapse-btn" type="button" id="togglePBars"><span data-icon="chevronDown"></span></button>
+                </div>
+              </div>
+              <div class="collapse-body">
+                <div class="bars" id="pBars"></div>
+              </div>
             </article>
-            <article class="card pad">
-              <div class="chead"><span class="ti2">Modal comparativo</span><span class="eyebrow">Quantidade e gasto</span></div>
-              <div class="bars" id="pModeBars"></div>
+            <article class="card pad" id="pCardModes">
+              <div class="chead">
+                <span class="ti2">Modal comparativo</span>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="eyebrow">Quantidade e gasto</span>
+                  <button class="collapse-btn" type="button" id="togglePModes"><span data-icon="chevronDown"></span></button>
+                </div>
+              </div>
+              <div class="collapse-body">
+                <div class="bars" id="pModeBars"></div>
+              </div>
             </article>
-            <article class="card pad">
-              <div class="chead"><span class="ti2">Economia por obra</span><span class="eyebrow">Somente quando economiza</span></div>
-              <div class="list" id="pSavingsList"></div>
+            <article class="card pad" id="pCardSavings">
+              <div class="chead">
+                <span class="ti2">Economia por obra</span>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="eyebrow">Somente quando economiza</span>
+                  <button class="collapse-btn" type="button" id="togglePSavings"><span data-icon="chevronDown"></span></button>
+                </div>
+              </div>
+              <div class="collapse-body">
+                <div class="list" id="pSavingsList"></div>
+              </div>
             </article>
           </section>
 
@@ -752,15 +797,16 @@
               <table>
                 <thead>
                   <tr>
+                    <th>Acoes</th>
                     <th>Colaborador</th>
-                    <th>Obra</th>
+                    <th>Funcao</th>
                     <th>Tipo</th>
+                    <th>Obra</th>
                     <th>Modalidade</th>
                     <th>Data da compra</th>
-                    <th>Valor pago</th>
                     <th>Localizador</th>
+                    <th>Valor pago</th>
                     <th>Pedido</th>
-                    <th>Acoes</th>
                   </tr>
                 </thead>
                 <tbody id="pRows"></tbody>
@@ -775,6 +821,11 @@
             <h1>Aereo</h1>
             <p>Conferencie compras de passagens aereas, localizador, companhia e pedido interno.</p>
           </div>
+          <div class="subtabs">
+            <button class="subtab on" type="button" data-p-air-tab="overview">Visao geral</button>
+            <button class="subtab" type="button" data-p-air-tab="pending">Pedidos pendentes</button>
+            <button class="subtab" type="button" data-p-air-tab="finalized">Pedidos finalizados</button>
+          </div>
           <section class="card pad" style="margin-bottom:14px">
             <div class="chead"><span class="ti2">Filtro por data da compra</span><span class="eyebrow">Periodo consultado</span></div>
             <div class="mini-form" style="grid-template-columns:1fr 1fr auto auto">
@@ -784,6 +835,10 @@
               <button class="primary" type="button" id="pAirPdf"><span data-icon="fileText"></span>Gerar PDF</button>
             </div>
           </section>
+          <div class="bulkbar">
+            <div class="bulk-meta" id="pAirBulkLabel">Selecione os pedidos pagos para fechamento</div>
+            <button class="primary" type="button" id="pAirFinalize"><span data-icon="badgeCheck"></span>Fechamento de passagens</button>
+          </div>
           <section class="dashgrid" style="grid-template-columns:.9fr 1.1fr;margin-bottom:14px">
             <article class="card pad">
               <div class="chead"><span class="ti2">Resumo do periodo</span><span class="eyebrow" id="pAirRangeLabel">Data da compra</span></div>
@@ -802,11 +857,15 @@
               <table>
                 <thead>
                   <tr>
+                    <th>Acoes</th>
                     <th>Colaborador</th>
-                    <th>Obra</th>
                     <th>Funcao</th>
                     <th>Tipo</th>
+                    <th>Obra</th>
                     <th>Data da compra</th>
+                    <th>Localizador</th>
+                    <th>Valor pago</th>
+                    <th>Valor aprovado</th>
                     <th>Data ida</th>
                     <th>Data volta</th>
                     <th>Horario ida</th>
@@ -814,11 +873,7 @@
                     <th>Companhia</th>
                     <th>Origem</th>
                     <th>Destino</th>
-                    <th>Localizador</th>
                     <th>Pedido</th>
-                    <th>Valor aprovado</th>
-                    <th>Valor pago</th>
-                    <th>Acoes</th>
                   </tr>
                 </thead>
                 <tbody id="pAirRows"></tbody>
@@ -832,6 +887,11 @@
             <h1>Rodoviario</h1>
             <p>Conferencie trechos rodoviarios, conexoes, observacoes e numero do pedido final.</p>
           </div>
+          <div class="subtabs">
+            <button class="subtab on" type="button" data-p-road-tab="overview">Visao geral</button>
+            <button class="subtab" type="button" data-p-road-tab="pending">Pedidos pendentes</button>
+            <button class="subtab" type="button" data-p-road-tab="finalized">Pedidos finalizados</button>
+          </div>
           <section class="card pad" style="margin-bottom:14px">
             <div class="chead"><span class="ti2">Filtro por data da compra</span><span class="eyebrow">Periodo consultado</span></div>
             <div class="mini-form" style="grid-template-columns:1fr 1fr auto auto">
@@ -841,6 +901,10 @@
               <button class="primary" type="button" id="pRoadPdf"><span data-icon="fileText"></span>Gerar PDF</button>
             </div>
           </section>
+          <div class="bulkbar">
+            <div class="bulk-meta" id="pRoadBulkLabel">Selecione os pedidos pagos para fechamento</div>
+            <button class="primary" type="button" id="pRoadFinalize"><span data-icon="badgeCheck"></span>Fechamento de passagens</button>
+          </div>
           <section class="dashgrid" style="grid-template-columns:.9fr 1.1fr;margin-bottom:14px">
             <article class="card pad">
               <div class="chead"><span class="ti2">Resumo do periodo</span><span class="eyebrow" id="pRoadRangeLabel">Data da compra</span></div>
@@ -859,11 +923,15 @@
               <table>
                 <thead>
                   <tr>
+                    <th>Acoes</th>
                     <th>Colaborador</th>
-                    <th>Obra</th>
                     <th>Funcao</th>
                     <th>Tipo</th>
+                    <th>Obra</th>
                     <th>Data da compra</th>
+                    <th>Localizador</th>
+                    <th>Valor pago</th>
+                    <th>Valor aprovado</th>
                     <th>Data ida</th>
                     <th>Data volta</th>
                     <th>Horario ida</th>
@@ -872,12 +940,97 @@
                     <th>Destino</th>
                     <th>Companhia</th>
                     <th>Pedido</th>
-                    <th>Valor aprovado</th>
-                    <th>Valor pago</th>
-                    <th>Acoes</th>
                   </tr>
                 </thead>
                 <tbody id="pRoadRows"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div class="view" id="pview-hospedagem">
+          <div class="hero">
+            <h1>Hospedagem</h1>
+            <p>Receba automaticamente os passageiros sinalizados com hotel e complemente os dados da reserva.</p>
+          </div>
+          <div class="subtabs">
+            <button class="subtab on" type="button" data-p-hosp-tab="overview">Visao geral</button>
+            <button class="subtab" type="button" data-p-hosp-tab="finalized">Finalizados</button>
+          </div>
+          <section class="card pad" style="margin-bottom:14px">
+            <div class="mini-form" style="grid-template-columns:1fr 1fr auto">
+              <label>Data inicio<input id="pHospStart" type="date"></label>
+              <label>Data fim<input id="pHospEnd" type="date"></label>
+              <button class="ghost" type="button" id="pHospClear">Limpar filtro</button>
+            </div>
+          </section>
+          <section class="card table-card table-compact">
+            <div class="pad"><div class="chead"><span class="ti2">Reservas de hospedagem</span><span class="eyebrow" id="pHospCount">0 registros</span></div></div>
+            <div style="overflow:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Acoes</th>
+                    <th>Colaborador</th>
+                    <th>Obra</th>
+                    <th>Cartao/Faturado</th>
+                    <th>Hotel</th>
+                    <th>Cidade</th>
+                    <th>Check in</th>
+                    <th>Check out</th>
+                    <th>Diarias</th>
+                    <th>Valor diaria</th>
+                    <th>Total diarias</th>
+                    <th>Valor total</th>
+                    <th>Itinerario</th>
+                    <th>Motivo</th>
+                    <th>Pedido</th>
+                    <th>Observacao</th>
+                  </tr>
+                </thead>
+                <tbody id="pHospRows"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div class="view" id="pview-carros">
+          <div class="hero">
+            <h1>Carros</h1>
+            <p>Receba automaticamente os passageiros sinalizados com carro e complemente os dados da locacao.</p>
+          </div>
+          <div class="subtabs">
+            <button class="subtab on" type="button" data-p-car-tab="overview">Visao geral</button>
+            <button class="subtab" type="button" data-p-car-tab="finalized">Finalizados</button>
+          </div>
+          <section class="card pad" style="margin-bottom:14px">
+            <div class="mini-form" style="grid-template-columns:1fr 1fr auto">
+              <label>Data inicio<input id="pCarStart" type="date"></label>
+              <label>Data fim<input id="pCarEnd" type="date"></label>
+              <button class="ghost" type="button" id="pCarClear">Limpar filtro</button>
+            </div>
+          </section>
+          <section class="card table-card table-compact">
+            <div class="pad"><div class="chead"><span class="ti2">Locacoes de carro</span><span class="eyebrow" id="pCarCount">0 registros</span></div></div>
+            <div style="overflow:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Acoes</th>
+                    <th>Motorista / Colaborador</th>
+                    <th>Obra</th>
+                    <th>Cidade</th>
+                    <th>Retirada</th>
+                    <th>Devolucao</th>
+                    <th>Numero de diarias</th>
+                    <th>Valor total</th>
+                    <th>Reserva</th>
+                    <th>Motivo</th>
+                    <th>Pedido</th>
+                    <th>Observacao</th>
+                  </tr>
+                </thead>
+                <tbody id="pCarRows"></tbody>
               </table>
             </div>
           </section>
@@ -1577,6 +1730,58 @@ AMAURI BARROSO DE MOURA"></textarea>
     </div>
   </div>
 
+  <div class="modal" id="passagensHospedagemModal" role="dialog" aria-modal="true" aria-labelledby="passagensHospedagemTitle">
+    <div class="dialog wide">
+      <div class="chead"><span class="ti2" id="passagensHospedagemTitle">Editar hospedagem</span><button class="rowact" type="button" id="closePassagensHospedagemModal" aria-label="Fechar" data-icon="close"></button></div>
+      <form id="passagensHospedagemForm" class="formgrid">
+        <label>Cartao ou faturado<input name="cartaoOuFaturado" placeholder="Ex.: Cartao"></label>
+        <label>Obra<input name="obra"></label>
+        <label>Colaborador<input name="nome"></label>
+        <label>Hotel<input name="hotel"></label>
+        <label>Cidade<input name="cidade"></label>
+        <label>Check in<input name="checkIn" type="date"></label>
+        <label>Check out<input name="checkOut" type="date"></label>
+        <label>Numero de diarias<input name="numeroDiarias" type="number" min="0" step="1"></label>
+        <label>Valor por diaria<input name="valorDiaria" placeholder="Ex.: 221,00"></label>
+        <label>Valor total diarias<input name="valorTotalDiarias" placeholder="Calculado automaticamente"></label>
+        <label>Valor total<input name="valorTotal" placeholder="Ex.: 1386,15"></label>
+        <label>Itinerario<input name="itinerario"></label>
+        <label>Motivo<input name="motivo"></label>
+        <label>Numero do pedido<input name="numeroPedido"></label>
+        <label class="checklabel"><input name="pago" type="checkbox">Pago</label>
+        <label style="grid-column:1 / -1">Observacao<input name="observacao"></label>
+        <footer style="grid-column:1 / -1">
+          <button class="ghost" type="button" id="cancelPassagensHospedagemModal">Cancelar</button>
+          <button class="primary" type="submit"><span data-icon="save"></span>Salvar hospedagem</button>
+        </footer>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="passagensCarroModal" role="dialog" aria-modal="true" aria-labelledby="passagensCarroTitle">
+    <div class="dialog wide">
+      <div class="chead"><span class="ti2" id="passagensCarroTitle">Editar carro</span><button class="rowact" type="button" id="closePassagensCarroModal" aria-label="Fechar" data-icon="close"></button></div>
+      <form id="passagensCarroForm" class="formgrid">
+        <label>Obra<input name="obra"></label>
+        <label>Motorista / colaborador<input name="motorista"></label>
+        <label>Cidade<input name="cidade"></label>
+        <label>Retirada<input name="retirada" type="date"></label>
+        <label>Devolucao<input name="devolucao" type="date"></label>
+        <label>Numero de diarias<input name="numeroDiarias" type="number" min="0" step="1"></label>
+        <label>Valor total<input name="valorTotal" placeholder="Ex.: 980,00"></label>
+        <label>Numero da reserva<input name="numeroReserva"></label>
+        <label>Motivo<input name="motivo"></label>
+        <label>Numero do pedido<input name="numeroPedido"></label>
+        <label class="checklabel"><input name="pago" type="checkbox">Pago</label>
+        <label style="grid-column:1 / -1">Observacao<input name="observacao"></label>
+        <footer style="grid-column:1 / -1">
+          <button class="ghost" type="button" id="cancelPassagensCarroModal">Cancelar</button>
+          <button class="primary" type="submit"><span data-icon="save"></span>Salvar carro</button>
+        </footer>
+      </form>
+    </div>
+  </div>
+
   <script>
     const ICONS = {
       bell:'M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0',
@@ -1614,7 +1819,11 @@ AMAURI BARROSO DE MOURA"></textarea>
       alertCircle:'M12 8v4M12 16h.01M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18',
       files:'M8 2h8v4H8zM6 6h12a2 2 0 0 1 2 2v12H8a2 2 0 0 1-2-2zM4 10V6a2 2 0 0 1 2-2',
       plane:'M2 16l20-5-20-5 5 5-5 5zm5 0 5 5',
-      bus:'M6 17h12M7 3h10a2 2 0 0 1 2 2v10H5V5a2 2 0 0 1 2-2zm1 15a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm8 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M5 9h14'
+      bus:'M6 17h12M7 3h10a2 2 0 0 1 2 2v10H5V5a2 2 0 0 1 2-2zm1 15a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm8 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M5 9h14',
+      bed:'M3 11V6a2 2 0 0 1 2-2h3a3 3 0 0 1 3 3v4M3 11h18v6M3 17v3M21 17v3M11 11h7a3 3 0 0 1 3 3',
+      car:'M5 16h14l-1-5a2 2 0 0 0-2-1H8a2 2 0 0 0-2 1zm0 0-1 3m15-3 1 3M7 19h.01M17 19h.01M3 10h2M19 10h2',
+      checkSquare:'M9 11l2 2 4-4M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2',
+      printer:'M6 9V3h12v6M6 18H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-1M7 14h10v7H7z'
     };
 
     function icon(name, size = 18) {
@@ -1786,15 +1995,29 @@ AMAURI BARROSO DE MOURA"></textarea>
     const passagensRows = [];
     const passagensCreditos = [];
     const passagensComplements = {};
+    const passagensHospedagens = [];
+    const passagensCarros = [];
     const pAirStart = document.getElementById('pAirStart');
     const pAirEnd = document.getElementById('pAirEnd');
     const pRoadStart = document.getElementById('pRoadStart');
     const pRoadEnd = document.getElementById('pRoadEnd');
+    const pHospStart = document.getElementById('pHospStart');
+    const pHospEnd = document.getElementById('pHospEnd');
+    const pCarStart = document.getElementById('pCarStart');
+    const pCarEnd = document.getElementById('pCarEnd');
     let passagensApiToken = (passagensConfig.token || '').trim();
     let passagensApiBaseUrl = (passagensConfig.baseUrl || 'https://portalmse.com.br/microservices/hub_mse/api_passagens').trim().replace(/\/+$/, '');
     let passagensLastSync = '';
     let editingCreditoId = null;
     let deletingPassagemKey = '';
+    let passagensAirTab = 'overview';
+    let passagensRoadTab = 'overview';
+    let passagensHospTab = 'overview';
+    let passagensCarTab = 'overview';
+    let editingHospedagemId = null;
+    let editingCarroId = null;
+    const passagensSelectedKeys = new Set();
+    const passagensOverviewCollapsed = { bars: false, modes: false, savings: false };
 
     function defaultMonth() {
       const now = new Date();
@@ -1831,6 +2054,10 @@ AMAURI BARROSO DE MOURA"></textarea>
       const remoteCredits = remotePayload.passagensCreditos || remotePayload.passagens_creditos || [];
       const localComplements = localPayload.passagensComplements || localPayload.passagens_complements || [];
       const remoteComplements = remotePayload.passagensComplements || remotePayload.passagens_complements || [];
+      const localHospedagens = localPayload.passagensHospedagens || localPayload.passagens_hospedagens || [];
+      const remoteHospedagens = remotePayload.passagensHospedagens || remotePayload.passagens_hospedagens || [];
+      const localCarros = localPayload.passagensCarros || localPayload.passagens_carros || [];
+      const remoteCarros = remotePayload.passagensCarros || remotePayload.passagens_carros || [];
       const localHitachi = localPayload.hitachiCollaborators || [];
       const remoteHitachi = remotePayload.hitachiCollaborators || [];
       return {
@@ -1839,6 +2066,8 @@ AMAURI BARROSO DE MOURA"></textarea>
         passagensRows: mergeByKey(localRows, remoteRows, item => `${item.tabela || 'passagens'}:${item.id}`),
         passagensCreditos: mergeByKey(localCredits, remoteCredits, item => String(item.id || '')),
         passagensComplements: mergeByKey(localComplements, remoteComplements, item => String(item.key || '')),
+        passagensHospedagens: mergeByKey(localHospedagens, remoteHospedagens, item => String(item.id || '')),
+        passagensCarros: mergeByKey(localCarros, remoteCarros, item => String(item.id || '')),
         passagensApiToken: localPayload.passagensApiToken || remotePayload.passagensApiToken || passagensApiToken,
         passagensApiBaseUrl: localPayload.passagensApiBaseUrl || remotePayload.passagensApiBaseUrl || passagensApiBaseUrl,
         passagensLastSync: localPayload.passagensLastSync || remotePayload.passagensLastSync || passagensLastSync
@@ -1863,6 +2092,8 @@ AMAURI BARROSO DE MOURA"></textarea>
         passagensRows: [],
         passagensCreditos: [],
         passagensComplements: [],
+        passagensHospedagens: [],
+        passagensCarros: [],
         passagensApiToken: '',
         passagensApiBaseUrl: passagensApiBaseUrl,
         passagensLastSync: ''
@@ -1917,6 +2148,8 @@ AMAURI BARROSO DE MOURA"></textarea>
           key,
           ...value
         })),
+        passagensHospedagens: passagensHospedagens.map(item => ({ ...item })),
+        passagensCarros: passagensCarros.map(item => ({ ...item })),
         passagensApiToken,
         passagensApiBaseUrl,
         passagensLastSync
@@ -2020,6 +2253,42 @@ AMAURI BARROSO DE MOURA"></textarea>
         status: item.status || 'Aguardando utilizacao',
         observacao: item.observacao || ''
       }))));
+      passagensHospedagens.splice(0, passagensHospedagens.length, ...((payload.passagensHospedagens || payload.passagens_hospedagens || []).map(item => ({
+        id: item.id || createId(),
+        passagemKey: item.passagemKey ?? item.passagem_key ?? '',
+        cartaoOuFaturado: item.cartaoOuFaturado ?? item.cartao_ou_faturado ?? '',
+        obra: item.obra || '',
+        nome: item.nome || '',
+        hotel: item.hotel || '',
+        cidade: item.cidade || '',
+        checkIn: item.checkIn ?? item.check_in ?? '',
+        checkOut: item.checkOut ?? item.check_out ?? '',
+        numeroDiarias: item.numeroDiarias ?? item.numero_diarias ?? '',
+        valorDiaria: item.valorDiaria ?? item.valor_diaria ?? '',
+        valorTotalDiarias: item.valorTotalDiarias ?? item.valor_total_diarias ?? '',
+        valorTotal: item.valorTotal ?? item.valor_total ?? '',
+        itinerario: item.itinerario || '',
+        motivo: item.motivo || '',
+        numeroPedido: item.numeroPedido ?? item.numero_pedido ?? '',
+        observacao: item.observacao || '',
+        pago: parseBool(item.pago ?? false)
+      }))));
+      passagensCarros.splice(0, passagensCarros.length, ...((payload.passagensCarros || payload.passagens_carros || []).map(item => ({
+        id: item.id || createId(),
+        passagemKey: item.passagemKey ?? item.passagem_key ?? '',
+        obra: item.obra || '',
+        motorista: item.motorista || '',
+        cidade: item.cidade || '',
+        retirada: item.retirada || '',
+        devolucao: item.devolucao || '',
+        numeroDiarias: item.numeroDiarias ?? item.numero_diarias ?? '',
+        valorTotal: item.valorTotal ?? item.valor_total ?? '',
+        numeroReserva: item.numeroReserva ?? item.numero_reserva ?? '',
+        motivo: item.motivo || '',
+        numeroPedido: item.numeroPedido ?? item.numero_pedido ?? '',
+        observacao: item.observacao || '',
+        pago: parseBool(item.pago ?? false)
+      }))));
       clearObject(passagensComplements);
       (payload.passagensComplements || payload.passagens_complements || []).forEach(item => {
         if (!item.key) return;
@@ -2038,7 +2307,9 @@ AMAURI BARROSO DE MOURA"></textarea>
           valorAprovado: item.valorAprovado ?? item.valor_aprovado ?? '',
           valorPago: item.valorPago ?? item.valor_pago ?? '',
           pagoConfirmado: parseBool(item.pagoConfirmado ?? item.pago_confirmado ?? false),
-          observacaoInterna: item.observacaoInterna ?? item.observacao_interna ?? ''
+          observacaoInterna: item.observacaoInterna ?? item.observacao_interna ?? '',
+          hotelSolicitado: parseBool(item.hotelSolicitado ?? item.hotel_solicitado ?? false),
+          carroSolicitado: parseBool(item.carroSolicitado ?? item.carro_solicitado ?? false)
         };
       });
       passagensApiToken = (payload.passagensApiToken || passagensApiToken || '').trim();
@@ -4249,23 +4520,45 @@ AMAURI BARROSO DE MOURA"></textarea>
       };
     }
 
+    function sortPassagensRows(rows) {
+      return rows.slice().sort((left, right) => {
+        const leftMoment = String(left.dataCompraMoment || '');
+        const rightMoment = String(right.dataCompraMoment || '');
+        if (leftMoment && rightMoment && leftMoment !== rightMoment) return rightMoment.localeCompare(leftMoment);
+        if (leftMoment && !rightMoment) return -1;
+        if (!leftMoment && rightMoment) return 1;
+        const leftDate = normalizeDateValue(left.dataCompra || '');
+        const rightDate = normalizeDateValue(right.dataCompra || '');
+        if (leftDate && rightDate && leftDate !== rightDate) return rightDate.localeCompare(leftDate);
+        if (leftDate && !rightDate) return -1;
+        if (!leftDate && rightDate) return 1;
+        return String(right.key || '').localeCompare(String(left.key || ''));
+      });
+    }
+
+    function allPassagensData() {
+      return sortPassagensRows(passagensRows.map(buildPassagemRow));
+    }
+
     function currentPassagensData() {
-      return passagensRows
-        .filter(item => monthKeyFromDate(passagemCompraDate(item)) === currentPassagensMonth())
-        .map(buildPassagemRow)
-        .sort((left, right) => {
-          const leftMoment = String(left.dataCompraMoment || '');
-          const rightMoment = String(right.dataCompraMoment || '');
-          if (leftMoment && rightMoment && leftMoment !== rightMoment) return rightMoment.localeCompare(leftMoment);
-          if (leftMoment && !rightMoment) return -1;
-          if (!leftMoment && rightMoment) return 1;
-          const leftDate = normalizeDateValue(left.dataCompra || '');
-          const rightDate = normalizeDateValue(right.dataCompra || '');
-          if (leftDate && rightDate && leftDate !== rightDate) return rightDate.localeCompare(leftDate);
-          if (leftDate && !rightDate) return -1;
-          if (!leftDate && rightDate) return 1;
-          return String(right.key || '').localeCompare(String(left.key || ''));
-        });
+      return allPassagensData().filter(item => monthKeyFromDate(item.dataCompra) === currentPassagensMonth());
+    }
+
+    function currentPassagensYear() {
+      return String(currentPassagensMonth() || '').slice(0, 4);
+    }
+
+    function currentPassagensYearData() {
+      const year = currentPassagensYear();
+      return allPassagensData().filter(item => String(item.dataCompra || '').startsWith(year));
+    }
+
+    function todayKey() {
+      return new Date().toLocaleDateString('sv-SE');
+    }
+
+    function todayPassagensData() {
+      return allPassagensData().filter(item => normalizeDateValue(item.dataCompra) === todayKey());
     }
 
     function filteredPassagens(rows, target = 'all') {
@@ -4289,6 +4582,156 @@ AMAURI BARROSO DE MOURA"></textarea>
         ].join(' '));
         return modeOk && (!query || hay.includes(query));
       });
+    }
+
+    function applyPassagensStatusFilter(rows, tabName) {
+      if (tabName === 'pending') return rows.filter(row => !row.pagoConfirmado);
+      if (tabName === 'finalized') return rows.filter(row => row.pagoConfirmado);
+      return rows;
+    }
+
+    function complementForKey(key) {
+      return passagensComplements[key] || {};
+    }
+
+    function countDiarias(start, end) {
+      const startValue = normalizeDateValue(start);
+      const endValue = normalizeDateValue(end);
+      if (!startValue || !endValue) return 1;
+      const startDate = new Date(`${startValue}T00:00:00`);
+      const endDate = new Date(`${endValue}T00:00:00`);
+      if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) return 1;
+      const diff = Math.round((endDate - startDate) / 86400000);
+      return diff >= 0 ? diff || 1 : 1;
+    }
+
+    function ensureHospedagemFromPassagem(row) {
+      const existing = passagensHospedagens.find(item => item.passagemKey === row.key);
+      const base = {
+        passagemKey: row.key,
+        obra: row.nome_obra || '',
+        nome: row.nome_colab || row.nome || '',
+        cidade: row.destino || '',
+        checkIn: row.dataIda || '',
+        checkOut: row.dataVolta || '',
+        numeroDiarias: countDiarias(row.dataIda, row.dataVolta),
+        valorDiaria: '',
+        valorTotalDiarias: '',
+        valorTotal: row.valorPago != null ? String(row.valorPago).replace('.', ',') : '',
+        itinerario: [row.origem, row.destino].filter(Boolean).join(' - '),
+        motivo: row.tipo || '',
+        numeroPedido: row.pedido || '',
+        observacao: '',
+        cartaoOuFaturado: ''
+      };
+      if (existing) {
+        Object.assign(existing, {
+          ...base,
+          ...existing
+        });
+        return existing;
+      }
+      const created = {
+        id: createId(),
+        ...base,
+        hotel: '',
+        pago: false
+      };
+      passagensHospedagens.push(created);
+      return created;
+    }
+
+    function ensureCarroFromPassagem(row) {
+      const existing = passagensCarros.find(item => item.passagemKey === row.key);
+      const base = {
+        passagemKey: row.key,
+        obra: row.nome_obra || '',
+        motorista: row.nome_colab || row.nome || '',
+        cidade: row.destino || '',
+        retirada: row.dataIda || '',
+        devolucao: row.dataVolta || '',
+        numeroDiarias: countDiarias(row.dataIda, row.dataVolta),
+        valorTotal: row.valorPago != null ? String(row.valorPago).replace('.', ',') : '',
+        numeroReserva: '',
+        motivo: row.tipo || '',
+        numeroPedido: row.pedido || '',
+        observacao: ''
+      };
+      if (existing) {
+        Object.assign(existing, {
+          ...base,
+          ...existing
+        });
+        return existing;
+      }
+      const created = {
+        id: createId(),
+        ...base,
+        pago: false
+      };
+      passagensCarros.push(created);
+      return created;
+    }
+
+    function togglePassagemFeature(key, feature) {
+      const complement = complementForKey(key);
+      if (feature === 'hotel') {
+        complement.hotelSolicitado = !parseBool(complement.hotelSolicitado);
+        if (complement.hotelSolicitado) {
+          const row = allPassagensData().find(item => item.key === key);
+          if (row) ensureHospedagemFromPassagem(row);
+        } else {
+          for (let index = passagensHospedagens.length - 1; index >= 0; index -= 1) {
+            if (passagensHospedagens[index].passagemKey === key) passagensHospedagens.splice(index, 1);
+          }
+        }
+      }
+      if (feature === 'carro') {
+        complement.carroSolicitado = !parseBool(complement.carroSolicitado);
+        if (complement.carroSolicitado) {
+          const row = allPassagensData().find(item => item.key === key);
+          if (row) ensureCarroFromPassagem(row);
+        } else {
+          for (let index = passagensCarros.length - 1; index >= 0; index -= 1) {
+            if (passagensCarros[index].passagemKey === key) passagensCarros.splice(index, 1);
+          }
+        }
+      }
+      passagensComplements[key] = { ...complement };
+      saveLocalCache();
+      renderPassagens();
+    }
+    window.togglePassagemFeature = togglePassagemFeature;
+
+    function togglePassagemSelection(key) {
+      if (passagensSelectedKeys.has(key)) passagensSelectedKeys.delete(key);
+      else passagensSelectedKeys.add(key);
+      renderPassagens();
+    }
+    window.togglePassagemSelection = togglePassagemSelection;
+
+    function finalizeSelectedPassagens(mode) {
+      const rows = allPassagensData().filter(item => item.modalidade === mode && passagensSelectedKeys.has(item.key));
+      if (!rows.length) {
+        window.alert('Selecione pelo menos uma passagem para marcar como paga.');
+        return;
+      }
+      rows.forEach(row => {
+        const currentComplement = complementForKey(row.key);
+        passagensComplements[row.key] = {
+          ...currentComplement,
+          pagoConfirmado: true
+        };
+      });
+      passagensSelectedKeys.clear();
+      saveLocalCache();
+      renderPassagens();
+      setSyncStatus(`${rows.length} passagem(ns) marcadas como pagas no fechamento.`);
+    }
+
+    function toggleOverviewPanel(panelKey) {
+      passagensOverviewCollapsed[panelKey] = !passagensOverviewCollapsed[panelKey];
+      renderPassagens();
     }
 
     function filterPassagensByRange(rows, start, end) {
@@ -4469,14 +4912,16 @@ AMAURI BARROSO DE MOURA"></textarea>
     }
 
     function openPassagensPdf(mode) {
-      const rows = currentPassagensData();
+      const tabName = mode === 'air' ? passagensAirTab : passagensRoadTab;
+      const rows = tabName === 'finalized' ? currentPassagensYearData() : currentPassagensData();
       const filteredRows = filteredPassagens(rows, mode);
+      const scopedRows = applyPassagensStatusFilter(filteredRows, tabName);
       const start = mode === 'air' ? pAirStart.value : pRoadStart.value;
       const end = mode === 'air' ? pAirEnd.value : pRoadEnd.value;
-      const rangeRows = filterPassagensByRange(filteredRows, start, end);
+      const rangeRows = filterPassagensByRange(scopedRows, start, end);
       const title = mode === 'air'
-        ? `Relatorio de Passagens Aereas - ${monthLabel(currentPassagensMonth())}`
-        : `Relatorio de Passagens Rodoviarias - ${monthLabel(currentPassagensMonth())}`;
+        ? `Relatorio de Passagens Aereas - ${tabName === 'finalized' ? currentPassagensYear() : monthLabel(currentPassagensMonth())}`
+        : `Relatorio de Passagens Rodoviarias - ${tabName === 'finalized' ? currentPassagensYear() : monthLabel(currentPassagensMonth())}`;
       const reportWindow = window.open('', '_blank', 'width=1400,height=900');
       if (!reportWindow) {
         window.alert('Nao foi possivel abrir a janela do PDF. Verifique se o navegador bloqueou pop-up.');
@@ -4490,6 +4935,160 @@ AMAURI BARROSO DE MOURA"></textarea>
         reportWindow.print();
       }, 400);
     }
+
+    function buildSingleRecordPdf(title, rows) {
+      return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>${title}</title>
+  <style>
+    body{font-family:Arial,sans-serif;margin:28px;color:#122b57}
+    h1{margin:0 0 6px;font-size:26px}
+    .sub{margin:0 0 22px;color:#60708d;font-size:13px}
+    table{width:100%;border-collapse:collapse}
+    th,td{border:1px solid #d9e2f0;padding:10px;text-align:left;font-size:12px;vertical-align:top}
+    th{background:#eef4ff;text-transform:uppercase;letter-spacing:.08em;font-size:11px}
+  </style>
+</head>
+<body>
+  <h1>${title}</h1>
+  <p class="sub">Gerado em ${new Date().toLocaleString('pt-BR')}</p>
+  <table>${rows}</table>
+</body>
+</html>`;
+    }
+
+    function printHospedagemPdf(id) {
+      const item = passagensHospedagens.find(entry => String(entry.id) === String(id));
+      if (!item) return;
+      const rows = `
+        <tr><th>Colaborador</th><td>${item.nome || '-'}</td><th>Obra</th><td>${item.obra || '-'}</td></tr>
+        <tr><th>Hotel</th><td>${item.hotel || '-'}</td><th>Cidade</th><td>${item.cidade || '-'}</td></tr>
+        <tr><th>Check in</th><td>${formatDate(item.checkIn)}</td><th>Check out</th><td>${formatDate(item.checkOut)}</td></tr>
+        <tr><th>Diarias</th><td>${item.numeroDiarias || '-'}</td><th>Valor diaria</th><td>${item.valorDiaria || '-'}</td></tr>
+        <tr><th>Total diarias</th><td>${item.valorTotalDiarias || '-'}</td><th>Valor total</th><td>${item.valorTotal || '-'}</td></tr>
+        <tr><th>Itinerario</th><td>${item.itinerario || '-'}</td><th>Motivo</th><td>${item.motivo || '-'}</td></tr>
+        <tr><th>Pedido</th><td>${item.numeroPedido || '-'}</td><th>Pagamento</th><td>${item.pago ? 'Pago' : 'Pendente'}</td></tr>
+        <tr><th>Observacao</th><td colspan="3">${item.observacao || '-'}</td></tr>
+      `;
+      const view = window.open('', '_blank', 'width=1100,height=900');
+      if (!view) return;
+      view.document.open();
+      view.document.write(buildSingleRecordPdf(`Hospedagem | ${item.nome || 'registro'}`, rows));
+      view.document.close();
+      view.focus();
+      window.setTimeout(() => view.print(), 300);
+    }
+    window.printHospedagemPdf = printHospedagemPdf;
+
+    function printCarroPdf(id) {
+      const item = passagensCarros.find(entry => String(entry.id) === String(id));
+      if (!item) return;
+      const rows = `
+        <tr><th>Motorista / colaborador</th><td>${item.motorista || '-'}</td><th>Obra</th><td>${item.obra || '-'}</td></tr>
+        <tr><th>Cidade</th><td>${item.cidade || '-'}</td><th>Pedido</th><td>${item.numeroPedido || '-'}</td></tr>
+        <tr><th>Retirada</th><td>${formatDate(item.retirada)}</td><th>Devolucao</th><td>${formatDate(item.devolucao)}</td></tr>
+        <tr><th>Numero de diarias</th><td>${item.numeroDiarias || '-'}</td><th>Valor total</th><td>${item.valorTotal || '-'}</td></tr>
+        <tr><th>Reserva</th><td>${item.numeroReserva || '-'}</td><th>Motivo</th><td>${item.motivo || '-'}</td></tr>
+        <tr><th>Observacao</th><td colspan="3">${item.observacao || '-'}</td></tr>
+      `;
+      const view = window.open('', '_blank', 'width=1100,height=900');
+      if (!view) return;
+      view.document.open();
+      view.document.write(buildSingleRecordPdf(`Carro | ${item.motorista || 'registro'}`, rows));
+      view.document.close();
+      view.focus();
+      window.setTimeout(() => view.print(), 300);
+    }
+    window.printCarroPdf = printCarroPdf;
+
+    function editHospedagem(id) {
+      const item = passagensHospedagens.find(entry => String(entry.id) === String(id));
+      if (!item) return;
+      editingHospedagemId = item.id;
+      const form = document.getElementById('passagensHospedagemForm');
+      Object.assign(form.elements, form.elements);
+      form.elements.cartaoOuFaturado.value = item.cartaoOuFaturado || '';
+      form.elements.obra.value = item.obra || '';
+      form.elements.nome.value = item.nome || '';
+      form.elements.hotel.value = item.hotel || '';
+      form.elements.cidade.value = item.cidade || '';
+      form.elements.checkIn.value = item.checkIn || '';
+      form.elements.checkOut.value = item.checkOut || '';
+      form.elements.numeroDiarias.value = item.numeroDiarias || '';
+      form.elements.valorDiaria.value = item.valorDiaria || '';
+      form.elements.valorTotalDiarias.value = item.valorTotalDiarias || '';
+      form.elements.valorTotal.value = item.valorTotal || '';
+      form.elements.itinerario.value = item.itinerario || '';
+      form.elements.motivo.value = item.motivo || '';
+      form.elements.numeroPedido.value = item.numeroPedido || '';
+      form.elements.observacao.value = item.observacao || '';
+      form.elements.pago.checked = Boolean(item.pago);
+      document.getElementById('passagensHospedagemTitle').textContent = `Editar hospedagem | ${item.nome || '-'}`;
+      openModalById('passagensHospedagemModal');
+    }
+    window.editHospedagem = editHospedagem;
+
+    function editCarro(id) {
+      const item = passagensCarros.find(entry => String(entry.id) === String(id));
+      if (!item) return;
+      editingCarroId = item.id;
+      const form = document.getElementById('passagensCarroForm');
+      form.elements.obra.value = item.obra || '';
+      form.elements.motorista.value = item.motorista || '';
+      form.elements.cidade.value = item.cidade || '';
+      form.elements.retirada.value = item.retirada || '';
+      form.elements.devolucao.value = item.devolucao || '';
+      form.elements.numeroDiarias.value = item.numeroDiarias || '';
+      form.elements.valorTotal.value = item.valorTotal || '';
+      form.elements.numeroReserva.value = item.numeroReserva || '';
+      form.elements.motivo.value = item.motivo || '';
+      form.elements.numeroPedido.value = item.numeroPedido || '';
+      form.elements.observacao.value = item.observacao || '';
+      form.elements.pago.checked = Boolean(item.pago);
+      document.getElementById('passagensCarroTitle').textContent = `Editar carro | ${item.motorista || '-'}`;
+      openModalById('passagensCarroModal');
+    }
+    window.editCarro = editCarro;
+
+    function deleteHospedagem(id) {
+      const index = passagensHospedagens.findIndex(entry => String(entry.id) === String(id));
+      if (index < 0) return;
+      if (!window.confirm('Deseja excluir esta hospedagem?')) return;
+      passagensHospedagens.splice(index, 1);
+      saveLocalCache();
+      renderPassagens();
+    }
+    window.deleteHospedagem = deleteHospedagem;
+
+    function deleteCarro(id) {
+      const index = passagensCarros.findIndex(entry => String(entry.id) === String(id));
+      if (index < 0) return;
+      if (!window.confirm('Deseja excluir este carro?')) return;
+      passagensCarros.splice(index, 1);
+      saveLocalCache();
+      renderPassagens();
+    }
+    window.deleteCarro = deleteCarro;
+
+    function toggleHospedagemPaid(id) {
+      const item = passagensHospedagens.find(entry => String(entry.id) === String(id));
+      if (!item) return;
+      item.pago = !item.pago;
+      saveLocalCache();
+      renderPassagens();
+    }
+    window.toggleHospedagemPaid = toggleHospedagemPaid;
+
+    function toggleCarroPaid(id) {
+      const item = passagensCarros.find(entry => String(entry.id) === String(id));
+      if (!item) return;
+      item.pago = !item.pago;
+      saveLocalCache();
+      renderPassagens();
+    }
+    window.toggleCarroPaid = toggleCarroPaid;
 
     function resetCreditoForm() {
       editingCreditoId = null;
@@ -4568,132 +5167,197 @@ AMAURI BARROSO DE MOURA"></textarea>
       `).join('') : `<tr><td colspan="7"><div class="empty-state"><b>Nenhum credito cadastrado.</b>Cadastre nome, localizador, valor, validade e status para acompanhar aqui.</div></td></tr>`;
     }
 
+    function buildPassagemActions(row, includeSelection = true) {
+      const complement = complementForKey(row.key);
+      return `<div class="actionstack">
+        ${includeSelection ? `<button class="rowflag ${passagensSelectedKeys.has(row.key) ? 'active green' : ''}" type="button" title="Selecionar para fechamento" aria-label="Selecionar para fechamento" onclick="togglePassagemSelection('${row.key}')">${icon('checkSquare')}</button>` : ''}
+        <button class="rowflag ${parseBool(complement.hotelSolicitado) ? 'active' : ''}" type="button" title="Enviar para hospedagem" aria-label="Enviar para hospedagem" onclick="togglePassagemFeature('${row.key}','hotel')">${icon('bed')}</button>
+        <button class="rowflag ${parseBool(complement.carroSolicitado) ? 'active' : ''}" type="button" title="Enviar para carros" aria-label="Enviar para carros" onclick="togglePassagemFeature('${row.key}','carro')">${icon('car')}</button>
+        <button class="rowact" title="Complementar passagem" aria-label="Complementar passagem" onclick="editPassagem('${row.key}')">${icon('edit')}</button>
+        <button class="rowact" title="Excluir passagem" aria-label="Excluir passagem" onclick="requestDeletePassagem('${row.key}')">${icon('trash')}</button>
+      </div>`;
+    }
+
     function renderPassagensTable(targetId, rows, columns) {
       const body = document.getElementById(targetId);
       if (!rows.length) {
-        body.innerHTML = `<tr><td colspan="${columns}" ><div class="empty-state"><b>Nenhuma passagem encontrada.</b>Sincronize a API ou ajuste os filtros do mes selecionado.</div></td></tr>`;
+        body.innerHTML = `<tr><td colspan="${columns}"><div class="empty-state"><b>Nenhum registro encontrado.</b>Ajuste os filtros, a competencia ou sincronize novas passagens.</div></td></tr>`;
         return;
-      }
-      body.innerHTML = rows.map(row => `
-        <tr>
-          <td><span class="company">${row.nome_colab || row.nome || '-'}</span></td>
-          <td>${row.nome_obra || '-'}</td>
-          <td>${row.nome_funcao || '-'}</td>
-          <td>${row.tipo || '-'}</td>
-          <td>${formatDate(row.dataCompra)}</td>
-          <td>${row.companhia || '-'}</td>
-          <td>${row.localizador || '-'}</td>
-          <td class="money">${row.valorAprovado == null ? '-' : brl(row.valorAprovado)}</td>
-          <td class="money">${row.valorPago == null ? '-' : brl(row.valorPago)}</td>
-          <td class="actioncell"><button class="rowact" title="Complementar passagem" aria-label="Complementar passagem" onclick="editPassagem('${row.key}')">${icon('edit')}</button><button class="rowact" title="Excluir passagem" aria-label="Excluir passagem" onclick="requestDeletePassagem('${row.key}')">${icon('trash')}</button></td>
-        </tr>
-      `).join('');
-      if (targetId === 'pRoadRows') {
-        body.innerHTML = rows.map(row => `
-          <tr class="${row.pagoConfirmado ? 'paid-row' : ''}">
-            <td><span class="company">${row.nome_colab || row.nome || '-'}</span></td>
-            <td>${row.nome_obra || '-'}</td>
-            <td>${row.nome_funcao || '-'}</td>
-            <td>${row.tipo || '-'}</td>
-            <td>${formatDate(row.dataCompra)}</td>
-            <td>${formatDate(row.dataIda)}</td>
-            <td>${formatDate(row.dataVolta)}</td>
-            <td>${row.horarioIda || '-'}</td>
-            <td>${row.horarioVolta || '-'}</td>
-            <td>${row.origem || '-'}</td>
-            <td>${row.destino || '-'}</td>
-            <td>${row.companhia || '-'}</td>
-            <td>${row.pedido || '<span class="pending">Pendente</span>'}</td>
-            <td class="money">${row.valorAprovado == null ? '-' : brl(row.valorAprovado)}</td>
-            <td class="money">${row.valorPago == null ? '-' : brl(row.valorPago)}</td>
-            <td class="actioncell"><button class="rowact" title="Complementar passagem" aria-label="Complementar passagem" onclick="editPassagem('${row.key}')">${icon('edit')}</button><button class="rowact" title="Excluir passagem" aria-label="Excluir passagem" onclick="requestDeletePassagem('${row.key}')">${icon('trash')}</button></td>
-          </tr>
-        `).join('');
-      }
-      if (targetId === 'pAirRows') {
-        body.innerHTML = rows.map(row => `
-          <tr class="${row.pagoConfirmado ? 'paid-row' : ''}">
-            <td><span class="company">${row.nome_colab || row.nome || '-'}</span></td>
-            <td>${row.nome_obra || '-'}</td>
-            <td>${row.nome_funcao || '-'}</td>
-            <td>${row.tipo || '-'}</td>
-            <td>${formatDate(row.dataCompra)}</td>
-            <td>${formatDate(row.dataIda)}</td>
-            <td>${formatDate(row.dataVolta)}</td>
-            <td>${row.horarioIda || '-'}</td>
-            <td>${row.horarioVolta || '-'}</td>
-            <td>${row.companhia || '-'}</td>
-            <td>${row.origem || '-'}</td>
-            <td>${row.destino || '-'}</td>
-            <td>${row.localizador || '-'}</td>
-            <td>${row.pedido || '<span class="pending">Pendente</span>'}</td>
-            <td class="money">${row.valorAprovado == null ? '-' : brl(row.valorAprovado)}</td>
-            <td class="money">${row.valorPago == null ? '-' : brl(row.valorPago)}</td>
-            <td class="actioncell"><button class="rowact" title="Complementar passagem" aria-label="Complementar passagem" onclick="editPassagem('${row.key}')">${icon('edit')}</button><button class="rowact" title="Excluir passagem" aria-label="Excluir passagem" onclick="requestDeletePassagem('${row.key}')">${icon('trash')}</button></td>
-          </tr>
-        `).join('');
       }
       if (targetId === 'pRows') {
         body.innerHTML = rows.map(row => `
           <tr class="${row.pagoConfirmado ? 'paid-row' : ''}">
+            <td class="actioncell">${buildPassagemActions(row, false)}</td>
             <td><span class="company">${row.nome_colab || row.nome || '-'}</span></td>
-            <td>${row.nome_obra || '-'}</td>
+            <td>${row.nome_funcao || '-'}</td>
             <td>${row.tipo || '-'}</td>
+            <td>${row.nome_obra || '-'}</td>
             <td><span class="tag ${row.modalidade === 'A definir' ? 'warn' : 'ok'}">${row.modalidade}</span></td>
             <td>${formatDate(row.dataCompra)}</td>
-            <td class="money">${row.valorPago == null ? '-' : brl(row.valorPago)}</td>
             <td>${row.localizador || '-'}</td>
+            <td class="money">${row.valorPago == null ? '-' : brl(row.valorPago)}</td>
             <td>${row.pedido || '<span class="pending">Pendente</span>'}</td>
-            <td class="actioncell"><button class="rowact" title="Complementar passagem" aria-label="Complementar passagem" onclick="editPassagem('${row.key}')">${icon('edit')}</button><button class="rowact" title="Excluir passagem" aria-label="Excluir passagem" onclick="requestDeletePassagem('${row.key}')">${icon('trash')}</button></td>
+          </tr>
+        `).join('');
+        return;
+      }
+      if (targetId === 'pAirRows' || targetId === 'pRoadRows') {
+        body.innerHTML = rows.map(row => `
+          <tr class="${row.pagoConfirmado ? 'paid-row' : ''}">
+            <td class="actioncell">${buildPassagemActions(row, true)}</td>
+            <td><span class="company">${row.nome_colab || row.nome || '-'}</span></td>
+            <td>${row.nome_funcao || '-'}</td>
+            <td>${row.tipo || '-'}</td>
+            <td>${row.nome_obra || '-'}</td>
+            <td>${formatDate(row.dataCompra)}</td>
+            <td>${row.localizador || '-'}</td>
+            <td class="money">${row.valorPago == null ? '-' : brl(row.valorPago)}</td>
+            <td class="money">${row.valorAprovado == null ? '-' : brl(row.valorAprovado)}</td>
+            <td>${formatDate(row.dataIda)}</td>
+            <td>${formatDate(row.dataVolta)}</td>
+            <td>${row.horarioIda || '-'}</td>
+            <td>${row.horarioVolta || '-'}</td>
+            <td>${row.companhia || '-'}</td>
+            <td>${row.origem || '-'}</td>
+            <td>${row.destino || '-'}</td>
+            <td>${row.pedido || '<span class="pending">Pendente</span>'}</td>
+          </tr>
+        `).join('');
+        return;
+      }
+      if (targetId === 'pHospRows') {
+        body.innerHTML = rows.map(item => `
+          <tr class="${item.pago ? 'paid-row' : ''}">
+            <td class="actioncell">
+              <div class="actionstack">
+                <button class="rowflag ${item.pago ? 'active green' : ''}" type="button" title="Marcar como pago" aria-label="Marcar como pago" onclick="toggleHospedagemPaid('${item.id}')">${icon('checkSquare')}</button>
+                <button class="rowflag" type="button" title="Gerar PDF" aria-label="Gerar PDF" onclick="printHospedagemPdf('${item.id}')">${icon('printer')}</button>
+                <button class="rowact" title="Editar hospedagem" aria-label="Editar hospedagem" onclick="editHospedagem('${item.id}')">${icon('edit')}</button>
+                <button class="rowact" title="Excluir hospedagem" aria-label="Excluir hospedagem" onclick="deleteHospedagem('${item.id}')">${icon('trash')}</button>
+              </div>
+            </td>
+            <td><span class="company">${item.nome || '-'}</span></td>
+            <td>${item.obra || '-'}</td>
+            <td>${item.cartaoOuFaturado || '-'}</td>
+            <td>${item.hotel || '-'}</td>
+            <td>${item.cidade || '-'}</td>
+            <td>${formatDate(item.checkIn)}</td>
+            <td>${formatDate(item.checkOut)}</td>
+            <td>${item.numeroDiarias || '-'}</td>
+            <td>${item.valorDiaria || '-'}</td>
+            <td>${item.valorTotalDiarias || '-'}</td>
+            <td>${item.valorTotal || '-'}</td>
+            <td>${item.itinerario || '-'}</td>
+            <td>${item.motivo || '-'}</td>
+            <td>${item.numeroPedido || '-'}</td>
+            <td>${item.observacao || '-'}</td>
+          </tr>
+        `).join('');
+        return;
+      }
+      if (targetId === 'pCarRows') {
+        body.innerHTML = rows.map(item => `
+          <tr class="${item.pago ? 'paid-row' : ''}">
+            <td class="actioncell">
+              <div class="actionstack">
+                <button class="rowflag ${item.pago ? 'active green' : ''}" type="button" title="Marcar como pago" aria-label="Marcar como pago" onclick="toggleCarroPaid('${item.id}')">${icon('checkSquare')}</button>
+                <button class="rowflag" type="button" title="Gerar PDF" aria-label="Gerar PDF" onclick="printCarroPdf('${item.id}')">${icon('printer')}</button>
+                <button class="rowact" title="Editar carro" aria-label="Editar carro" onclick="editCarro('${item.id}')">${icon('edit')}</button>
+                <button class="rowact" title="Excluir carro" aria-label="Excluir carro" onclick="deleteCarro('${item.id}')">${icon('trash')}</button>
+              </div>
+            </td>
+            <td><span class="company">${item.motorista || '-'}</span></td>
+            <td>${item.obra || '-'}</td>
+            <td>${item.cidade || '-'}</td>
+            <td>${formatDate(item.retirada)}</td>
+            <td>${formatDate(item.devolucao)}</td>
+            <td>${item.numeroDiarias || '-'}</td>
+            <td>${item.valorTotal || '-'}</td>
+            <td>${item.numeroReserva || '-'}</td>
+            <td>${item.motivo || '-'}</td>
+            <td>${item.numeroPedido || '-'}</td>
+            <td>${item.observacao || '-'}</td>
           </tr>
         `).join('');
       }
     }
 
-    function renderPassagens() {
-      const rows = currentPassagensData();
-      const filtered = filteredPassagens(rows, 'all');
-      const airRows = filteredPassagens(rows, 'air');
-      const roadRows = filteredPassagens(rows, 'road');
-      const totalPaid = rows.reduce((sum, row) => sum + (row.valorPago || 0), 0);
-      const totalSavings = rows.reduce((sum, row) => sum + (row.economia || 0), 0);
-      const byObra = {};
-      const byMode = {
-        Aereo: { count: 0, total: 0 },
-        Rodoviario: { count: 0, total: 0 }
-      };
-      const savingsByObra = {};
+    function passagensListByMode(mode, tabName, startValue, endValue) {
+      const baseRows = tabName === 'finalized'
+        ? currentPassagensYearData().filter(item => item.modalidade === mode)
+        : currentPassagensData().filter(item => item.modalidade === mode);
+      return filterPassagensByRange(
+        applyPassagensStatusFilter(filteredPassagens(baseRows, mode === 'Aereo' ? 'air' : 'road'), tabName),
+        startValue,
+        endValue
+      );
+    }
 
-      rows.forEach(row => {
+    function queryMatch(values) {
+      const query = norm(document.getElementById('pq').value);
+      if (!query) return true;
+      return norm(values.join(' ')).includes(query);
+    }
+
+    function renderPassagens() {
+      const todayRows = filteredPassagens(todayPassagensData(), 'all');
+      const monthRows = currentPassagensData();
+      const totalPaidToday = todayRows.reduce((sum, row) => sum + (row.valorPago || 0), 0);
+      const totalSavingsToday = todayRows.reduce((sum, row) => sum + (row.economia || 0), 0);
+      const byObra = {};
+      const byMode = { Aereo: { count: 0, total: 0 }, Rodoviario: { count: 0, total: 0 } };
+      const savingsByObra = {};
+      todayRows.forEach(row => {
         const obra = row.nome_obra || 'Sem obra';
         byObra[obra] = (byObra[obra] || 0) + (row.valorPago || 0);
         if (row.modalidade === 'Aereo' || row.modalidade === 'Rodoviario') {
           byMode[row.modalidade].count += 1;
           byMode[row.modalidade].total += row.valorPago || 0;
         }
-        if (row.economia > 0) {
-          savingsByObra[obra] = (savingsByObra[obra] || 0) + row.economia;
-        }
+        if (row.economia > 0) savingsByObra[obra] = (savingsByObra[obra] || 0) + row.economia;
       });
 
-      const airRangeRows = filterPassagensByRange(airRows, pAirStart.value, pAirEnd.value);
-      const roadRangeRows = filterPassagensByRange(roadRows, pRoadStart.value, pRoadEnd.value);
+      const airRangeRows = passagensListByMode('Aereo', passagensAirTab, pAirStart.value, pAirEnd.value);
+      const roadRangeRows = passagensListByMode('Rodoviario', passagensRoadTab, pRoadStart.value, pRoadEnd.value);
+      const hospedagemRows = passagensHospedagens.filter(item => (passagensHospTab === 'finalized' ? item.pago : true)).filter(item => {
+        if (!queryMatch([item.nome, item.obra, item.hotel, item.cidade, item.motivo, item.numeroPedido])) return false;
+        const refDate = normalizeDateValue(item.checkIn || item.checkOut);
+        if (pHospStart.value && (!refDate || refDate < normalizeDateValue(pHospStart.value))) return false;
+        if (pHospEnd.value && (!refDate || refDate > normalizeDateValue(pHospEnd.value))) return false;
+        return true;
+      });
+      const carroRows = passagensCarros.filter(item => (passagensCarTab === 'finalized' ? item.pago : true)).filter(item => {
+        if (!queryMatch([item.motorista, item.obra, item.cidade, item.motivo, item.numeroPedido, item.numeroReserva])) return false;
+        const refDate = normalizeDateValue(item.retirada || item.devolucao);
+        if (pCarStart.value && (!refDate || refDate < normalizeDateValue(pCarStart.value))) return false;
+        if (pCarEnd.value && (!refDate || refDate > normalizeDateValue(pCarEnd.value))) return false;
+        return true;
+      });
 
       pMonthPicker.value = currentPassagensMonth();
-      document.getElementById('pPageTitle').textContent = `Controle de Passagens | ${monthLabel(currentPassagensMonth())}`;
-      document.getElementById('pPageSubtitle').textContent = rows.length
-        ? `Solicitacoes filtradas pela data da compra em ${monthLabel(currentPassagensMonth())}. Complete localizador, pedido e detalhes finais quando necessario.`
-        : `Nenhuma solicitacao com data da compra em ${monthLabel(currentPassagensMonth())}. Use o cadastro manual para testar ou complemente os itens da API.`;
-      document.getElementById('pTotal').textContent = rows.length;
-      document.getElementById('pAir').textContent = rows.filter(row => row.modalidade === 'Aereo').length;
-      document.getElementById('pRoad').textContent = rows.filter(row => row.modalidade === 'Rodoviario').length;
-      document.getElementById('pPaid').textContent = brl(totalPaid);
-      document.getElementById('pSavings').textContent = brl(totalSavings);
-      document.getElementById('pCountLabel').textContent = `${filtered.length} registros filtrados`;
-      document.getElementById('pFootCount').textContent = `${rows.length} item(ns) no mes`;
-      document.getElementById('pAirCount').textContent = `${airRangeRows.length} registros`;
-      document.getElementById('pRoadCount').textContent = `${roadRangeRows.length} registros`;
+      document.getElementById('pPageTitle').textContent = `Controle de Passagens | compras de hoje`;
+      document.getElementById('pPageSubtitle').textContent = todayRows.length
+        ? `A tela inicial mostra somente as passagens compradas hoje (${formatDate(todayKey())}).`
+        : `Nenhuma passagem comprada hoje. Os demais detalhes seguem disponiveis nas abas de Aereo, Rodoviario, Hospedagem e Carros.`;
+      document.getElementById('pTotal').textContent = todayRows.length;
+      document.getElementById('pAir').textContent = todayRows.filter(row => row.modalidade === 'Aereo').length;
+      document.getElementById('pRoad').textContent = todayRows.filter(row => row.modalidade === 'Rodoviario').length;
+      document.getElementById('pPaid').textContent = brl(totalPaidToday);
+      document.getElementById('pSavings').textContent = brl(totalSavingsToday);
+      document.getElementById('pCountLabel').textContent = `${todayRows.length} compras de hoje`;
+      document.getElementById('pFootCount').textContent = `${todayRows.length} item(ns) hoje`;
+      document.getElementById('pAirCount').textContent = `${airRangeRows.length} registro(s)`;
+      document.getElementById('pRoadCount').textContent = `${roadRangeRows.length} registro(s)`;
+      document.getElementById('pHospCount').textContent = `${hospedagemRows.length} registro(s)`;
+      document.getElementById('pCarCount').textContent = `${carroRows.length} registro(s)`;
       document.getElementById('pSyncStamp').textContent = passagensLastSync ? `Ultima sync ${passagensLastSync}` : 'Sem sincronizacao ainda';
+
+      document.getElementById('pCardBars').classList.toggle('collapsed-panel', passagensOverviewCollapsed.bars);
+      document.getElementById('pCardModes').classList.toggle('collapsed-panel', passagensOverviewCollapsed.modes);
+      document.getElementById('pCardSavings').classList.toggle('collapsed-panel', passagensOverviewCollapsed.savings);
+      document.getElementById('togglePBars').innerHTML = icon(passagensOverviewCollapsed.bars ? 'chevronRight' : 'chevronDown', 16);
+      document.getElementById('togglePModes').innerHTML = icon(passagensOverviewCollapsed.modes ? 'chevronRight' : 'chevronDown', 16);
+      document.getElementById('togglePSavings').innerHTML = icon(passagensOverviewCollapsed.savings ? 'chevronRight' : 'chevronDown', 16);
 
       const obraEntries = Object.entries(byObra).sort((a, b) => b[1] - a[1]);
       const obraMax = obraEntries.length ? obraEntries[0][1] : 0;
@@ -4702,8 +5366,7 @@ AMAURI BARROSO DE MOURA"></textarea>
           <div class="barlabel"><span>${obra}</span><b>${brl(total)}</b></div>
           <div class="track"><div class="fill" style="width:${obraMax ? (total / obraMax) * 100 : 0}%"></div></div>
         </div>
-      `).join('') : `<div class="empty-state"><b>Sem obras carregadas.</b>Depois da sincronizacao, o gasto por obra aparece aqui.</div>`;
-
+      `).join('') : `<div class="empty-state"><b>Sem compras hoje.</b>Assim que houver novas emissões hoje, o gasto por obra aparece aqui.</div>`;
       const modeEntries = Object.entries(byMode);
       const modeMax = Math.max(...modeEntries.map(([, info]) => info.count), 0);
       document.getElementById('pModeBars').innerHTML = modeEntries.map(([mode, info]) => `
@@ -4712,23 +5375,39 @@ AMAURI BARROSO DE MOURA"></textarea>
           <div class="track"><div class="fill" style="width:${modeMax ? (info.count / modeMax) * 100 : 0}%"></div></div>
         </div>
       `).join('');
-
       const savingsEntries = Object.entries(savingsByObra).sort((a, b) => b[1] - a[1]);
       document.getElementById('pSavingsList').innerHTML = savingsEntries.length ? savingsEntries.map(([obra, total]) => `
         <div class="li">
-          <div><b class="link">${obra}</b><div class="lisub">Economia acumulada no periodo mensal</div></div>
+          <div><b class="link">${obra}</b><div class="lisub">Economia acumulada nas compras de hoje</div></div>
           <span class="tag ok">${brl(total)}</span>
         </div>
-      `).join('') : `<div class="empty-state"><b>Sem economia neste mes.</b>Esse quadro mostra apenas passagens com valor pago abaixo do aprovado.</div>`;
+      `).join('') : `<div class="empty-state"><b>Sem economia hoje.</b>Esse quadro mostra apenas compras do dia com valor pago abaixo do aprovado.</div>`;
 
-      renderPassagensTable('pRows', filtered, 9);
+      renderPassagensTable('pRows', todayRows, 10);
       renderPassagensTable('pAirRows', airRangeRows, 17);
-      renderPassagensTable('pRoadRows', roadRangeRows, 16);
+      renderPassagensTable('pRoadRows', roadRangeRows, 17);
+      renderPassagensTable('pHospRows', hospedagemRows, 16);
+      renderPassagensTable('pCarRows', carroRows, 12);
+
       renderPassagensRangeSummary('pAirSummary', 'pAirRangeLabel', airRangeRows, pAirStart.value, pAirEnd.value);
       renderPassagensRangeSummary('pRoadSummary', 'pRoadRangeLabel', roadRangeRows, pRoadStart.value, pRoadEnd.value);
       renderPassagensRangeBars('pAirBars', airRangeRows, 'Nenhuma passagem aerea nesse intervalo.');
       renderPassagensRangeBars('pRoadBars', roadRangeRows, 'Nenhuma passagem rodoviaria nesse intervalo.');
-      const cadastroRows = rows.filter(row => row.tabela === 'manual' || row.key.startsWith('manual:'));
+      document.getElementById('pAirBulkLabel').textContent = passagensAirTab === 'finalized'
+        ? `Finalizados do ano ${currentPassagensYear()}`
+        : `${passagensSelectedKeys.size} selecionada(s) para fechamento`;
+      document.getElementById('pRoadBulkLabel').textContent = passagensRoadTab === 'finalized'
+        ? `Finalizados do ano ${currentPassagensYear()}`
+        : `${passagensSelectedKeys.size} selecionada(s) para fechamento`;
+      document.getElementById('pAirFinalize').classList.toggle('hidden', passagensAirTab === 'finalized');
+      document.getElementById('pRoadFinalize').classList.toggle('hidden', passagensRoadTab === 'finalized');
+
+      document.querySelectorAll('[data-p-air-tab]').forEach(button => button.classList.toggle('on', button.dataset.pAirTab === passagensAirTab));
+      document.querySelectorAll('[data-p-road-tab]').forEach(button => button.classList.toggle('on', button.dataset.pRoadTab === passagensRoadTab));
+      document.querySelectorAll('[data-p-hosp-tab]').forEach(button => button.classList.toggle('on', button.dataset.pHospTab === passagensHospTab));
+      document.querySelectorAll('[data-p-car-tab]').forEach(button => button.classList.toggle('on', button.dataset.pCarTab === passagensCarTab));
+
+      const cadastroRows = monthRows.filter(row => row.tabela === 'manual' || row.key.startsWith('manual:'));
       document.getElementById('pCadastroCount').textContent = `${cadastroRows.length} registros`;
       document.getElementById('pCadastroRows').innerHTML = cadastroRows.length ? cadastroRows.map(row => `
         <tr class="${row.pagoConfirmado ? 'paid-row' : ''}">
@@ -4740,7 +5419,7 @@ AMAURI BARROSO DE MOURA"></textarea>
           <td class="money">${row.valorPago == null ? '-' : brl(row.valorPago)}</td>
           <td class="actioncell"><button class="rowact" title="Editar cadastro manual" aria-label="Editar cadastro manual" onclick="editPassagem('${row.key}')">${icon('edit')}</button></td>
         </tr>
-      `).join('') : `<tr><td colspan="7"><div class="empty-state"><b>Nenhum cadastro manual neste mes.</b>Use esta aba para testar enquanto a API ainda nao devolve a data da compra.</div></td></tr>`;
+      `).join('') : `<tr><td colspan="7"><div class="empty-state"><b>Nenhum cadastro manual neste mes.</b>Use esta aba para testar enquanto a API ainda nao devolve todos os campos operacionais.</div></td></tr>`;
       renderPassagensCreditos();
     }
 
@@ -4975,7 +5654,7 @@ AMAURI BARROSO DE MOURA"></textarea>
     document.getElementById('dq').addEventListener('input', renderDiarista);
     document.getElementById('hq').addEventListener('input', renderHitachi);
     document.getElementById('pq').addEventListener('input', renderPassagens);
-    [pAirStart, pAirEnd, pRoadStart, pRoadEnd].forEach(input => input.addEventListener('change', renderPassagens));
+    [pAirStart, pAirEnd, pRoadStart, pRoadEnd, pHospStart, pHospEnd, pCarStart, pCarEnd].forEach(input => input.addEventListener('change', renderPassagens));
     document.getElementById('pAirClear').addEventListener('click', () => {
       pAirStart.value = '';
       pAirEnd.value = '';
@@ -5336,7 +6015,42 @@ AMAURI BARROSO DE MOURA"></textarea>
     document.getElementById('cancelPassagensEditModal').addEventListener('click', () => closeModalById('passagensEditModal'));
     document.getElementById('closePassagensDeleteModal').addEventListener('click', () => closeModalById('passagensDeleteModal'));
     document.getElementById('cancelPassagensDeleteModal').addEventListener('click', () => closeModalById('passagensDeleteModal'));
+    document.getElementById('closePassagensHospedagemModal').addEventListener('click', () => closeModalById('passagensHospedagemModal'));
+    document.getElementById('cancelPassagensHospedagemModal').addEventListener('click', () => closeModalById('passagensHospedagemModal'));
+    document.getElementById('closePassagensCarroModal').addEventListener('click', () => closeModalById('passagensCarroModal'));
+    document.getElementById('cancelPassagensCarroModal').addEventListener('click', () => closeModalById('passagensCarroModal'));
     document.getElementById('cancelCreditoEdit').addEventListener('click', resetCreditoForm);
+    document.getElementById('togglePBars').addEventListener('click', () => toggleOverviewPanel('bars'));
+    document.getElementById('togglePModes').addEventListener('click', () => toggleOverviewPanel('modes'));
+    document.getElementById('togglePSavings').addEventListener('click', () => toggleOverviewPanel('savings'));
+    document.getElementById('pAirFinalize').addEventListener('click', () => finalizeSelectedPassagens('Aereo'));
+    document.getElementById('pRoadFinalize').addEventListener('click', () => finalizeSelectedPassagens('Rodoviario'));
+    document.getElementById('pHospClear').addEventListener('click', () => {
+      pHospStart.value = '';
+      pHospEnd.value = '';
+      renderPassagens();
+    });
+    document.getElementById('pCarClear').addEventListener('click', () => {
+      pCarStart.value = '';
+      pCarEnd.value = '';
+      renderPassagens();
+    });
+    document.querySelectorAll('[data-p-air-tab]').forEach(button => button.addEventListener('click', () => {
+      passagensAirTab = button.dataset.pAirTab || 'overview';
+      renderPassagens();
+    }));
+    document.querySelectorAll('[data-p-road-tab]').forEach(button => button.addEventListener('click', () => {
+      passagensRoadTab = button.dataset.pRoadTab || 'overview';
+      renderPassagens();
+    }));
+    document.querySelectorAll('[data-p-hosp-tab]').forEach(button => button.addEventListener('click', () => {
+      passagensHospTab = button.dataset.pHospTab || 'overview';
+      renderPassagens();
+    }));
+    document.querySelectorAll('[data-p-car-tab]').forEach(button => button.addEventListener('click', () => {
+      passagensCarTab = button.dataset.pCarTab || 'overview';
+      renderPassagens();
+    }));
     document.getElementById('passagensConfigForm').addEventListener('submit', event => {
       event.preventDefault();
       const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
@@ -5469,6 +6183,62 @@ AMAURI BARROSO DE MOURA"></textarea>
       renderPassagens();
       closeModalById('passagensEditModal');
     });
+    document.getElementById('passagensHospedagemForm').addEventListener('submit', event => {
+      event.preventDefault();
+      if (!editingHospedagemId) return;
+      const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
+      const item = passagensHospedagens.find(entry => String(entry.id) === String(editingHospedagemId));
+      if (!item) return;
+      const numeroDiarias = Number(formData.numeroDiarias || countDiarias(formData.checkIn, formData.checkOut));
+      const valorDiaria = parseMoney(formData.valorDiaria);
+      Object.assign(item, {
+        cartaoOuFaturado: formData.cartaoOuFaturado || '',
+        obra: formData.obra || '',
+        nome: formData.nome || '',
+        hotel: formData.hotel || '',
+        cidade: formData.cidade || '',
+        checkIn: formData.checkIn || '',
+        checkOut: formData.checkOut || '',
+        numeroDiarias,
+        valorDiaria: formData.valorDiaria || '',
+        valorTotalDiarias: formData.valorTotalDiarias || (valorDiaria != null ? brl(valorDiaria * (numeroDiarias || 1)) : ''),
+        valorTotal: formData.valorTotal || '',
+        itinerario: formData.itinerario || '',
+        motivo: formData.motivo || '',
+        numeroPedido: formData.numeroPedido || '',
+        observacao: formData.observacao || '',
+        pago: Boolean(formData.pago)
+      });
+      editingHospedagemId = null;
+      saveLocalCache();
+      renderPassagens();
+      closeModalById('passagensHospedagemModal');
+    });
+    document.getElementById('passagensCarroForm').addEventListener('submit', event => {
+      event.preventDefault();
+      if (!editingCarroId) return;
+      const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
+      const item = passagensCarros.find(entry => String(entry.id) === String(editingCarroId));
+      if (!item) return;
+      Object.assign(item, {
+        obra: formData.obra || '',
+        motorista: formData.motorista || '',
+        cidade: formData.cidade || '',
+        retirada: formData.retirada || '',
+        devolucao: formData.devolucao || '',
+        numeroDiarias: formData.numeroDiarias || '',
+        valorTotal: formData.valorTotal || '',
+        numeroReserva: formData.numeroReserva || '',
+        motivo: formData.motivo || '',
+        numeroPedido: formData.numeroPedido || '',
+        observacao: formData.observacao || '',
+        pago: Boolean(formData.pago)
+      });
+      editingCarroId = null;
+      saveLocalCache();
+      renderPassagens();
+      closeModalById('passagensCarroModal');
+    });
     document.getElementById('passagensDeleteForm').addEventListener('submit', async event => {
       event.preventDefault();
       if (!deletingPassagemKey) return;
@@ -5490,6 +6260,12 @@ AMAURI BARROSO DE MOURA"></textarea>
       const rowIndex = passagensRows.findIndex(item => passagemKey(item) === targetKey);
       if (rowIndex >= 0) passagensRows.splice(rowIndex, 1);
       delete passagensComplements[targetKey];
+      for (let index = passagensHospedagens.length - 1; index >= 0; index -= 1) {
+        if (passagensHospedagens[index].passagemKey === targetKey) passagensHospedagens.splice(index, 1);
+      }
+      for (let index = passagensCarros.length - 1; index >= 0; index -= 1) {
+        if (passagensCarros[index].passagemKey === targetKey) passagensCarros.splice(index, 1);
+      }
       deletingPassagemKey = '';
       event.currentTarget.reset();
       errorBox.style.display = 'none';
