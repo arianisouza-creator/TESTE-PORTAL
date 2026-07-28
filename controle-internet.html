@@ -1978,7 +1978,12 @@
         kitRescisao: item.kitRescisao ?? item.kit_rescisao ?? 'N/A',
         holeriteArquivo: item.holeriteArquivo || '',
         comprovantePagamentoArquivo: item.comprovantePagamentoArquivo || '',
-        comprovanteAdiantamentoArquivo: item.comprovanteAdiantamentoArquivo || ''
+        comprovanteAdiantamentoArquivo: item.comprovanteAdiantamentoArquivo || '',
+        holeriteStorageKey: item.holeriteStorageKey || '',
+        comprovantePagamentoStorageKey: item.comprovantePagamentoStorageKey || '',
+        comprovantePagamentoPage: item.comprovantePagamentoPage ?? null,
+        comprovanteAdiantamentoStorageKey: item.comprovanteAdiantamentoStorageKey || '',
+        comprovanteAdiantamentoPage: item.comprovanteAdiantamentoPage ?? null
       }))));
 
       hitachiCompanyDocs.splice(0, hitachiCompanyDocs.length, ...((payload.hitachiCompanyDocs || []).map(item => ({
@@ -2768,6 +2773,75 @@
       return /\/FT\s*\/Sig|\/Type\s*\/Sig|Assinatura Digital/i.test(text);
     }
 
+    const HITACHI_DOC_DB = 'portal-mse-hitachi-docs';
+    const HITACHI_DOC_STORE = 'documents';
+
+    function openHitachiDocDatabase() {
+      return new Promise((resolve, reject) => {
+        if (!window.indexedDB) {
+          reject(new Error('Armazenamento local de documentos indisponivel neste navegador.'));
+          return;
+        }
+        const request = window.indexedDB.open(HITACHI_DOC_DB, 1);
+        request.onupgradeneeded = event => {
+          const db = event.target.result;
+          if (!db.objectStoreNames.contains(HITACHI_DOC_STORE)) {
+            db.createObjectStore(HITACHI_DOC_STORE, { keyPath: 'key' });
+          }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error || new Error('Nao foi possivel abrir o armazenamento local.'));
+      });
+    }
+
+    async function saveHitachiDocumentBlob(key, blob, meta = {}) {
+      const db = await openHitachiDocDatabase();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(HITACHI_DOC_STORE, 'readwrite');
+        tx.objectStore(HITACHI_DOC_STORE).put({
+          key,
+          blob,
+          fileName: meta.fileName || '',
+          pageNumber: meta.pageNumber ?? null,
+          savedAt: new Date().toISOString()
+        });
+        tx.oncomplete = () => resolve(key);
+        tx.onerror = () => reject(tx.error || new Error('Nao foi possivel salvar o documento localmente.'));
+      });
+    }
+
+    async function getHitachiDocumentBlob(key) {
+      const db = await openHitachiDocDatabase();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(HITACHI_DOC_STORE, 'readonly');
+        const request = tx.objectStore(HITACHI_DOC_STORE).get(key);
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error || new Error('Nao foi possivel abrir o documento local.'));
+      });
+    }
+
+    async function openStoredHitachiDocument(storageKey, pageNumber = null) {
+      if (!storageKey) {
+        alert('Nenhum documento foi salvo para este item.');
+        return;
+      }
+      try {
+        const stored = await getHitachiDocumentBlob(storageKey);
+        if (!stored || !stored.blob) {
+          alert('Este documento nao esta salvo neste navegador. Importe o arquivo novamente para abrir aqui.');
+          return;
+        }
+        const url = URL.createObjectURL(stored.blob);
+        const suffix = pageNumber ? `#page=${pageNumber}` : '';
+        window.open(`${url}${suffix}`, '_blank', 'noopener');
+        window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+      } catch (error) {
+        console.error(error);
+        alert('Nao foi possivel abrir o documento agora.');
+      }
+    }
+    window.openStoredHitachiDocument = openStoredHitachiDocument;
+
     function extractPagamentoName(text) {
       const normalized = stripAccents(text || '');
       const lineMatch = normalized.match(/Nome\:\s*([^\n\r]+)/i);
@@ -2849,6 +2923,16 @@
           return docsByName.get(key);
         };
 
+        const docStorageCache = new Map();
+        const ensureUploadedPdfStorage = async file => {
+          const cacheKey = `${monthKey}|${file.name}|${file.size}|${file.lastModified || 0}`;
+          if (docStorageCache.has(cacheKey)) return docStorageCache.get(cacheKey);
+          const storageKey = `hitachi|${monthKey}|arquivo|${normalizePersonName(file.name) || file.name}`;
+          await saveHitachiDocumentBlob(storageKey, file, { fileName: file.name });
+          docStorageCache.set(cacheKey, storageKey);
+          return storageKey;
+        };
+
         if (holeriteZip) {
           if (!window.JSZip) throw new Error('Leitor de ZIP indisponivel no navegador.');
           const zip = await JSZip.loadAsync(await holeriteZip.arrayBuffer());
@@ -2860,14 +2944,22 @@
             if (!key) continue;
             const buffer = await entry.async('uint8array');
             const signed = pdfHasDigitalSignature(buffer);
-            ensureDocEntry(key).holerite = {
+            const docs = ensureDocEntry(key);
+            docs.holerite = {
               status: signed ? 'OK' : 'PENDENTE',
               label: `${entry.name}${signed ? ' | assinado' : ' | sem assinatura digital'}`
             };
+            if (signed) {
+              const blob = new Blob([buffer], { type: 'application/pdf' });
+              const storageKey = `hitachi|${monthKey}|${key}|holerite`;
+              await saveHitachiDocumentBlob(storageKey, blob, { fileName: entry.name });
+              docs.holerite.storageKey = storageKey;
+            }
           }
         }
 
         for (const file of pagamentoFiles) {
+          const storageKey = await ensureUploadedPdfStorage(file);
           const pages = await readPdfPages(file);
           pages.forEach(page => {
             const collaboratorName = extractPagamentoName(page.text);
@@ -2875,12 +2967,15 @@
             if (!key) return;
             ensureDocEntry(key).comprovantePagamento = {
               status: 'OK',
-              label: `${file.name} | pagina ${page.pageNumber}`
+              label: `${file.name} | pagina ${page.pageNumber}`,
+              storageKey,
+              pageNumber: page.pageNumber
             };
           });
         }
 
         for (const file of adiantamentoFiles) {
+          const storageKey = await ensureUploadedPdfStorage(file);
           const pages = await readPdfPages(file);
           pages.forEach(page => {
             const collaboratorName = extractAdiantamentoName(page.text);
@@ -2888,7 +2983,9 @@
             if (!key) return;
             ensureDocEntry(key).comprovanteAdiantamento = {
               status: 'OK',
-              label: `${file.name} | pagina ${page.pageNumber}`
+              label: `${file.name} | pagina ${page.pageNumber}`,
+              storageKey,
+              pageNumber: page.pageNumber
             };
           });
         }
@@ -2903,7 +3000,12 @@
             comprovanteAdiantamento: docs.comprovanteAdiantamento ? docs.comprovanteAdiantamento.status : 'PENDENTE',
             holeriteArquivo: docs.holerite ? docs.holerite.label : '',
             comprovantePagamentoArquivo: docs.comprovantePagamento ? docs.comprovantePagamento.label : '',
-            comprovanteAdiantamentoArquivo: docs.comprovanteAdiantamento ? docs.comprovanteAdiantamento.label : ''
+            comprovanteAdiantamentoArquivo: docs.comprovanteAdiantamento ? docs.comprovanteAdiantamento.label : '',
+            holeriteStorageKey: docs.holerite && docs.holerite.status === 'OK' ? (docs.holerite.storageKey || '') : '',
+            comprovantePagamentoStorageKey: docs.comprovantePagamento ? (docs.comprovantePagamento.storageKey || '') : '',
+            comprovantePagamentoPage: docs.comprovantePagamento ? (docs.comprovantePagamento.pageNumber ?? null) : null,
+            comprovanteAdiantamentoStorageKey: docs.comprovanteAdiantamento ? (docs.comprovanteAdiantamento.storageKey || '') : '',
+            comprovanteAdiantamentoPage: docs.comprovanteAdiantamento ? (docs.comprovanteAdiantamento.pageNumber ?? null) : null
           };
         });
 
@@ -3001,7 +3103,12 @@
             kitRescisao: situacao === 'Ativo' ? (existing?.kitRescisao || previous?.kitRescisao || 'N/A') : (existing?.kitRescisao || previous?.kitRescisao || 'PENDENTE'),
             holeriteArquivo: existing?.holeriteArquivo || previous?.holeriteArquivo || '',
             comprovantePagamentoArquivo: existing?.comprovantePagamentoArquivo || previous?.comprovantePagamentoArquivo || '',
-            comprovanteAdiantamentoArquivo: existing?.comprovanteAdiantamentoArquivo || previous?.comprovanteAdiantamentoArquivo || ''
+            comprovanteAdiantamentoArquivo: existing?.comprovanteAdiantamentoArquivo || previous?.comprovanteAdiantamentoArquivo || '',
+            holeriteStorageKey: existing?.holeriteStorageKey || previous?.holeriteStorageKey || '',
+            comprovantePagamentoStorageKey: existing?.comprovantePagamentoStorageKey || previous?.comprovantePagamentoStorageKey || '',
+            comprovantePagamentoPage: existing?.comprovantePagamentoPage ?? previous?.comprovantePagamentoPage ?? null,
+            comprovanteAdiantamentoStorageKey: existing?.comprovanteAdiantamentoStorageKey || previous?.comprovanteAdiantamentoStorageKey || '',
+            comprovanteAdiantamentoPage: existing?.comprovanteAdiantamentoPage ?? previous?.comprovanteAdiantamentoPage ?? null
           });
         });
 
@@ -3021,7 +3128,12 @@
             kitRescisao: existing?.kitRescisao || previous.kitRescisao || 'N/A',
             holeriteArquivo: existing?.holeriteArquivo || previous?.holeriteArquivo || '',
             comprovantePagamentoArquivo: existing?.comprovantePagamentoArquivo || previous?.comprovantePagamentoArquivo || '',
-            comprovanteAdiantamentoArquivo: existing?.comprovanteAdiantamentoArquivo || previous?.comprovanteAdiantamentoArquivo || ''
+            comprovanteAdiantamentoArquivo: existing?.comprovanteAdiantamentoArquivo || previous?.comprovanteAdiantamentoArquivo || '',
+            holeriteStorageKey: existing?.holeriteStorageKey || previous?.holeriteStorageKey || '',
+            comprovantePagamentoStorageKey: existing?.comprovantePagamentoStorageKey || previous?.comprovantePagamentoStorageKey || '',
+            comprovantePagamentoPage: existing?.comprovantePagamentoPage ?? previous?.comprovantePagamentoPage ?? null,
+            comprovanteAdiantamentoStorageKey: existing?.comprovanteAdiantamentoStorageKey || previous?.comprovanteAdiantamentoStorageKey || '',
+            comprovanteAdiantamentoPage: existing?.comprovanteAdiantamentoPage ?? previous?.comprovanteAdiantamentoPage ?? null
           });
         });
 
@@ -3069,7 +3181,12 @@
           kitRescisao: existing?.kitRescisao || 'N/A',
           holeriteArquivo: existing?.holeriteArquivo || '',
           comprovantePagamentoArquivo: existing?.comprovantePagamentoArquivo || '',
-          comprovanteAdiantamentoArquivo: existing?.comprovanteAdiantamentoArquivo || ''
+          comprovanteAdiantamentoArquivo: existing?.comprovanteAdiantamentoArquivo || '',
+          holeriteStorageKey: existing?.holeriteStorageKey || '',
+          comprovantePagamentoStorageKey: existing?.comprovantePagamentoStorageKey || '',
+          comprovantePagamentoPage: existing?.comprovantePagamentoPage ?? null,
+          comprovanteAdiantamentoStorageKey: existing?.comprovanteAdiantamentoStorageKey || '',
+          comprovanteAdiantamentoPage: existing?.comprovanteAdiantamentoPage ?? null
         };
       });
 
@@ -3690,6 +3807,17 @@
     }
     window.editHitachiCompanyDoc = editHitachiCompanyDoc;
 
+    function renderHitachiDocumentLine(label, fileLabel, storageKey, pageNumber = null, options = {}) {
+      if (!fileLabel) return '';
+      const requireOk = !!options.requireOk;
+      const status = options.status || '';
+      const canOpen = !!storageKey && (!requireOk || status === 'OK');
+      const openButton = canOpen
+        ? `<button class="inline-btn" type="button" onclick='openStoredHitachiDocument(${JSON.stringify(storageKey)}, ${pageNumber == null ? 'null' : Number(pageNumber)})'>Abrir documento</button>`
+        : '';
+      return `<small>${label}: ${fileLabel}${openButton ? ` <span class="doc-open">${openButton}</span>` : ''}</small>`;
+    }
+
     async function updateHitachiInline(id, field, value) {
       const item = hitachiCollaborators.find(entry => entry.id === id);
       if (!item) return;
@@ -3795,9 +3923,9 @@
           <td>
             <span class="company">${row.colaborador}</span>
             <div class="docmeta">
-              ${row.holeriteArquivo ? `<small>Holerite: ${row.holeriteArquivo}</small>` : ''}
-              ${row.comprovantePagamentoArquivo ? `<small>Comprovante pgto: ${row.comprovantePagamentoArquivo}</small>` : ''}
-              ${row.comprovanteAdiantamentoArquivo ? `<small>Comprovante adiant.: ${row.comprovanteAdiantamentoArquivo}</small>` : ''}
+              ${renderHitachiDocumentLine('Holerite', row.holeriteArquivo, row.holeriteStorageKey, null, { requireOk: true, status: row.holerite })}
+              ${renderHitachiDocumentLine('Comprovante pgto', row.comprovantePagamentoArquivo, row.comprovantePagamentoStorageKey, row.comprovantePagamentoPage)}
+              ${renderHitachiDocumentLine('Comprovante adiant.', row.comprovanteAdiantamentoArquivo, row.comprovanteAdiantamentoStorageKey, row.comprovanteAdiantamentoPage)}
             </div>
           </td>
           <td>${row.empresa}</td>
@@ -5368,7 +5496,9 @@
     document.getElementById('hitachiForm').addEventListener('submit', async event => {
       event.preventDefault();
       const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
+      const existing = hitachiCollaborators.find(item => item.id === editingHitachiId);
       const payload = {
+        ...(existing || {}),
         id: editingHitachiId || createId(),
         monthKey: formData.monthKey || currentHitachiMonth(),
         empresa: formData.empresa,
@@ -5407,8 +5537,18 @@
         holerite: formData.holerite,
         comprovantePagamento: formData.comprovantePagamento,
         comprovanteAdiantamento: formData.comprovanteAdiantamento,
-        kitRescisao: formData.kitRescisao
+        kitRescisao: formData.kitRescisao,
+        ...(hitachiCollaborators.find(item => item.id === overviewEditingHitachiId) || {})
       };
+      payload.id = overviewEditingHitachiId;
+      payload.monthKey = formData.monthKey || currentHitachiMonth();
+      payload.empresa = formData.empresa;
+      payload.colaborador = formData.colaborador;
+      payload.situacao = formData.situacao;
+      payload.holerite = formData.holerite;
+      payload.comprovantePagamento = formData.comprovantePagamento;
+      payload.comprovanteAdiantamento = formData.comprovanteAdiantamento;
+      payload.kitRescisao = formData.kitRescisao;
       await saveHitachiCollaborator(payload);
       overviewEditingHitachiId = null;
       closeModalById('hitachiEditModal');
