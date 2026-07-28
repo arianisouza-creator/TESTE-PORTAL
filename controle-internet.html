@@ -4878,6 +4878,22 @@ AMAURI BARROSO DE MOURA"></textarea>
     }
     window.togglePassagemExpanded = togglePassagemExpanded;
 
+    function expandedEntityKey(type, id) {
+      return `${type}:${id}`;
+    }
+
+    function toggleExpandedEntity(type, id) {
+      const key = expandedEntityKey(type, id);
+      if (expandedPassagemKeys.has(key)) expandedPassagemKeys.delete(key);
+      else expandedPassagemKeys.add(key);
+      renderPassagens();
+    }
+    window.toggleExpandedEntity = toggleExpandedEntity;
+
+    function isExpandedEntity(type, id) {
+      return expandedPassagemKeys.has(expandedEntityKey(type, id));
+    }
+
     function valueText(value, formatter = value => value) {
       if (value == null || value === '') return '-';
       return formatter(value);
@@ -4920,6 +4936,48 @@ AMAURI BARROSO DE MOURA"></textarea>
             <div class="ditem"><span>Valor aprovado</span><b>${row.valorAprovado == null ? '-' : brl(row.valorAprovado)}</b></div>
             <div class="ditem"><span>Hotel</span><b>${parseBool(complementForKey(row.key).hotelSolicitado) ? 'Sim' : 'Nao'}</b></div>
             <div class="ditem"><span>Carro</span><b>${parseBool(complementForKey(row.key).carroSolicitado) ? 'Sim' : 'Nao'}</b></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function detailHospedagemGrid(item) {
+      return `
+        <div class="detail-box">
+          <div class="detail-grid-passagem">
+            <div class="ditem"><span>Hotel</span><b>${valueText(item.hotel)}</b></div>
+            <div class="ditem"><span>Cidade</span><b>${valueText(item.cidade)}</b></div>
+            <div class="ditem"><span>Check in</span><b>${formatDate(item.checkIn)}</b></div>
+            <div class="ditem"><span>Check out</span><b>${formatDate(item.checkOut)}</b></div>
+            <div class="ditem"><span>Cartao / faturado</span><b>${valueText(item.cartaoOuFaturado)}</b></div>
+            <div class="ditem"><span>Diarias</span><b>${valueText(item.numeroDiarias)}</b></div>
+            <div class="ditem"><span>Valor da diaria</span><b>${valueText(item.valorDiaria)}</b></div>
+            <div class="ditem"><span>Total diarias</span><b>${valueText(item.valorTotalDiarias)}</b></div>
+            <div class="ditem"><span>Valor total</span><b>${valueText(item.valorTotal)}</b></div>
+            <div class="ditem"><span>Itinerario</span><b>${valueText(item.itinerario)}</b></div>
+            <div class="ditem"><span>Motivo</span><b>${valueText(item.motivo)}</b></div>
+            <div class="ditem"><span>Pedido</span><b>${valueText(item.numeroPedido)}</b></div>
+            <div class="ditem"><span>Pagamento</span><b>${item.pago ? 'Pago' : 'Pendente'}</b></div>
+            <div class="ditem" style="grid-column:1 / -1"><span>Observacao</span><b>${valueText(item.observacao)}</b></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function detailCarroGrid(item) {
+      return `
+        <div class="detail-box">
+          <div class="detail-grid-passagem">
+            <div class="ditem"><span>Cidade</span><b>${valueText(item.cidade)}</b></div>
+            <div class="ditem"><span>Retirada</span><b>${formatDate(item.retirada)}</b></div>
+            <div class="ditem"><span>Devolucao</span><b>${formatDate(item.devolucao)}</b></div>
+            <div class="ditem"><span>Numero de diarias</span><b>${valueText(item.numeroDiarias)}</b></div>
+            <div class="ditem"><span>Valor total</span><b>${valueText(item.valorTotal)}</b></div>
+            <div class="ditem"><span>Numero da reserva</span><b>${valueText(item.numeroReserva)}</b></div>
+            <div class="ditem"><span>Motivo</span><b>${valueText(item.motivo)}</b></div>
+            <div class="ditem"><span>Pedido</span><b>${valueText(item.numeroPedido)}</b></div>
+            <div class="ditem"><span>Pagamento</span><b>${item.pago ? 'Pago' : 'Pendente'}</b></div>
+            <div class="ditem" style="grid-column:1 / -1"><span>Observacao</span><b>${valueText(item.observacao)}</b></div>
           </div>
         </div>
       `;
@@ -5194,12 +5252,22 @@ AMAURI BARROSO DE MOURA"></textarea>
     }
     window.printCarroPdf = printCarroPdf;
 
+    function requestProtectedEdit(subjectLabel) {
+      const password = window.prompt(`Digite a senha para editar ${subjectLabel}:`);
+      if (password == null) return false;
+      if (password !== PROTECTED_PASS) {
+        window.alert('Senha invalida.');
+        return false;
+      }
+      return true;
+    }
+
     function editHospedagem(id) {
       const item = passagensHospedagens.find(entry => String(entry.id) === String(id));
       if (!item) return;
+      if (!requestProtectedEdit('esta hospedagem')) return;
       editingHospedagemId = item.id;
       const form = document.getElementById('passagensHospedagemForm');
-      Object.assign(form.elements, form.elements);
       form.elements.cartaoOuFaturado.value = item.cartaoOuFaturado || '';
       form.elements.obra.value = item.obra || '';
       form.elements.nome.value = item.nome || '';
@@ -5224,6 +5292,7 @@ AMAURI BARROSO DE MOURA"></textarea>
     function editCarro(id) {
       const item = passagensCarros.find(entry => String(entry.id) === String(id));
       if (!item) return;
+      if (!requestProtectedEdit('este carro')) return;
       editingCarroId = item.id;
       const form = document.getElementById('passagensCarroForm');
       form.elements.obra.value = item.obra || '';
@@ -5413,13 +5482,14 @@ AMAURI BARROSO DE MOURA"></textarea>
       }
       if (targetId === 'pHospRows') {
         body.innerHTML = rows.map(item => `
-          <tr class="${item.pago ? 'paid-row' : ''}">
+          <tr class="compact-row row-main-click ${item.pago ? 'paid-row' : ''}" onclick="toggleExpandedEntity('hosp','${item.id}')">
             <td class="actioncell">
               <div class="actionstack">
-                <button class="rowflag ${item.pago ? 'active green' : ''}" type="button" title="Marcar como pago" aria-label="Marcar como pago" onclick="toggleHospedagemPaid('${item.id}')">${icon('checkSquare')}</button>
-                <button class="rowflag" type="button" title="Gerar PDF" aria-label="Gerar PDF" onclick="printHospedagemPdf('${item.id}')">${icon('printer')}</button>
-                <button class="rowact" title="Editar hospedagem" aria-label="Editar hospedagem" onclick="editHospedagem('${item.id}')">${icon('edit')}</button>
-                <button class="rowact" title="Excluir hospedagem" aria-label="Excluir hospedagem" onclick="deleteHospedagem('${item.id}')">${icon('trash')}</button>
+                <button class="rowflag ${item.pago ? 'active green' : ''}" type="button" title="Marcar como pago" aria-label="Marcar como pago" onclick="event.stopPropagation();toggleHospedagemPaid('${item.id}')">${icon('checkSquare')}</button>
+                <button class="rowflag" type="button" title="Gerar PDF" aria-label="Gerar PDF" onclick="event.stopPropagation();printHospedagemPdf('${item.id}')">${icon('printer')}</button>
+                <button class="rowflag" type="button" title="Abrir ou fechar detalhes" aria-label="Abrir ou fechar detalhes" onclick="event.stopPropagation();toggleExpandedEntity('hosp','${item.id}')">${icon(isExpandedEntity('hosp', item.id) ? 'chevronDown' : 'chevronRight')}</button>
+                <button class="rowact" title="Editar hospedagem" aria-label="Editar hospedagem" onclick="event.stopPropagation();editHospedagem('${item.id}')">${icon('edit')}</button>
+                <button class="rowact" title="Excluir hospedagem" aria-label="Excluir hospedagem" onclick="event.stopPropagation();deleteHospedagem('${item.id}')">${icon('trash')}</button>
               </div>
             </td>
             <td><span class="company">${item.nome || '-'}</span></td>
@@ -5438,18 +5508,20 @@ AMAURI BARROSO DE MOURA"></textarea>
             <td>${item.numeroPedido || '-'}</td>
             <td>${item.observacao || '-'}</td>
           </tr>
+          ${isExpandedEntity('hosp', item.id) ? `<tr class="detail-row"><td colspan="${columns}">${detailHospedagemGrid(item)}</td></tr>` : ''}
         `).join('');
         return;
       }
       if (targetId === 'pCarRows') {
         body.innerHTML = rows.map(item => `
-          <tr class="${item.pago ? 'paid-row' : ''}">
+          <tr class="compact-row row-main-click ${item.pago ? 'paid-row' : ''}" onclick="toggleExpandedEntity('car','${item.id}')">
             <td class="actioncell">
               <div class="actionstack">
-                <button class="rowflag ${item.pago ? 'active green' : ''}" type="button" title="Marcar como pago" aria-label="Marcar como pago" onclick="toggleCarroPaid('${item.id}')">${icon('checkSquare')}</button>
-                <button class="rowflag" type="button" title="Gerar PDF" aria-label="Gerar PDF" onclick="printCarroPdf('${item.id}')">${icon('printer')}</button>
-                <button class="rowact" title="Editar carro" aria-label="Editar carro" onclick="editCarro('${item.id}')">${icon('edit')}</button>
-                <button class="rowact" title="Excluir carro" aria-label="Excluir carro" onclick="deleteCarro('${item.id}')">${icon('trash')}</button>
+                <button class="rowflag ${item.pago ? 'active green' : ''}" type="button" title="Marcar como pago" aria-label="Marcar como pago" onclick="event.stopPropagation();toggleCarroPaid('${item.id}')">${icon('checkSquare')}</button>
+                <button class="rowflag" type="button" title="Gerar PDF" aria-label="Gerar PDF" onclick="event.stopPropagation();printCarroPdf('${item.id}')">${icon('printer')}</button>
+                <button class="rowflag" type="button" title="Abrir ou fechar detalhes" aria-label="Abrir ou fechar detalhes" onclick="event.stopPropagation();toggleExpandedEntity('car','${item.id}')">${icon(isExpandedEntity('car', item.id) ? 'chevronDown' : 'chevronRight')}</button>
+                <button class="rowact" title="Editar carro" aria-label="Editar carro" onclick="event.stopPropagation();editCarro('${item.id}')">${icon('edit')}</button>
+                <button class="rowact" title="Excluir carro" aria-label="Excluir carro" onclick="event.stopPropagation();deleteCarro('${item.id}')">${icon('trash')}</button>
               </div>
             </td>
             <td><span class="company">${item.motorista || '-'}</span></td>
@@ -5464,7 +5536,9 @@ AMAURI BARROSO DE MOURA"></textarea>
             <td>${item.numeroPedido || '-'}</td>
             <td>${item.observacao || '-'}</td>
           </tr>
+          ${isExpandedEntity('car', item.id) ? `<tr class="detail-row"><td colspan="${columns}">${detailCarroGrid(item)}</td></tr>` : ''}
         `).join('');
+        return;
       }
     }
 
@@ -5683,6 +5757,7 @@ AMAURI BARROSO DE MOURA"></textarea>
     function editPassagem(key) {
       const item = currentPassagensData().find(row => row.key === key) || passagensRows.map(buildPassagemRow).find(row => row.key === key);
       if (!item) return;
+      if (!requestProtectedEdit('esta passagem')) return;
       editingPassagemKey = key;
       const form = document.getElementById('passagensEditForm');
       form.elements.dataCompra.value = item.dataCompra || '';
