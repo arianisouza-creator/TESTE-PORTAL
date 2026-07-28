@@ -102,11 +102,13 @@
     .collapsed-panel .collapse-body{display:none}
     .bulkbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px}
     .bulk-meta{font:600 10px "IBM Plex Mono",monospace;text-transform:uppercase;color:var(--mut);letter-spacing:1px}
-    .actionstack{display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-wrap:wrap}
-    .rowflag{width:34px;height:34px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--body);display:grid;place-items:center}
-    .rowflag:hover{background:#f1f3f5}
+    .actionstack{display:flex;justify-content:flex-end;align-items:center;gap:6px;flex-wrap:nowrap}
+    .rowflag{width:36px;height:36px;border:1px solid #dbe3f0;border-radius:10px;background:#fff;color:#5a6780;display:grid;place-items:center;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+    .rowflag:hover{background:#f6f9ff;border-color:#cfe0ff;color:#1d4ed8}
     .rowflag.active{border-color:#cfe0ff;background:#eef4ff;color:#1d4ed8}
     .rowflag.active.green{border-color:rgba(31,157,87,.2);background:rgba(31,157,87,.1);color:#197a45}
+    .rowflag.hotel{color:#2563eb}
+    .rowflag.car{color:#1f6feb}
     .rowcheck{width:16px;height:16px}
     .rowcheck-wrap{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid var(--line);border-radius:9px;background:#fff}
     .rowcheck-wrap.active{border-color:#cfe0ff;background:#eef4ff}
@@ -167,6 +169,22 @@
     th{background:#f8fafc;border-bottom:1px solid var(--line);font:600 10px "IBM Plex Mono",monospace;color:var(--mut);text-transform:uppercase;text-align:left;padding:12px}
     td{padding:12px;border-bottom:1px solid var(--line-2);color:var(--body)}
     tbody tr:hover{background:#fbfcff}
+    tr.compact-row td{padding-top:10px;padding-bottom:10px}
+    tr.detail-row td{padding:0;border-bottom:1px solid var(--line-2);background:#fbfcff}
+    .detail-box{padding:14px 16px;display:grid;gap:12px}
+    .detail-grid-passagem{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+    .detail-grid-passagem .ditem{border:1px solid #e7edf7;border-radius:12px;background:#fff;padding:10px 12px}
+    .detail-grid-passagem .ditem span{display:block;font:600 10px "IBM Plex Mono",monospace;text-transform:uppercase;color:var(--mut);margin-bottom:5px}
+    .detail-grid-passagem .ditem b{display:block;color:var(--ink);font-size:13px;line-height:1.35}
+    .table-filter-row th{padding:10px 12px;background:#fff;border-bottom:1px solid var(--line)}
+    .th-filter{width:100%;height:34px;border:1px solid #dde4f0;border-radius:10px;padding:0 10px;background:#f9fbff;color:var(--ink);font:500 12px "IBM Plex Sans",system-ui,sans-serif}
+    .table-header-main th{position:sticky;top:0;z-index:1}
+    .row-main-click{cursor:pointer}
+    .collapse-inline{display:flex;align-items:center;gap:8px}
+    .cell-chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 10px;font:600 10px "IBM Plex Mono",monospace;text-transform:uppercase;background:#eef4ff;color:#1d4ed8}
+    .cell-chip.ok{background:rgba(31,157,87,.1);color:#197a45}
+    .cell-chip.warn{background:rgba(217,145,26,.12);color:#b8780f}
+    .cell-chip.neutral{background:#eef0f3;color:#667085}
     .company,.money,b.link{color:var(--ink);font-weight:700}
     .docmeta{display:grid;gap:8px;margin-top:8px}
     .docline{display:grid;gap:6px}
@@ -241,9 +259,9 @@
     .side-closed .side{width:0;padding:0;opacity:0;border-width:0;overflow:hidden;margin-top:20px}
     .side-closed .main{padding-left:0}
     svg{width:18px;height:18px;stroke-width:1.8}
-    @media (max-width:1280px){.kpis{grid-template-columns:repeat(3,1fr)}.dashgrid{grid-template-columns:1fr 1fr}.detail-grid,.cred-grid{grid-template-columns:1fr}}
+    @media (max-width:1280px){.kpis{grid-template-columns:repeat(3,1fr)}.dashgrid{grid-template-columns:1fr 1fr}.detail-grid,.cred-grid{grid-template-columns:1fr}.detail-grid-passagem{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media (max-width:980px){.shell{padding:0 20px}.side{display:none}.main{padding-left:0}.monthbar,.toolbar{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.detail-grid{grid-template-columns:1fr}.hinner{padding:14px}.clock,.tecto,.user{display:none}.uinner{padding:0 20px}.trow{padding:0 20px}}
-    @media (max-width:640px){.trow{height:auto;display:grid;grid-template-columns:1fr;gap:8px;padding:12px 20px}.tscroll{display:grid;mask-image:none;-webkit-mask-image:none}.ti{padding:8px 0;border-left:0;border-top:1px solid var(--line-2)}.greet{padding-right:0}.kpis{grid-template-columns:1fr}.dashgrid{grid-template-columns:1fr}.formgrid,.import-grid{grid-template-columns:1fr}.donut-wrap,.cred-grid{grid-template-columns:1fr}.uinner{overflow:auto}}
+    @media (max-width:640px){.trow{height:auto;display:grid;grid-template-columns:1fr;gap:8px;padding:12px 20px}.tscroll{display:grid;mask-image:none;-webkit-mask-image:none}.ti{padding:8px 0;border-left:0;border-top:1px solid var(--line-2)}.greet{padding-right:0}.kpis{grid-template-columns:1fr}.dashgrid{grid-template-columns:1fr}.formgrid,.import-grid{grid-template-columns:1fr}.donut-wrap,.cred-grid{grid-template-columns:1fr}.uinner{overflow:auto}.detail-grid-passagem{grid-template-columns:1fr}}
     .pending-mail-list{display:grid;gap:12px;max-height:340px;overflow:auto;padding-right:4px}
     .pending-mail-item{border:1px solid var(--line);border-radius:12px;background:#fbfcff;padding:12px}
     .pending-mail-item b{display:block;color:#17356c;margin-bottom:6px}
@@ -840,13 +858,29 @@
             <button class="primary" type="button" id="pAirFinalize"><span data-icon="badgeCheck"></span>Fechamento de passagens</button>
           </div>
           <section class="dashgrid" style="grid-template-columns:.9fr 1.1fr;margin-bottom:14px">
-            <article class="card pad">
-              <div class="chead"><span class="ti2">Resumo do periodo</span><span class="eyebrow" id="pAirRangeLabel">Data da compra</span></div>
-              <div class="list" id="pAirSummary"></div>
+            <article class="card pad" id="pAirSummaryCard">
+              <div class="chead">
+                <span class="ti2">Resumo do periodo</span>
+                <div class="collapse-inline">
+                  <span class="eyebrow" id="pAirRangeLabel">Data da compra</span>
+                  <button class="collapse-btn" type="button" id="togglePAirSummary"><span data-icon="chevronDown"></span></button>
+                </div>
+              </div>
+              <div class="collapse-body">
+                <div class="list" id="pAirSummary"></div>
+              </div>
             </article>
-            <article class="card pad">
-              <div class="chead"><span class="ti2">Valor gasto por obra</span><span class="eyebrow">Periodo filtrado</span></div>
-              <div class="bars" id="pAirBars"></div>
+            <article class="card pad" id="pAirBarsCard">
+              <div class="chead">
+                <span class="ti2">Valor gasto por obra</span>
+                <div class="collapse-inline">
+                  <span class="eyebrow">Periodo filtrado</span>
+                  <button class="collapse-btn" type="button" id="togglePAirBars"><span data-icon="chevronDown"></span></button>
+                </div>
+              </div>
+              <div class="collapse-body">
+                <div class="bars" id="pAirBars"></div>
+              </div>
             </article>
           </section>
           <section class="card table-card">
@@ -856,7 +890,7 @@
             <div style="overflow:auto">
               <table>
                 <thead>
-                  <tr>
+                  <tr class="table-header-main">
                     <th>Acoes</th>
                     <th>Colaborador</th>
                     <th>Funcao</th>
@@ -866,14 +900,19 @@
                     <th>Localizador</th>
                     <th>Valor pago</th>
                     <th>Valor aprovado</th>
-                    <th>Data ida</th>
-                    <th>Data volta</th>
-                    <th>Horario ida</th>
-                    <th>Horario volta</th>
-                    <th>Companhia</th>
-                    <th>Origem</th>
-                    <th>Destino</th>
                     <th>Pedido</th>
+                  </tr>
+                  <tr class="table-filter-row">
+                    <th></th>
+                    <th><input class="th-filter" id="pAirFilterColab" placeholder="Filtrar colaborador"></th>
+                    <th><input class="th-filter" id="pAirFilterFuncao" placeholder="Filtrar funcao"></th>
+                    <th><input class="th-filter" id="pAirFilterTipo" placeholder="Filtrar tipo"></th>
+                    <th><input class="th-filter" id="pAirFilterObra" placeholder="Filtrar obra"></th>
+                    <th></th>
+                    <th><input class="th-filter" id="pAirFilterLocalizador" placeholder="Filtrar localizador"></th>
+                    <th></th>
+                    <th></th>
+                    <th><input class="th-filter" id="pAirFilterPedido" placeholder="Filtrar pedido"></th>
                   </tr>
                 </thead>
                 <tbody id="pAirRows"></tbody>
@@ -906,13 +945,29 @@
             <button class="primary" type="button" id="pRoadFinalize"><span data-icon="badgeCheck"></span>Fechamento de passagens</button>
           </div>
           <section class="dashgrid" style="grid-template-columns:.9fr 1.1fr;margin-bottom:14px">
-            <article class="card pad">
-              <div class="chead"><span class="ti2">Resumo do periodo</span><span class="eyebrow" id="pRoadRangeLabel">Data da compra</span></div>
-              <div class="list" id="pRoadSummary"></div>
+            <article class="card pad" id="pRoadSummaryCard">
+              <div class="chead">
+                <span class="ti2">Resumo do periodo</span>
+                <div class="collapse-inline">
+                  <span class="eyebrow" id="pRoadRangeLabel">Data da compra</span>
+                  <button class="collapse-btn" type="button" id="togglePRoadSummary"><span data-icon="chevronDown"></span></button>
+                </div>
+              </div>
+              <div class="collapse-body">
+                <div class="list" id="pRoadSummary"></div>
+              </div>
             </article>
-            <article class="card pad">
-              <div class="chead"><span class="ti2">Valor gasto por obra</span><span class="eyebrow">Periodo filtrado</span></div>
-              <div class="bars" id="pRoadBars"></div>
+            <article class="card pad" id="pRoadBarsCard">
+              <div class="chead">
+                <span class="ti2">Valor gasto por obra</span>
+                <div class="collapse-inline">
+                  <span class="eyebrow">Periodo filtrado</span>
+                  <button class="collapse-btn" type="button" id="togglePRoadBars"><span data-icon="chevronDown"></span></button>
+                </div>
+              </div>
+              <div class="collapse-body">
+                <div class="bars" id="pRoadBars"></div>
+              </div>
             </article>
           </section>
           <section class="card table-card">
@@ -922,7 +977,7 @@
             <div style="overflow:auto">
               <table>
                 <thead>
-                  <tr>
+                  <tr class="table-header-main">
                     <th>Acoes</th>
                     <th>Colaborador</th>
                     <th>Funcao</th>
@@ -932,14 +987,19 @@
                     <th>Localizador</th>
                     <th>Valor pago</th>
                     <th>Valor aprovado</th>
-                    <th>Data ida</th>
-                    <th>Data volta</th>
-                    <th>Horario ida</th>
-                    <th>Horario volta</th>
-                    <th>Origem</th>
-                    <th>Destino</th>
-                    <th>Companhia</th>
                     <th>Pedido</th>
+                  </tr>
+                  <tr class="table-filter-row">
+                    <th></th>
+                    <th><input class="th-filter" id="pRoadFilterColab" placeholder="Filtrar colaborador"></th>
+                    <th><input class="th-filter" id="pRoadFilterFuncao" placeholder="Filtrar funcao"></th>
+                    <th><input class="th-filter" id="pRoadFilterTipo" placeholder="Filtrar tipo"></th>
+                    <th><input class="th-filter" id="pRoadFilterObra" placeholder="Filtrar obra"></th>
+                    <th></th>
+                    <th><input class="th-filter" id="pRoadFilterLocalizador" placeholder="Filtrar localizador"></th>
+                    <th></th>
+                    <th></th>
+                    <th><input class="th-filter" id="pRoadFilterPedido" placeholder="Filtrar pedido"></th>
                   </tr>
                 </thead>
                 <tbody id="pRoadRows"></tbody>
@@ -2018,6 +2078,35 @@ AMAURI BARROSO DE MOURA"></textarea>
     let editingCarroId = null;
     const passagensSelectedKeys = new Set();
     const passagensOverviewCollapsed = { bars: false, modes: false, savings: false };
+    const passagensSectionCollapsed = {
+      airSummary: false,
+      airBars: false,
+      roadSummary: false,
+      roadBars: false
+    };
+    const expandedPassagemKeys = new Set();
+    const pAirHeaderFilters = {
+      colaborador: document.getElementById('pAirFilterColab'),
+      funcao: document.getElementById('pAirFilterFuncao'),
+      tipo: document.getElementById('pAirFilterTipo'),
+      obra: document.getElementById('pAirFilterObra'),
+      localizador: document.getElementById('pAirFilterLocalizador'),
+      companhia: document.getElementById('pAirFilterCompanhia'),
+      origem: document.getElementById('pAirFilterOrigem'),
+      destino: document.getElementById('pAirFilterDestino'),
+      pedido: document.getElementById('pAirFilterPedido')
+    };
+    const pRoadHeaderFilters = {
+      colaborador: document.getElementById('pRoadFilterColab'),
+      funcao: document.getElementById('pRoadFilterFuncao'),
+      tipo: document.getElementById('pRoadFilterTipo'),
+      obra: document.getElementById('pRoadFilterObra'),
+      localizador: document.getElementById('pRoadFilterLocalizador'),
+      origem: document.getElementById('pRoadFilterOrigem'),
+      destino: document.getElementById('pRoadFilterDestino'),
+      companhia: document.getElementById('pRoadFilterCompanhia'),
+      pedido: document.getElementById('pRoadFilterPedido')
+    };
 
     function defaultMonth() {
       const now = new Date();
@@ -4734,6 +4823,63 @@ AMAURI BARROSO DE MOURA"></textarea>
       renderPassagens();
     }
 
+    function togglePassagensSection(panelKey) {
+      passagensSectionCollapsed[panelKey] = !passagensSectionCollapsed[panelKey];
+      renderPassagens();
+    }
+
+    function togglePassagemExpanded(key) {
+      if (expandedPassagemKeys.has(key)) expandedPassagemKeys.delete(key);
+      else expandedPassagemKeys.add(key);
+      renderPassagens();
+    }
+    window.togglePassagemExpanded = togglePassagemExpanded;
+
+    function valueText(value, formatter = value => value) {
+      if (value == null || value === '') return '-';
+      return formatter(value);
+    }
+
+    function filterPassagensByHeader(rows, filterMap) {
+      const activeEntries = Object.entries(filterMap).map(([key, input]) => [key, norm(input.value)]).filter(([, value]) => value);
+      if (!activeEntries.length) return rows;
+      return rows.filter(row => activeEntries.every(([key, value]) => {
+        const source = {
+          colaborador: row.nome_colab || row.nome || '',
+          funcao: row.nome_funcao || '',
+          tipo: row.tipo || '',
+          obra: row.nome_obra || '',
+          localizador: row.localizador || '',
+          companhia: row.companhia || '',
+          origem: row.origem || '',
+          destino: row.destino || '',
+          pedido: row.pedido || ''
+        }[key] || '';
+        return norm(source).includes(value);
+      }));
+    }
+
+    function detailPassagemGrid(row) {
+      return `
+        <div class="detail-box">
+          <div class="detail-grid-passagem">
+            <div class="ditem"><span>Data de ida</span><b>${formatDate(row.dataIda)}</b></div>
+            <div class="ditem"><span>Data de volta</span><b>${formatDate(row.dataVolta)}</b></div>
+            <div class="ditem"><span>Horario de ida</span><b>${valueText(row.horarioIda)}</b></div>
+            <div class="ditem"><span>Horario de volta</span><b>${valueText(row.horarioVolta)}</b></div>
+            <div class="ditem"><span>Companhia</span><b>${valueText(row.companhia)}</b></div>
+            <div class="ditem"><span>Origem</span><b>${valueText(row.origem)}</b></div>
+            <div class="ditem"><span>Destino</span><b>${valueText(row.destino)}</b></div>
+            <div class="ditem"><span>Pedido</span><b>${valueText(row.pedido)}</b></div>
+            <div class="ditem"><span>Valor pago</span><b>${row.valorPago == null ? '-' : brl(row.valorPago)}</b></div>
+            <div class="ditem"><span>Valor aprovado</span><b>${row.valorAprovado == null ? '-' : brl(row.valorAprovado)}</b></div>
+            <div class="ditem"><span>Hotel</span><b>${parseBool(complementForKey(row.key).hotelSolicitado) ? 'Sim' : 'Nao'}</b></div>
+            <div class="ditem"><span>Carro</span><b>${parseBool(complementForKey(row.key).carroSolicitado) ? 'Sim' : 'Nao'}</b></div>
+          </div>
+        </div>
+      `;
+    }
+
     function filterPassagensByRange(rows, start, end) {
       const startValue = normalizeDateValue(start);
       const endValue = normalizeDateValue(end);
@@ -5170,11 +5316,12 @@ AMAURI BARROSO DE MOURA"></textarea>
     function buildPassagemActions(row, includeSelection = true) {
       const complement = complementForKey(row.key);
       return `<div class="actionstack">
-        ${includeSelection ? `<button class="rowflag ${passagensSelectedKeys.has(row.key) ? 'active green' : ''}" type="button" title="Selecionar para fechamento" aria-label="Selecionar para fechamento" onclick="togglePassagemSelection('${row.key}')">${icon('checkSquare')}</button>` : ''}
-        <button class="rowflag ${parseBool(complement.hotelSolicitado) ? 'active' : ''}" type="button" title="Enviar para hospedagem" aria-label="Enviar para hospedagem" onclick="togglePassagemFeature('${row.key}','hotel')">${icon('bed')}</button>
-        <button class="rowflag ${parseBool(complement.carroSolicitado) ? 'active' : ''}" type="button" title="Enviar para carros" aria-label="Enviar para carros" onclick="togglePassagemFeature('${row.key}','carro')">${icon('car')}</button>
-        <button class="rowact" title="Complementar passagem" aria-label="Complementar passagem" onclick="editPassagem('${row.key}')">${icon('edit')}</button>
-        <button class="rowact" title="Excluir passagem" aria-label="Excluir passagem" onclick="requestDeletePassagem('${row.key}')">${icon('trash')}</button>
+        ${includeSelection ? `<button class="rowflag ${passagensSelectedKeys.has(row.key) ? 'active green' : ''}" type="button" title="Selecionar para fechamento" aria-label="Selecionar para fechamento" onclick="event.stopPropagation();togglePassagemSelection('${row.key}')">${icon('checkSquare')}</button>` : ''}
+        <button class="rowflag hotel ${parseBool(complement.hotelSolicitado) ? 'active' : ''}" type="button" title="Enviar para hospedagem" aria-label="Enviar para hospedagem" onclick="event.stopPropagation();togglePassagemFeature('${row.key}','hotel')">${icon('bed')}</button>
+        <button class="rowflag car ${parseBool(complement.carroSolicitado) ? 'active' : ''}" type="button" title="Enviar para carros" aria-label="Enviar para carros" onclick="event.stopPropagation();togglePassagemFeature('${row.key}','carro')">${icon('car')}</button>
+        <button class="rowflag" type="button" title="Abrir ou fechar detalhes" aria-label="Abrir ou fechar detalhes" onclick="event.stopPropagation();togglePassagemExpanded('${row.key}')">${icon(expandedPassagemKeys.has(row.key) ? 'chevronDown' : 'chevronRight')}</button>
+        <button class="rowact" title="Complementar passagem" aria-label="Complementar passagem" onclick="event.stopPropagation();editPassagem('${row.key}')">${icon('edit')}</button>
+        <button class="rowact" title="Excluir passagem" aria-label="Excluir passagem" onclick="event.stopPropagation();requestDeletePassagem('${row.key}')">${icon('trash')}</button>
       </div>`;
     }
 
@@ -5186,7 +5333,7 @@ AMAURI BARROSO DE MOURA"></textarea>
       }
       if (targetId === 'pRows') {
         body.innerHTML = rows.map(row => `
-          <tr class="${row.pagoConfirmado ? 'paid-row' : ''}">
+          <tr class="compact-row ${row.pagoConfirmado ? 'paid-row' : ''}">
             <td class="actioncell">${buildPassagemActions(row, false)}</td>
             <td><span class="company">${row.nome_colab || row.nome || '-'}</span></td>
             <td>${row.nome_funcao || '-'}</td>
@@ -5203,7 +5350,7 @@ AMAURI BARROSO DE MOURA"></textarea>
       }
       if (targetId === 'pAirRows' || targetId === 'pRoadRows') {
         body.innerHTML = rows.map(row => `
-          <tr class="${row.pagoConfirmado ? 'paid-row' : ''}">
+          <tr class="compact-row row-main-click ${row.pagoConfirmado ? 'paid-row' : ''}" onclick="togglePassagemExpanded('${row.key}')">
             <td class="actioncell">${buildPassagemActions(row, true)}</td>
             <td><span class="company">${row.nome_colab || row.nome || '-'}</span></td>
             <td>${row.nome_funcao || '-'}</td>
@@ -5213,15 +5360,9 @@ AMAURI BARROSO DE MOURA"></textarea>
             <td>${row.localizador || '-'}</td>
             <td class="money">${row.valorPago == null ? '-' : brl(row.valorPago)}</td>
             <td class="money">${row.valorAprovado == null ? '-' : brl(row.valorAprovado)}</td>
-            <td>${formatDate(row.dataIda)}</td>
-            <td>${formatDate(row.dataVolta)}</td>
-            <td>${row.horarioIda || '-'}</td>
-            <td>${row.horarioVolta || '-'}</td>
-            <td>${row.companhia || '-'}</td>
-            <td>${row.origem || '-'}</td>
-            <td>${row.destino || '-'}</td>
             <td>${row.pedido || '<span class="pending">Pendente</span>'}</td>
           </tr>
+          ${expandedPassagemKeys.has(row.key) ? `<tr class="detail-row"><td colspan="${columns}">${detailPassagemGrid(row)}</td></tr>` : ''}
         `).join('');
         return;
       }
@@ -5317,8 +5458,14 @@ AMAURI BARROSO DE MOURA"></textarea>
         if (row.economia > 0) savingsByObra[obra] = (savingsByObra[obra] || 0) + row.economia;
       });
 
-      const airRangeRows = passagensListByMode('Aereo', passagensAirTab, pAirStart.value, pAirEnd.value);
-      const roadRangeRows = passagensListByMode('Rodoviario', passagensRoadTab, pRoadStart.value, pRoadEnd.value);
+      const airRangeRows = filterPassagensByHeader(
+        passagensListByMode('Aereo', passagensAirTab, pAirStart.value, pAirEnd.value),
+        pAirHeaderFilters
+      );
+      const roadRangeRows = filterPassagensByHeader(
+        passagensListByMode('Rodoviario', passagensRoadTab, pRoadStart.value, pRoadEnd.value),
+        pRoadHeaderFilters
+      );
       const hospedagemRows = passagensHospedagens.filter(item => (passagensHospTab === 'finalized' ? item.pago : true)).filter(item => {
         if (!queryMatch([item.nome, item.obra, item.hotel, item.cidade, item.motivo, item.numeroPedido])) return false;
         const refDate = normalizeDateValue(item.checkIn || item.checkOut);
@@ -5355,9 +5502,17 @@ AMAURI BARROSO DE MOURA"></textarea>
       document.getElementById('pCardBars').classList.toggle('collapsed-panel', passagensOverviewCollapsed.bars);
       document.getElementById('pCardModes').classList.toggle('collapsed-panel', passagensOverviewCollapsed.modes);
       document.getElementById('pCardSavings').classList.toggle('collapsed-panel', passagensOverviewCollapsed.savings);
+      document.getElementById('pAirSummaryCard').classList.toggle('collapsed-panel', passagensSectionCollapsed.airSummary);
+      document.getElementById('pAirBarsCard').classList.toggle('collapsed-panel', passagensSectionCollapsed.airBars);
+      document.getElementById('pRoadSummaryCard').classList.toggle('collapsed-panel', passagensSectionCollapsed.roadSummary);
+      document.getElementById('pRoadBarsCard').classList.toggle('collapsed-panel', passagensSectionCollapsed.roadBars);
       document.getElementById('togglePBars').innerHTML = icon(passagensOverviewCollapsed.bars ? 'chevronRight' : 'chevronDown', 16);
       document.getElementById('togglePModes').innerHTML = icon(passagensOverviewCollapsed.modes ? 'chevronRight' : 'chevronDown', 16);
       document.getElementById('togglePSavings').innerHTML = icon(passagensOverviewCollapsed.savings ? 'chevronRight' : 'chevronDown', 16);
+      document.getElementById('togglePAirSummary').innerHTML = icon(passagensSectionCollapsed.airSummary ? 'chevronRight' : 'chevronDown', 16);
+      document.getElementById('togglePAirBars').innerHTML = icon(passagensSectionCollapsed.airBars ? 'chevronRight' : 'chevronDown', 16);
+      document.getElementById('togglePRoadSummary').innerHTML = icon(passagensSectionCollapsed.roadSummary ? 'chevronRight' : 'chevronDown', 16);
+      document.getElementById('togglePRoadBars').innerHTML = icon(passagensSectionCollapsed.roadBars ? 'chevronRight' : 'chevronDown', 16);
 
       const obraEntries = Object.entries(byObra).sort((a, b) => b[1] - a[1]);
       const obraMax = obraEntries.length ? obraEntries[0][1] : 0;
@@ -5384,8 +5539,8 @@ AMAURI BARROSO DE MOURA"></textarea>
       `).join('') : `<div class="empty-state"><b>Sem economia hoje.</b>Esse quadro mostra apenas compras do dia com valor pago abaixo do aprovado.</div>`;
 
       renderPassagensTable('pRows', todayRows, 10);
-      renderPassagensTable('pAirRows', airRangeRows, 17);
-      renderPassagensTable('pRoadRows', roadRangeRows, 17);
+      renderPassagensTable('pAirRows', airRangeRows, 10);
+      renderPassagensTable('pRoadRows', roadRangeRows, 10);
       renderPassagensTable('pHospRows', hospedagemRows, 16);
       renderPassagensTable('pCarRows', carroRows, 12);
 
@@ -6023,6 +6178,10 @@ AMAURI BARROSO DE MOURA"></textarea>
     document.getElementById('togglePBars').addEventListener('click', () => toggleOverviewPanel('bars'));
     document.getElementById('togglePModes').addEventListener('click', () => toggleOverviewPanel('modes'));
     document.getElementById('togglePSavings').addEventListener('click', () => toggleOverviewPanel('savings'));
+    document.getElementById('togglePAirSummary').addEventListener('click', () => togglePassagensSection('airSummary'));
+    document.getElementById('togglePAirBars').addEventListener('click', () => togglePassagensSection('airBars'));
+    document.getElementById('togglePRoadSummary').addEventListener('click', () => togglePassagensSection('roadSummary'));
+    document.getElementById('togglePRoadBars').addEventListener('click', () => togglePassagensSection('roadBars'));
     document.getElementById('pAirFinalize').addEventListener('click', () => finalizeSelectedPassagens('Aereo'));
     document.getElementById('pRoadFinalize').addEventListener('click', () => finalizeSelectedPassagens('Rodoviario'));
     document.getElementById('pHospClear').addEventListener('click', () => {
@@ -6039,6 +6198,9 @@ AMAURI BARROSO DE MOURA"></textarea>
       passagensAirTab = button.dataset.pAirTab || 'overview';
       renderPassagens();
     }));
+    [...Object.values(pAirHeaderFilters), ...Object.values(pRoadHeaderFilters)].forEach(input => {
+      input.addEventListener('input', renderPassagens);
+    });
     document.querySelectorAll('[data-p-road-tab]').forEach(button => button.addEventListener('click', () => {
       passagensRoadTab = button.dataset.pRoadTab || 'overview';
       renderPassagens();
