@@ -4884,7 +4884,9 @@ AMAURI BARROSO DE MOURA"></textarea>
     }
 
     function filterPassagensByHeader(rows, filterMap) {
-      const activeEntries = Object.entries(filterMap).map(([key, input]) => [key, norm(input.value)]).filter(([, value]) => value);
+      const activeEntries = Object.entries(filterMap)
+        .map(([key, input]) => [key, norm(input && typeof input.value !== 'undefined' ? input.value : '')])
+        .filter(([, value]) => value);
       if (!activeEntries.length) return rows;
       return rows.filter(row => activeEntries.every(([key, value]) => {
         const source = {
@@ -6248,7 +6250,7 @@ AMAURI BARROSO DE MOURA"></textarea>
       passagensAirTab = button.dataset.pAirTab || 'overview';
       renderPassagens();
     }));
-    [...Object.values(pAirHeaderFilters), ...Object.values(pRoadHeaderFilters)].forEach(input => {
+    [...Object.values(pAirHeaderFilters), ...Object.values(pRoadHeaderFilters)].filter(Boolean).forEach(input => {
       input.addEventListener('input', renderPassagens);
     });
     document.querySelectorAll('[data-p-road-tab]').forEach(button => button.addEventListener('click', () => {
