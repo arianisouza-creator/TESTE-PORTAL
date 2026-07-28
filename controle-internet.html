@@ -1810,6 +1810,7 @@ AMAURI BARROSO DE MOURA"></textarea>
         <label>Numero do pedido<input name="numeroPedido"></label>
         <label class="checklabel"><input name="pago" type="checkbox">Pago</label>
         <label style="grid-column:1 / -1">Observacao<input name="observacao"></label>
+        <div class="helper" id="passagensConfigFeedback" style="grid-column:1 / -1"></div>
         <footer style="grid-column:1 / -1">
           <button class="ghost" type="button" id="cancelPassagensHospedagemModal">Cancelar</button>
           <button class="primary" type="submit"><span data-icon="save"></span>Salvar hospedagem</button>
@@ -2166,6 +2167,48 @@ AMAURI BARROSO DE MOURA"></textarea>
     function setSyncStatus(message) {
       const stamp = document.getElementById('updatedAt');
       if (stamp) stamp.textContent = message;
+    }
+
+    function setPassagensConfigFeedback(message = '', tone = '') {
+      const node = document.getElementById('passagensConfigFeedback');
+      if (!node) return;
+      node.textContent = message || '';
+      node.style.color = tone === 'error' ? '#c2410c' : tone === 'success' ? '#15803d' : '';
+    }
+
+    async function validatePassagensApiConfig(baseUrl, token) {
+      const cleanBaseUrl = String(baseUrl || '').trim().replace(/\/+$/, '');
+      const cleanToken = String(token || '').trim();
+      if (!cleanBaseUrl) {
+        throw new Error('Informe a base da API de passagens.');
+      }
+      if (!cleanToken) {
+        throw new Error('Informe o token Bearer da API de passagens.');
+      }
+      let response;
+      try {
+        response = await fetch(`${cleanBaseUrl}/v1/passagens?per_page=1&page=1&order_by=data_viagem&order_dir=DESC`, {
+          headers: {
+            Authorization: `Bearer ${cleanToken}`
+          }
+        });
+      } catch (error) {
+        throw new Error('Falha de rede ao acessar a API. Confira internet, CORS ou bloqueio do navegador.');
+      }
+      if (!response.ok) {
+        let detail = '';
+        try {
+          detail = (await response.text()).trim();
+        } catch (error) {
+          detail = '';
+        }
+        throw new Error(`API Passagens respondeu ${response.status}${detail ? ` - ${detail}` : ''}`);
+      }
+      const payload = await response.json();
+      return {
+        total: Number(payload.total || 0),
+        totalPages: Number(payload.total_pages || 0)
+      };
     }
 
     function emptyPayload() {
@@ -5582,11 +5625,13 @@ AMAURI BARROSO DE MOURA"></textarea>
       if (!passagensApiBaseUrl) {
         window.alert('Configure a base da API de passagens antes de sincronizar.');
         openModalById('passagensConfigModal');
+        setPassagensConfigFeedback('Preencha a base da API antes de sincronizar.', 'error');
         return;
       }
       if (!passagensApiToken) {
         window.alert('Configure o token Bearer da API de passagens antes de sincronizar.');
         openModalById('passagensConfigModal');
+        setPassagensConfigFeedback('Preencha o token Bearer antes de sincronizar.', 'error');
         return;
       }
       const button = document.getElementById('syncPassagens');
@@ -5594,6 +5639,7 @@ AMAURI BARROSO DE MOURA"></textarea>
       button.disabled = true;
       button.innerHTML = `${icon('refresh')}Sincronizando...`;
       try {
+        setPassagensConfigFeedback('Conexao validada. Buscando registros da API...', 'success');
         const headers = {
           Authorization: `Bearer ${passagensApiToken}`
         };
@@ -5620,9 +5666,12 @@ AMAURI BARROSO DE MOURA"></textarea>
         saveLocalCache();
         renderPassagens();
         setSyncStatus(`Passagens sincronizadas da API em ${passagensLastSync} (${rows.length} registros)`);
+        setPassagensConfigFeedback(`API conectada com sucesso. ${rows.length} registro(s) sincronizado(s).`, 'success');
       } catch (error) {
         console.error(error);
-        window.alert('Nao foi possivel sincronizar as passagens. Verifique a configuracao da API e tente novamente.');
+        const message = error && error.message ? error.message : 'Erro desconhecido ao sincronizar passagens.';
+        setPassagensConfigFeedback(message, 'error');
+        window.alert(`Nao foi possivel sincronizar as passagens.\n\nMotivo: ${message}`);
       } finally {
         button.disabled = false;
         button.innerHTML = originalLabel;
@@ -6162,6 +6211,7 @@ AMAURI BARROSO DE MOURA"></textarea>
       const form = document.getElementById('passagensConfigForm');
       form.elements.baseUrl.value = passagensApiBaseUrl;
       form.elements.token.value = passagensApiToken;
+      setPassagensConfigFeedback('');
       openModalById('passagensConfigModal');
     });
     document.getElementById('closePassagensConfigModal').addEventListener('click', () => closeModalById('passagensConfigModal'));
@@ -6213,15 +6263,38 @@ AMAURI BARROSO DE MOURA"></textarea>
       passagensCarTab = button.dataset.pCarTab || 'overview';
       renderPassagens();
     }));
-    document.getElementById('passagensConfigForm').addEventListener('submit', event => {
+    document.getElementById('passagensConfigForm').addEventListener('submit', async event => {
       event.preventDefault();
-      const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
-      passagensApiBaseUrl = (formData.baseUrl || '').trim().replace(/\/+$/, '');
-      passagensApiToken = (formData.token || '').trim();
-      saveLocalCache();
-      renderPassagens();
-      closeModalById('passagensConfigModal');
-      setSyncStatus('Configuracao da API de passagens atualizada no navegador');
+      const form = event.currentTarget;
+      const submitButton = form.querySelector('button[type="submit"]');
+      const originalLabel = submitButton ? submitButton.innerHTML : '';
+      const formData = Object.fromEntries(new FormData(form).entries());
+      const nextBaseUrl = (formData.baseUrl || '').trim().replace(/\/+$/, '');
+      const nextToken = (formData.token || '').trim();
+      setPassagensConfigFeedback('Testando conexao com a API de passagens...', '');
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.innerHTML = `${icon('refresh')}Testando...`;
+      }
+      try {
+        const result = await validatePassagensApiConfig(nextBaseUrl, nextToken);
+        passagensApiBaseUrl = nextBaseUrl;
+        passagensApiToken = nextToken;
+        saveLocalCache();
+        renderPassagens();
+        closeModalById('passagensConfigModal');
+        setSyncStatus(`API de passagens conectada. ${result.total} registro(s) disponivel(is).`);
+        setPassagensConfigFeedback(`Conexao validada com sucesso. ${result.total} registro(s) encontrado(s) na API.`, 'success');
+      } catch (error) {
+        console.error(error);
+        const message = error && error.message ? error.message : 'Nao foi possivel validar a API de passagens.';
+        setPassagensConfigFeedback(message, 'error');
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.innerHTML = originalLabel;
+        }
+      }
     });
     document.getElementById('passagensManualForm').addEventListener('submit', async event => {
       event.preventDefault();
