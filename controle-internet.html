@@ -348,6 +348,7 @@
         </button>
         <div class="navtree">
           <button class="subitem" id="navHitachi" type="button">KPI Hitachi</button>
+          <button class="subitem" id="navGerenciamento" type="button">Gerenciamento</button>
         </div>
       </div>
     </aside>
@@ -1521,6 +1522,159 @@ AMAURI BARROSO DE MOURA"></textarea>
           </div>
         </div>
       </section>
+
+      <section class="module" id="moduleManagement">
+        <div class="subrow2">
+          <button class="sidetoggle" type="button" title="Recolher menu" aria-label="Recolher menu" data-icon="menu"></button>
+          <span class="ico" data-icon="clipboard"></span>
+          <span class="lab">
+            <b>Gerenciamento</b>
+            <small>Controle de NF e prazos contratuais</small>
+          </span>
+        </div>
+
+        <div class="monthbar">
+          <div class="search"><span data-icon="search"></span><input id="gq" placeholder="Buscar por responsavel, fornecedor, obra ou NF..."></div>
+          <div class="selectbox"><span data-icon="calendar"></span><input id="gMonthPicker" type="month"></div>
+          <button class="primary" id="openManagementCadastro"><span data-icon="plus"></span>Novo lancamento</button>
+        </div>
+
+        <div class="topmenu">
+          <button class="toplink on" data-g-view="overview">Visao Geral</button>
+          <button class="toplink" data-g-view="cadastro">Cadastro</button>
+        </div>
+
+        <div class="view on" id="gview-overview">
+          <div class="hero">
+            <h1 id="gPageTitle">Gerenciamento</h1>
+            <p id="gPageSubtitle">Resumo total das notas fiscais cadastradas e acompanhamento de prazo das obras.</p>
+          </div>
+
+          <section class="kpis" style="grid-template-columns:repeat(4,1fr)">
+            <div class="kpi">
+              <div class="ktop"><div class="kicon blue" data-icon="clipboard"></div><div class="klabel">Lancamentos</div></div>
+              <div class="kvalue" id="gLaunchCount">0</div>
+              <div class="kmeta">Notas cadastradas</div>
+            </div>
+            <div class="kpi">
+              <div class="ktop"><div class="kicon green" data-icon="dollar"></div><div class="klabel">Valor total</div></div>
+              <div class="kvalue" id="gLaunchValue">R$ 0,00</div>
+              <div class="kmeta">Soma geral das NFs</div>
+            </div>
+            <div class="kpi">
+              <div class="ktop"><div class="kicon blue" data-icon="building"></div><div class="klabel">Obras</div></div>
+              <div class="kvalue" id="gObraCount">0</div>
+              <div class="kmeta">Cadastros disponiveis</div>
+            </div>
+            <div class="kpi">
+              <div class="ktop"><div class="kicon slate" data-icon="users"></div><div class="klabel">Responsaveis</div></div>
+              <div class="kvalue" id="gRespCount">0</div>
+              <div class="kmeta">Cadastro de lancamento</div>
+            </div>
+          </section>
+
+          <section class="dashgrid" style="grid-template-columns:1.1fr .9fr">
+            <article class="card pad">
+              <div class="chead"><span class="ti2">Resumo total por NF</span><span class="eyebrow">Sem filtro de competencia</span></div>
+              <div class="list" id="gNfTotals"></div>
+            </article>
+            <article class="card pad">
+              <div class="chead"><span class="ti2">Prazo das obras</span><span class="eyebrow">Contagem regressiva contratual</span></div>
+              <div class="list" id="gObraDeadlines"></div>
+            </article>
+          </section>
+
+          <section class="card table-card" style="margin-top:16px">
+            <div class="pad">
+              <div class="chead"><span class="ti2">Lancamentos da competencia</span><span class="eyebrow" id="gCountLabel">0 registros</span></div>
+            </div>
+            <div style="overflow:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Competencia</th>
+                    <th>Data do lancamento</th>
+                    <th>Responsavel</th>
+                    <th>Fornecedor</th>
+                    <th>Obra</th>
+                    <th>NF</th>
+                    <th>Valor</th>
+                    <th>Observacoes</th>
+                    <th>Acoes</th>
+                  </tr>
+                </thead>
+                <tbody id="gRows"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div class="view" id="gview-cadastro">
+          <div class="hero" style="margin-bottom:14px">
+            <h1>Cadastro de gerenciamento</h1>
+            <p>Cadastre lancamentos de NF, obras e responsaveis para alimentar o controle documental.</p>
+          </div>
+
+          <section class="card pad" style="margin-bottom:14px">
+            <div class="chead"><span class="ti2">Novo lancamento de NF</span><span class="eyebrow">Competencia mensal</span></div>
+            <form id="managementLaunchForm" class="formgrid">
+              <label>Competencia<input name="monthKey" type="month" required></label>
+              <label>Data do lancamento<input name="dataLancamento" type="date" required></label>
+              <label>Responsavel
+                <select name="responsavelId" id="managementResponsavelSelect" required></select>
+              </label>
+              <label style="grid-column:1 / -1">Empreiteiro / fornecedor<input name="fornecedor" required placeholder="Nome do fornecedor"></label>
+              <label>Obra
+                <select name="obraId" id="managementObraSelect" required></select>
+              </label>
+              <label>Nº da NF<input name="numeroNf" required placeholder="Ex.: 1234"></label>
+              <label>Valor (R$)<input name="valor" required placeholder="0,00"></label>
+              <label>Observacoes<input name="observacao" placeholder="Anotacoes do lancamento"></label>
+              <div style="grid-column:1 / -1;display:flex;justify-content:flex-end;gap:10px">
+                <button class="ghost" type="button" id="cancelManagementLaunchEdit" style="display:none">Cancelar edicao</button>
+                <button class="primary" type="submit" id="saveManagementLaunchBtn"><span data-icon="plus"></span>Salvar lancamento</button>
+              </div>
+            </form>
+          </section>
+
+          <div class="cred-grid">
+            <section class="card pad">
+              <div class="chead"><span class="ti2">Nova obra</span><span class="eyebrow">Base contratual</span></div>
+              <form id="managementObraForm" class="formgrid">
+                <label>Nome da obra<input name="nomeObra" required placeholder="Nome da obra"></label>
+                <label>Diretor responsavel<input name="diretorResponsavel" required placeholder="Diretor da obra"></label>
+                <label>Prazo do contrato<input name="prazoContrato" type="date" required></label>
+                <div style="grid-column:1 / -1;display:flex;justify-content:flex-end;gap:10px">
+                  <button class="ghost" type="button" id="cancelManagementObraEdit" style="display:none">Cancelar edicao</button>
+                  <button class="primary" type="submit" id="saveManagementObraBtn"><span data-icon="plus"></span>Salvar obra</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="card pad">
+              <div class="chead"><span class="ti2">Responsavel por lancamento</span><span class="eyebrow">Cadastro rapido</span></div>
+              <form id="managementResponsavelForm" class="formgrid">
+                <label>Nome do responsavel<input name="nomeResponsavel" required placeholder="Responsavel pelo lancamento"></label>
+                <div style="grid-column:1 / -1;display:flex;justify-content:flex-end;gap:10px">
+                  <button class="ghost" type="button" id="cancelManagementResponsavelEdit" style="display:none">Cancelar edicao</button>
+                  <button class="primary" type="submit" id="saveManagementResponsavelBtn"><span data-icon="plus"></span>Salvar responsavel</button>
+                </div>
+              </form>
+            </section>
+          </div>
+
+          <div class="cred-grid" style="margin-top:14px">
+            <section class="card pad">
+              <div class="chead"><span class="ti2">Obras cadastradas</span><span class="eyebrow" id="gObrasCadastroCount">0 registros</span></div>
+              <div class="cred-list" id="gObrasCadastroList"></div>
+            </section>
+            <section class="card pad">
+              <div class="chead"><span class="ti2">Responsaveis cadastrados</span><span class="eyebrow" id="gResponsaveisCadastroCount">0 registros</span></div>
+              <div class="cred-list" id="gResponsaveisCadastroList"></div>
+            </section>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -1929,6 +2083,12 @@ AMAURI BARROSO DE MOURA"></textarea>
       document.querySelector(`.toplink[data-h-view="${viewName}"]`).classList.add('on');
       document.getElementById(`hview-${viewName}`).classList.add('on');
     }
+    function openManagementView(viewName) {
+      document.querySelectorAll('.toplink[data-g-view]').forEach(item => item.classList.remove('on'));
+      document.querySelectorAll('#moduleManagement .view').forEach(view => view.classList.remove('on'));
+      document.querySelector(`.toplink[data-g-view="${viewName}"]`).classList.add('on');
+      document.getElementById(`gview-${viewName}`).classList.add('on');
+    }
     function openPassagensView(viewName) {
       document.querySelectorAll('.toplink[data-p-view]').forEach(item => item.classList.remove('on'));
       document.querySelectorAll('#modulePassagens .view').forEach(view => view.classList.remove('on'));
@@ -1942,14 +2102,16 @@ AMAURI BARROSO DE MOURA"></textarea>
       document.getElementById('moduleDiarista').classList.toggle('on', moduleName === 'diarista');
       document.getElementById('modulePassagens').classList.toggle('on', moduleName === 'passagens');
       document.getElementById('moduleHitachi').classList.toggle('on', moduleName === 'hitachi');
+      document.getElementById('moduleManagement').classList.toggle('on', moduleName === 'management');
       document.getElementById('navInternet').classList.toggle('on', moduleName === 'internet');
       document.getElementById('navDiarista').classList.toggle('on', moduleName === 'diarista');
       document.getElementById('navPassagens').classList.toggle('on', moduleName === 'passagens');
       document.getElementById('navHitachi').classList.toggle('on', moduleName === 'hitachi');
+      document.getElementById('navGerenciamento').classList.toggle('on', moduleName === 'management');
       document.getElementById('adminToggle').classList.toggle('on', isAdminModule);
-      document.getElementById('docsToggle').classList.toggle('on', moduleName === 'hitachi');
+      document.getElementById('docsToggle').classList.toggle('on', moduleName === 'hitachi' || moduleName === 'management');
       document.getElementById('adminBlock').classList.toggle('open', isAdminModule);
-      if (moduleName === 'hitachi') {
+      if (moduleName === 'hitachi' || moduleName === 'management') {
         document.getElementById('docsBlock').classList.add('open');
       }
       document.getElementById('dMonthMirror').value = currentMonthKey();
@@ -1987,6 +2149,9 @@ AMAURI BARROSO DE MOURA"></textarea>
     let editingHitachiCompanyId = null;
     let overviewEditingHitachiId = null;
     let overviewEditingHitachiCompanyId = null;
+    let editingManagementLaunchId = null;
+    let editingManagementObraId = null;
+    let editingManagementResponsavelId = null;
     let editingPassagemKey = '';
     let protectedAuthenticated = false;
     let currentModule = 'internet';
@@ -2002,6 +2167,7 @@ AMAURI BARROSO DE MOURA"></textarea>
     const PASSAGENS_API_ONLY = passagensConfig.useApiOnly !== false;
     const LOCAL_CACHE_KEY = 'portal-mse-cache-v2';
     const monthPicker = document.getElementById('monthPicker');
+    const gMonthPicker = document.getElementById('gMonthPicker');
     const monthOverrides = {};
     const monthLines = {};
     const contracts = [];
@@ -2009,6 +2175,9 @@ AMAURI BARROSO DE MOURA"></textarea>
     const diaristaMonthOverrides = {};
     const hitachiCollaborators = [];
     const hitachiCompanyDocs = [];
+    const managementLaunches = [];
+    const managementObras = [];
+    const managementResponsaveis = [];
     const HITACHI_MANUAL_SERVICE_NAMES = [
       'ALBERT VICENTE ZAMBELLO',
       'ALESSANDRA DA SILVA ASSEN',
@@ -2163,9 +2332,18 @@ AMAURI BARROSO DE MOURA"></textarea>
       const remoteCarros = remotePayload.passagensCarros || remotePayload.passagens_carros || [];
       const localHitachi = localPayload.hitachiCollaborators || [];
       const remoteHitachi = remotePayload.hitachiCollaborators || [];
+      const localManagementLaunches = localPayload.managementLaunches || localPayload.management_launches || [];
+      const remoteManagementLaunches = remotePayload.managementLaunches || remotePayload.management_launches || [];
+      const localManagementObras = localPayload.managementObras || localPayload.management_obras || [];
+      const remoteManagementObras = remotePayload.managementObras || remotePayload.management_obras || [];
+      const localManagementResponsaveis = localPayload.managementResponsaveis || localPayload.management_responsaveis || [];
+      const remoteManagementResponsaveis = remotePayload.managementResponsaveis || remotePayload.management_responsaveis || [];
       return {
         ...remotePayload,
         hitachiCollaborators: mergeByKey(localHitachi, remoteHitachi, item => `${item.monthKey || item.month_key || ''}|${item.empresa || ''}|${normalizePersonName(item.colaborador || '')}`),
+        managementLaunches: mergeByKey(localManagementLaunches, remoteManagementLaunches, item => String(item.id || '')),
+        managementObras: mergeByKey(localManagementObras, remoteManagementObras, item => String(item.id || '')),
+        managementResponsaveis: mergeByKey(localManagementResponsaveis, remoteManagementResponsaveis, item => String(item.id || '')),
         passagensRows: mergeByKey(localRows, remoteRows, item => `${item.tabela || 'passagens'}:${item.id}`),
         passagensCreditos: mergeByKey(localCredits, remoteCredits, item => String(item.id || '')),
         passagensComplements: mergeByKey(localComplements, remoteComplements, item => String(item.key || '')),
@@ -2234,6 +2412,9 @@ AMAURI BARROSO DE MOURA"></textarea>
         hitachiCollaborators: [],
         hitachiCompanyDocs: [],
         hitachiRecipients: '',
+        managementLaunches: [],
+        managementObras: [],
+        managementResponsaveis: [],
         passagensRows: [],
         passagensCreditos: [],
         passagensComplements: [],
@@ -2287,6 +2468,9 @@ AMAURI BARROSO DE MOURA"></textarea>
         hitachiCollaborators: hitachiCollaborators.map(item => ({ ...item })),
         hitachiCompanyDocs: hitachiCompanyDocs.map(item => ({ ...item })),
         hitachiRecipients,
+        managementLaunches: managementLaunches.map(item => ({ ...item })),
+        managementObras: managementObras.map(item => ({ ...item })),
+        managementResponsaveis: managementResponsaveis.map(item => ({ ...item })),
         passagensRows: passagensRows.map(item => ({ ...item })),
         passagensCreditos: passagensCreditos.map(item => ({ ...item })),
         passagensComplements: Object.entries(passagensComplements).map(([key, value]) => ({
@@ -2388,6 +2572,30 @@ AMAURI BARROSO DE MOURA"></textarea>
         status: item.status || 'OK'
       }))));
       hitachiRecipients = payload.hitachiRecipients || '';
+      managementLaunches.splice(0, managementLaunches.length, ...((payload.managementLaunches || payload.management_launches || []).map(item => ({
+        id: Number(item.id),
+        monthKey: item.monthKey ?? item.month_key ?? defaultMonth(),
+        dataLancamento: item.dataLancamento ?? item.data_lancamento ?? '',
+        responsavelId: item.responsavelId ?? item.responsavel_id ?? '',
+        responsavelNome: item.responsavelNome ?? item.responsavel_nome ?? '',
+        fornecedor: item.fornecedor || '',
+        obraId: item.obraId ?? item.obra_id ?? '',
+        obraNome: item.obraNome ?? item.obra_nome ?? '',
+        diretorResponsavel: item.diretorResponsavel ?? item.diretor_responsavel ?? '',
+        numeroNf: item.numeroNf ?? item.numero_nf ?? '',
+        valor: item.valor == null ? null : Number(item.valor),
+        observacao: item.observacao || ''
+      }))));
+      managementObras.splice(0, managementObras.length, ...((payload.managementObras || payload.management_obras || []).map(item => ({
+        id: Number(item.id),
+        nomeObra: item.nomeObra ?? item.nome_obra ?? '',
+        diretorResponsavel: item.diretorResponsavel ?? item.diretor_responsavel ?? '',
+        prazoContrato: item.prazoContrato ?? item.prazo_contrato ?? ''
+      }))));
+      managementResponsaveis.splice(0, managementResponsaveis.length, ...((payload.managementResponsaveis || payload.management_responsaveis || []).map(item => ({
+        id: Number(item.id),
+        nomeResponsavel: item.nomeResponsavel ?? item.nome_responsavel ?? ''
+      }))));
       passagensRows.splice(0, passagensRows.length, ...((payload.passagensRows || payload.passagens_rows || []).map(item => ({ ...item }))));
       passagensCreditos.splice(0, passagensCreditos.length, ...((payload.passagensCreditos || payload.passagens_creditos || []).map(item => ({
         id: item.id || createId(),
@@ -2506,7 +2714,7 @@ AMAURI BARROSO DE MOURA"></textarea>
     }
 
     async function loadRemoteState() {
-      const [remoteContracts, remoteMonthEntries, remoteLines, remoteDiarista, remoteDiaristaEntries, remoteHitachi, remoteHitachiCompanyDocs, remotePassagensRows, remotePassagensComplements, remotePassagensCreditos] = await Promise.all([
+      const [remoteContracts, remoteMonthEntries, remoteLines, remoteDiarista, remoteDiaristaEntries, remoteHitachi, remoteHitachiCompanyDocs, remoteManagementLaunches, remoteManagementObras, remoteManagementResponsaveis, remotePassagensRows, remotePassagensComplements, remotePassagensCreditos] = await Promise.all([
         supabaseRequest('internet_contracts', { query: 'select=*&order=id.asc' }),
         supabaseRequest('internet_month_entries', { query: 'select=*&order=month_key.asc,contract_id.asc' }),
         supabaseRequest('internet_lines', { query: 'select=*&order=month_key.asc,id.asc' }),
@@ -2514,6 +2722,9 @@ AMAURI BARROSO DE MOURA"></textarea>
         supabaseRequest('diarista_month_entries', { query: 'select=*&order=month_key.asc,diarista_id.asc' }),
         supabaseRequest('hitachi_collaborators', { query: 'select=*&order=month_key.desc,empresa.asc,colaborador.asc' }),
         supabaseRequest('hitachi_company_docs', { query: 'select=*&order=month_key.desc,empresa.asc,documento.asc' }),
+        supabaseRequest('management_nf_launches', { query: 'select=*&order=month_key.desc,data_lancamento.desc,id.desc' }),
+        supabaseRequest('management_nf_obras', { query: 'select=*&order=nome_obra.asc' }),
+        supabaseRequest('management_nf_responsaveis', { query: 'select=*&order=nome_responsavel.asc' }),
         PASSAGENS_API_ONLY ? Promise.resolve([]) : supabaseRequest('passagens_rows', { query: 'select=*&order=updated_at.asc' }),
         PASSAGENS_API_ONLY ? Promise.resolve([]) : supabaseRequest('passagens_complements', { query: 'select=*&order=updated_at.asc' }),
         PASSAGENS_API_ONLY ? Promise.resolve([]) : supabaseRequest('passagens_creditos', { query: 'select=*&order=updated_at.asc' })
@@ -2526,6 +2737,9 @@ AMAURI BARROSO DE MOURA"></textarea>
         diaristaMonthEntries: remoteDiaristaEntries,
         hitachiCollaborators: remoteHitachi,
         hitachiCompanyDocs: remoteHitachiCompanyDocs,
+        managementLaunches: remoteManagementLaunches,
+        managementObras: remoteManagementObras,
+        managementResponsaveis: remoteManagementResponsaveis,
         passagensRows: remotePassagensRows.map(item => ({ ...(item.item || {}) })),
         passagensComplements: remotePassagensComplements.map(item => ({ key: item.key, ...(item.data || {}) })),
         passagensCreditos: remotePassagensCreditos.map(item => ({ id: item.id, ...(item.data || {}) }))
@@ -2687,6 +2901,78 @@ AMAURI BARROSO DE MOURA"></textarea>
           documento: item.documento || '',
           status: item.status || 'OK'
         }]
+      });
+    }
+
+    async function upsertManagementLaunchRemote(item) {
+      if (!REMOTE_ENABLED) return;
+      await supabaseRequest('management_nf_launches', {
+        method: 'POST',
+        prefer: 'resolution=merge-duplicates,return=representation',
+        body: [{
+          id: Number(item.id),
+          month_key: item.monthKey || defaultMonth(),
+          data_lancamento: item.dataLancamento || '',
+          responsavel_id: item.responsavelId ? Number(item.responsavelId) : null,
+          responsavel_nome: item.responsavelNome || '',
+          fornecedor: item.fornecedor || '',
+          obra_id: item.obraId ? Number(item.obraId) : null,
+          obra_nome: item.obraNome || '',
+          diretor_responsavel: item.diretorResponsavel || '',
+          numero_nf: item.numeroNf || '',
+          valor: item.valor == null ? null : Number(item.valor),
+          observacao: item.observacao || ''
+        }]
+      });
+    }
+
+    async function upsertManagementObraRemote(item) {
+      if (!REMOTE_ENABLED) return;
+      await supabaseRequest('management_nf_obras', {
+        method: 'POST',
+        prefer: 'resolution=merge-duplicates,return=representation',
+        body: [{
+          id: Number(item.id),
+          nome_obra: item.nomeObra || '',
+          diretor_responsavel: item.diretorResponsavel || '',
+          prazo_contrato: item.prazoContrato || ''
+        }]
+      });
+    }
+
+    async function upsertManagementResponsavelRemote(item) {
+      if (!REMOTE_ENABLED) return;
+      await supabaseRequest('management_nf_responsaveis', {
+        method: 'POST',
+        prefer: 'resolution=merge-duplicates,return=representation',
+        body: [{
+          id: Number(item.id),
+          nome_responsavel: item.nomeResponsavel || ''
+        }]
+      });
+    }
+
+    async function deleteManagementLaunchRemote(id) {
+      if (!REMOTE_ENABLED) return;
+      await supabaseRequest('management_nf_launches', {
+        method: 'DELETE',
+        query: `id=eq.${encodeURIComponent(Number(id))}`
+      });
+    }
+
+    async function deleteManagementObraRemote(id) {
+      if (!REMOTE_ENABLED) return;
+      await supabaseRequest('management_nf_obras', {
+        method: 'DELETE',
+        query: `id=eq.${encodeURIComponent(Number(id))}`
+      });
+    }
+
+    async function deleteManagementResponsavelRemote(id) {
+      if (!REMOTE_ENABLED) return;
+      await supabaseRequest('management_nf_responsaveis', {
+        method: 'DELETE',
+        query: `id=eq.${encodeURIComponent(Number(id))}`
       });
     }
 
@@ -4275,6 +4561,354 @@ AMAURI BARROSO DE MOURA"></textarea>
       openModalById('hitachiCompanyModal');
     }
     window.editHitachiCompanyDoc = editHitachiCompanyDoc;
+
+    function currentManagementMonth() {
+      return gMonthPicker.value || currentMonthKey();
+    }
+
+    function managementMonthDate(monthKey) {
+      if (!monthKey) return null;
+      const [year, month] = String(monthKey).split('-').map(Number);
+      if (!year || !month) return null;
+      return new Date(year, month - 1, 1);
+    }
+
+    function managementDeadlineLabel(dateValue) {
+      if (!dateValue) return 'Prazo nao informado';
+      const today = new Date();
+      const current = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const target = new Date(`${dateValue}T00:00:00`);
+      if (Number.isNaN(target.getTime())) return 'Prazo invalido';
+      const diffMs = target.getTime() - current.getTime();
+      const diffDays = Math.ceil(diffMs / 86400000);
+      if (diffDays < 0) return `Encerrada ha ${Math.abs(diffDays)} dia(s)`;
+      const months = Math.floor(diffDays / 30);
+      const days = diffDays % 30;
+      if (!months) return `Faltam ${days} dia(s)`;
+      return `Faltam ${months} mes(es) e ${days} dia(s)`;
+    }
+
+    function getManagementResponsavelName(id) {
+      const item = managementResponsaveis.find(entry => String(entry.id) === String(id));
+      return item ? item.nomeResponsavel : '';
+    }
+
+    function getManagementObra(id) {
+      return managementObras.find(entry => String(entry.id) === String(id)) || null;
+    }
+
+    function managementFilteredRows(monthKey = currentManagementMonth()) {
+      const q = norm(document.getElementById('gq').value);
+      return managementLaunches
+        .filter(item => (item.monthKey || '') === monthKey)
+        .filter(item => {
+          if (!q) return true;
+          const hay = norm([
+            item.monthKey,
+            item.dataLancamento,
+            item.responsavelNome,
+            item.fornecedor,
+            item.obraNome,
+            item.numeroNf,
+            item.observacao
+          ].join(' '));
+          return hay.includes(q);
+        })
+        .sort((a, b) => String(b.dataLancamento || '').localeCompare(String(a.dataLancamento || '')) || Number(b.id || 0) - Number(a.id || 0));
+    }
+
+    function populateManagementSelects() {
+      const responsavelSelect = document.getElementById('managementResponsavelSelect');
+      const obraSelect = document.getElementById('managementObraSelect');
+      responsavelSelect.innerHTML = `<option value="">Selecionar responsavel</option>${managementResponsaveis
+        .slice()
+        .sort((a, b) => String(a.nomeResponsavel || '').localeCompare(String(b.nomeResponsavel || '')))
+        .map(item => `<option value="${item.id}">${escapeHtml(item.nomeResponsavel || 'Sem nome')}</option>`)
+        .join('')}`;
+      obraSelect.innerHTML = `<option value="">Selecionar obra</option>${managementObras
+        .slice()
+        .sort((a, b) => String(a.nomeObra || '').localeCompare(String(b.nomeObra || '')))
+        .map(item => `<option value="${item.id}">${escapeHtml(item.nomeObra || 'Sem obra')}</option>`)
+        .join('')}`;
+    }
+
+    function resetManagementLaunchForm() {
+      editingManagementLaunchId = null;
+      const form = document.getElementById('managementLaunchForm');
+      form.reset();
+      form.elements.monthKey.value = currentManagementMonth();
+      populateManagementSelects();
+      document.getElementById('saveManagementLaunchBtn').innerHTML = `${icon('plus')}Salvar lancamento`;
+      document.getElementById('cancelManagementLaunchEdit').style.display = 'none';
+    }
+
+    function resetManagementObraForm() {
+      editingManagementObraId = null;
+      const form = document.getElementById('managementObraForm');
+      form.reset();
+      document.getElementById('saveManagementObraBtn').innerHTML = `${icon('plus')}Salvar obra`;
+      document.getElementById('cancelManagementObraEdit').style.display = 'none';
+    }
+
+    function resetManagementResponsavelForm() {
+      editingManagementResponsavelId = null;
+      const form = document.getElementById('managementResponsavelForm');
+      form.reset();
+      document.getElementById('saveManagementResponsavelBtn').innerHTML = `${icon('plus')}Salvar responsavel`;
+      document.getElementById('cancelManagementResponsavelEdit').style.display = 'none';
+    }
+
+    function renderManagementCadastroList() {
+      const obraList = document.getElementById('gObrasCadastroList');
+      const responsavelList = document.getElementById('gResponsaveisCadastroList');
+      document.getElementById('gObrasCadastroCount').textContent = `${managementObras.length} registro${managementObras.length === 1 ? '' : 's'}`;
+      document.getElementById('gResponsaveisCadastroCount').textContent = `${managementResponsaveis.length} registro${managementResponsaveis.length === 1 ? '' : 's'}`;
+
+      if (!managementObras.length) {
+        obraList.innerHTML = `<div class="empty-state"><b>Nenhuma obra cadastrada.</b>Cadastre nome da obra, diretor e prazo contratual.</div>`;
+      } else {
+        obraList.innerHTML = managementObras
+          .slice()
+          .sort((a, b) => String(a.nomeObra || '').localeCompare(String(b.nomeObra || '')))
+          .map(item => `
+            <div class="cred-item">
+              <h4>${escapeHtml(item.nomeObra || 'Sem obra')}</h4>
+              <div class="cred-row"><span>Diretor</span><b>${escapeHtml(item.diretorResponsavel || '-')}</b></div>
+              <div class="cred-row"><span>Prazo do contrato</span><b>${formatDate(item.prazoContrato) || '-'}</b></div>
+              <div class="cred-row"><span>Status de prazo</span><b>${escapeHtml(managementDeadlineLabel(item.prazoContrato))}</b></div>
+              <div style="margin-top:10px;display:flex;justify-content:flex-end;gap:8px">
+                <button class="inline-btn" type="button" onclick="editManagementObra(${item.id})">Editar</button>
+                <button class="inline-btn danger" type="button" onclick="deleteManagementObra(${item.id})">Excluir</button>
+              </div>
+            </div>
+          `).join('');
+      }
+
+      if (!managementResponsaveis.length) {
+        responsavelList.innerHTML = `<div class="empty-state"><b>Nenhum responsavel cadastrado.</b>Inclua quem faz os lancamentos para usar no formulario.</div>`;
+      } else {
+        responsavelList.innerHTML = managementResponsaveis
+          .slice()
+          .sort((a, b) => String(a.nomeResponsavel || '').localeCompare(String(b.nomeResponsavel || '')))
+          .map(item => `
+            <div class="cred-item">
+              <h4>${escapeHtml(item.nomeResponsavel || 'Sem nome')}</h4>
+              <div class="cred-row"><span>Lancamentos vinculados</span><b>${managementLaunches.filter(entry => String(entry.responsavelId) === String(item.id)).length}</b></div>
+              <div style="margin-top:10px;display:flex;justify-content:flex-end;gap:8px">
+                <button class="inline-btn" type="button" onclick="editManagementResponsavel(${item.id})">Editar</button>
+                <button class="inline-btn danger" type="button" onclick="deleteManagementResponsavel(${item.id})">Excluir</button>
+              </div>
+            </div>
+          `).join('');
+      }
+    }
+
+    function renderManagement() {
+      if (!gMonthPicker.value) gMonthPicker.value = currentMonthKey();
+      populateManagementSelects();
+      const monthKey = currentManagementMonth();
+      const rows = managementFilteredRows(monthKey);
+      const totalValue = managementLaunches.reduce((sum, item) => sum + (Number(item.valor) || 0), 0);
+      const groupedByNf = new Map();
+
+      managementLaunches.forEach(item => {
+        const nfKey = item.numeroNf || `Sem NF-${item.id}`;
+        const current = groupedByNf.get(nfKey) || {
+          numeroNf: item.numeroNf || 'Sem NF',
+          fornecedor: item.fornecedor || '-',
+          obraNome: item.obraNome || '-',
+          valor: 0,
+          quantidade: 0
+        };
+        current.valor += Number(item.valor) || 0;
+        current.quantidade += 1;
+        groupedByNf.set(nfKey, current);
+      });
+
+      document.getElementById('gPageTitle').textContent = `Gerenciamento | ${monthLabel(monthKey)}`;
+      document.getElementById('gPageSubtitle').textContent = `Controle de NF da competencia ${monthLabel(monthKey)} com resumo total acumulado das notas e prazos contratuais.`;
+      document.getElementById('gLaunchCount').textContent = managementLaunches.length;
+      document.getElementById('gLaunchValue').textContent = brl(totalValue);
+      document.getElementById('gObraCount').textContent = managementObras.length;
+      document.getElementById('gRespCount').textContent = managementResponsaveis.length;
+      document.getElementById('gCountLabel').textContent = `${rows.length} registro${rows.length === 1 ? '' : 's'} na competencia`;
+
+      const totals = [...groupedByNf.values()].sort((a, b) => b.valor - a.valor || a.numeroNf.localeCompare(b.numeroNf));
+      document.getElementById('gNfTotals').innerHTML = totals.length ? totals.map(item => `
+        <div class="litem">
+          <div>
+            <b>NF ${escapeHtml(item.numeroNf)}</b>
+            <small>${escapeHtml(item.fornecedor)} | ${escapeHtml(item.obraNome)} | ${item.quantidade} lancamento(s)</small>
+          </div>
+          <span class="money">${brl(item.valor)}</span>
+        </div>
+      `).join('') : `<div class="empty-state"><b>Nenhuma NF cadastrada.</b>Assim que houver lancamentos, o resumo total aparece aqui.</div>`;
+
+      document.getElementById('gObraDeadlines').innerHTML = managementObras.length ? managementObras
+        .slice()
+        .sort((a, b) => String(a.prazoContrato || '').localeCompare(String(b.prazoContrato || '')))
+        .map(item => `
+          <div class="litem">
+            <div>
+              <b>${escapeHtml(item.nomeObra || 'Sem obra')}</b>
+              <small>${escapeHtml(item.diretorResponsavel || 'Diretor nao informado')}</small>
+            </div>
+            <span>${escapeHtml(managementDeadlineLabel(item.prazoContrato))}</span>
+          </div>
+        `).join('') : `<div class="empty-state"><b>Nenhuma obra cadastrada.</b>Cadastre as obras para acompanhar o prazo final do contrato.</div>`;
+
+      const body = document.getElementById('gRows');
+      if (!rows.length) {
+        body.innerHTML = `<tr><td colspan="9"><div class="empty-state"><b>Nenhum lancamento nessa competencia.</b>Use o cadastro para incluir NF, obra e responsavel.</div></td></tr>`;
+      } else {
+        body.innerHTML = rows.map(item => `
+          <tr>
+            <td>${monthLabel(item.monthKey)}</td>
+            <td>${formatDate(item.dataLancamento) || '-'}</td>
+            <td><b class="link">${escapeHtml(item.responsavelNome || '-')}</b></td>
+            <td>${escapeHtml(item.fornecedor || '-')}</td>
+            <td>${escapeHtml(item.obraNome || '-')}</td>
+            <td>${escapeHtml(item.numeroNf || '-')}</td>
+            <td><span class="money">${item.valor != null ? brl(Number(item.valor) || 0) : '-'}</span></td>
+            <td>${escapeHtml(item.observacao || '-')}</td>
+            <td class="actioncell">
+              <div style="display:flex;justify-content:flex-end;gap:8px">
+                <button class="rowact" title="Editar lancamento" aria-label="Editar lancamento" onclick="editManagementLaunch(${item.id})">${icon('edit')}</button>
+                <button class="rowact" title="Excluir lancamento" aria-label="Excluir lancamento" onclick="deleteManagementLaunch(${item.id})">${icon('trash')}</button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      renderManagementCadastroList();
+    }
+
+    function editManagementLaunch(id) {
+      const item = managementLaunches.find(entry => entry.id === id);
+      if (!item) return;
+      editingManagementLaunchId = id;
+      openManagementView('cadastro');
+      const form = document.getElementById('managementLaunchForm');
+      populateManagementSelects();
+      form.elements.monthKey.value = item.monthKey || currentManagementMonth();
+      form.elements.dataLancamento.value = item.dataLancamento || '';
+      form.elements.responsavelId.value = item.responsavelId || '';
+      form.elements.fornecedor.value = item.fornecedor || '';
+      form.elements.obraId.value = item.obraId || '';
+      form.elements.numeroNf.value = item.numeroNf || '';
+      form.elements.valor.value = item.valor == null ? '' : String(item.valor).replace('.', ',');
+      form.elements.observacao.value = item.observacao || '';
+      document.getElementById('saveManagementLaunchBtn').innerHTML = `${icon('save')}Salvar alteracoes`;
+      document.getElementById('cancelManagementLaunchEdit').style.display = '';
+    }
+    window.editManagementLaunch = editManagementLaunch;
+
+    async function deleteManagementLaunch(id) {
+      const item = managementLaunches.find(entry => entry.id === id);
+      if (!item) return;
+      if (!window.confirm(`Excluir a NF ${item.numeroNf || '-'} de ${item.fornecedor || 'fornecedor'}?`)) return;
+      const index = managementLaunches.findIndex(entry => entry.id === id);
+      if (index < 0) return;
+      managementLaunches.splice(index, 1);
+      saveLocalCache();
+      renderManagement();
+      try {
+        await deleteManagementLaunchRemote(id);
+        setSyncStatus(`Lancamento da NF ${item.numeroNf || '-'} removido`);
+      } catch (error) {
+        console.error(error);
+        setSyncStatus('Falha ao excluir lancamento no Supabase. Cache local mantido.');
+      }
+    }
+    window.deleteManagementLaunch = deleteManagementLaunch;
+
+    function editManagementObra(id) {
+      const item = managementObras.find(entry => entry.id === id);
+      if (!item) return;
+      editingManagementObraId = id;
+      openManagementView('cadastro');
+      const form = document.getElementById('managementObraForm');
+      form.elements.nomeObra.value = item.nomeObra || '';
+      form.elements.diretorResponsavel.value = item.diretorResponsavel || '';
+      form.elements.prazoContrato.value = item.prazoContrato || '';
+      document.getElementById('saveManagementObraBtn').innerHTML = `${icon('save')}Salvar alteracoes`;
+      document.getElementById('cancelManagementObraEdit').style.display = '';
+    }
+    window.editManagementObra = editManagementObra;
+
+    async function deleteManagementObra(id) {
+      const item = managementObras.find(entry => entry.id === id);
+      if (!item) return;
+      if (!window.confirm(`Excluir a obra ${item.nomeObra || '-'}?`)) return;
+      managementLaunches.forEach(entry => {
+        if (String(entry.obraId) === String(id)) {
+          entry.obraId = '';
+          entry.obraNome = '';
+          entry.diretorResponsavel = '';
+        }
+      });
+      const index = managementObras.findIndex(entry => entry.id === id);
+      if (index < 0) return;
+      managementObras.splice(index, 1);
+      saveLocalCache();
+      renderManagement();
+      try {
+        await Promise.all([
+          deleteManagementObraRemote(id),
+          ...managementLaunches
+            .filter(entry => !entry.obraId && !entry.obraNome)
+            .map(entry => upsertManagementLaunchRemote(entry))
+        ]);
+        setSyncStatus(`Obra ${item.nomeObra || '-'} removida`);
+      } catch (error) {
+        console.error(error);
+        setSyncStatus('Falha ao excluir obra no Supabase. Cache local mantido.');
+      }
+    }
+    window.deleteManagementObra = deleteManagementObra;
+
+    function editManagementResponsavel(id) {
+      const item = managementResponsaveis.find(entry => entry.id === id);
+      if (!item) return;
+      editingManagementResponsavelId = id;
+      openManagementView('cadastro');
+      const form = document.getElementById('managementResponsavelForm');
+      form.elements.nomeResponsavel.value = item.nomeResponsavel || '';
+      document.getElementById('saveManagementResponsavelBtn').innerHTML = `${icon('save')}Salvar alteracoes`;
+      document.getElementById('cancelManagementResponsavelEdit').style.display = '';
+    }
+    window.editManagementResponsavel = editManagementResponsavel;
+
+    async function deleteManagementResponsavel(id) {
+      const item = managementResponsaveis.find(entry => entry.id === id);
+      if (!item) return;
+      if (!window.confirm(`Excluir o responsavel ${item.nomeResponsavel || '-'}?`)) return;
+      managementLaunches.forEach(entry => {
+        if (String(entry.responsavelId) === String(id)) {
+          entry.responsavelId = '';
+          entry.responsavelNome = '';
+        }
+      });
+      const index = managementResponsaveis.findIndex(entry => entry.id === id);
+      if (index < 0) return;
+      managementResponsaveis.splice(index, 1);
+      saveLocalCache();
+      renderManagement();
+      try {
+        await Promise.all([
+          deleteManagementResponsavelRemote(id),
+          ...managementLaunches
+            .filter(entry => !entry.responsavelId && !entry.responsavelNome)
+            .map(entry => upsertManagementLaunchRemote(entry))
+        ]);
+        setSyncStatus(`Responsavel ${item.nomeResponsavel || '-'} removido`);
+      } catch (error) {
+        console.error(error);
+        setSyncStatus('Falha ao excluir responsavel no Supabase. Cache local mantido.');
+      }
+    }
+    window.deleteManagementResponsavel = deleteManagementResponsavel;
 
     function renderHitachiDocumentLine(label, fileLabel, storageKey, pageNumber = null, options = {}) {
       if (!fileLabel) return '';
@@ -6118,6 +6752,7 @@ AMAURI BARROSO DE MOURA"></textarea>
     });
     document.getElementById('dq').addEventListener('input', renderDiarista);
     document.getElementById('hq').addEventListener('input', renderHitachi);
+    document.getElementById('gq').addEventListener('input', renderManagement);
     document.getElementById('pq').addEventListener('input', renderPassagens);
     [pAirStart, pAirEnd, pRoadStart, pRoadEnd, pHospStart, pHospEnd, pCarStart, pCarEnd].forEach(input => input.addEventListener('change', renderPassagens));
     document.getElementById('pAirClear').addEventListener('click', () => {
@@ -6136,6 +6771,10 @@ AMAURI BARROSO DE MOURA"></textarea>
       if (!hMonthPicker.value) hMonthPicker.value = currentMonthKey();
       document.getElementById('hitachiPayrollMonth').value = hMonthPicker.value;
       renderHitachi();
+    });
+    gMonthPicker.addEventListener('change', () => {
+      if (!gMonthPicker.value) gMonthPicker.value = currentMonthKey();
+      renderManagement();
     });
     pMonthPicker.addEventListener('change', () => {
       if (!pMonthPicker.value) pMonthPicker.value = currentMonthKey();
@@ -6434,6 +7073,12 @@ AMAURI BARROSO DE MOURA"></textarea>
         refreshProtectedViews();
       });
     });
+    document.querySelectorAll('.toplink[data-g-view]').forEach(button => {
+      button.addEventListener('click', () => {
+        openManagementView(button.dataset.gView);
+        renderManagement();
+      });
+    });
     document.querySelectorAll('.toplink[data-p-view]').forEach(button => {
       button.addEventListener('click', () => {
         openPassagensView(button.dataset.pView);
@@ -6463,10 +7108,137 @@ AMAURI BARROSO DE MOURA"></textarea>
         setSyncStatus('Falha ao sincronizar diarista. Cache local mantido.');
       }
     });
+
+    document.getElementById('cancelManagementLaunchEdit').addEventListener('click', resetManagementLaunchForm);
+    document.getElementById('cancelManagementObraEdit').addEventListener('click', resetManagementObraForm);
+    document.getElementById('cancelManagementResponsavelEdit').addEventListener('click', resetManagementResponsavelForm);
+
+    document.getElementById('managementLaunchForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
+      const obra = getManagementObra(formData.obraId);
+      const payload = {
+        id: editingManagementLaunchId || createId(),
+        monthKey: formData.monthKey || currentManagementMonth(),
+        dataLancamento: formData.dataLancamento || '',
+        responsavelId: formData.responsavelId || '',
+        responsavelNome: getManagementResponsavelName(formData.responsavelId),
+        fornecedor: formData.fornecedor || '',
+        obraId: formData.obraId || '',
+        obraNome: obra ? obra.nomeObra || '' : '',
+        diretorResponsavel: obra ? obra.diretorResponsavel || '' : '',
+        numeroNf: formData.numeroNf || '',
+        valor: formData.valor ? Number(String(formData.valor).replace(/\./g, '').replace(',', '.')) : null,
+        observacao: formData.observacao || ''
+      };
+      const index = managementLaunches.findIndex(item => item.id === payload.id);
+      if (index >= 0) {
+        managementLaunches[index] = { ...managementLaunches[index], ...payload };
+      } else {
+        managementLaunches.push(payload);
+      }
+      gMonthPicker.value = payload.monthKey;
+      resetManagementLaunchForm();
+      saveLocalCache();
+      renderManagement();
+      try {
+        await upsertManagementLaunchRemote(payload);
+        setSyncStatus(`Lancamento da NF ${payload.numeroNf || '-'} sincronizado`);
+      } catch (error) {
+        console.error(error);
+        setSyncStatus(`Falha ao sincronizar NF ${payload.numeroNf || '-'}. Cache local mantido.`);
+      }
+    });
+
+    document.getElementById('managementObraForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
+      const payload = {
+        id: editingManagementObraId || createId(),
+        nomeObra: formData.nomeObra || '',
+        diretorResponsavel: formData.diretorResponsavel || '',
+        prazoContrato: formData.prazoContrato || ''
+      };
+      const index = managementObras.findIndex(item => item.id === payload.id);
+      if (index >= 0) {
+        managementObras[index] = payload;
+        managementLaunches.forEach(item => {
+          if (String(item.obraId) === String(payload.id)) {
+            item.obraNome = payload.nomeObra;
+            item.diretorResponsavel = payload.diretorResponsavel;
+          }
+        });
+      } else {
+        managementObras.push(payload);
+      }
+      resetManagementObraForm();
+      populateManagementSelects();
+      saveLocalCache();
+      renderManagement();
+      try {
+        await Promise.all([
+          upsertManagementObraRemote(payload),
+          ...managementLaunches
+            .filter(item => String(item.obraId) === String(payload.id))
+            .map(item => upsertManagementLaunchRemote(item))
+        ]);
+        setSyncStatus(`Obra ${payload.nomeObra || '-'} sincronizada`);
+      } catch (error) {
+        console.error(error);
+        setSyncStatus(`Falha ao sincronizar obra ${payload.nomeObra || '-'}. Cache local mantido.`);
+      }
+    });
+
+    document.getElementById('managementResponsavelForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
+      const payload = {
+        id: editingManagementResponsavelId || createId(),
+        nomeResponsavel: formData.nomeResponsavel || ''
+      };
+      const index = managementResponsaveis.findIndex(item => item.id === payload.id);
+      if (index >= 0) {
+        managementResponsaveis[index] = payload;
+        managementLaunches.forEach(item => {
+          if (String(item.responsavelId) === String(payload.id)) item.responsavelNome = payload.nomeResponsavel;
+        });
+      } else {
+        managementResponsaveis.push(payload);
+      }
+      resetManagementResponsavelForm();
+      populateManagementSelects();
+      saveLocalCache();
+      renderManagement();
+      try {
+        await Promise.all([
+          upsertManagementResponsavelRemote(payload),
+          ...managementLaunches
+            .filter(item => String(item.responsavelId) === String(payload.id))
+            .map(item => upsertManagementLaunchRemote(item))
+        ]);
+        setSyncStatus(`Responsavel ${payload.nomeResponsavel || '-'} sincronizado`);
+      } catch (error) {
+        console.error(error);
+        setSyncStatus(`Falha ao sincronizar responsavel ${payload.nomeResponsavel || '-'}. Cache local mantido.`);
+      }
+    });
+
     document.getElementById('navInternet').addEventListener('click', () => switchModule('internet'));
     document.getElementById('navDiarista').addEventListener('click', () => switchModule('diarista'));
     document.getElementById('navPassagens').addEventListener('click', () => switchModule('passagens'));
     document.getElementById('navHitachi').addEventListener('click', () => switchModule('hitachi'));
+    document.getElementById('navGerenciamento').addEventListener('click', () => {
+      switchModule('management');
+      renderManagement();
+    });
+    document.getElementById('openManagementCadastro').addEventListener('click', () => {
+      switchModule('management');
+      openManagementView('cadastro');
+      resetManagementLaunchForm();
+      resetManagementObraForm();
+      resetManagementResponsavelForm();
+      renderManagement();
+    });
     document.getElementById('syncPassagens').addEventListener('click', syncPassagensData);
     document.getElementById('openPassagensConfig').addEventListener('click', () => {
       const form = document.getElementById('passagensConfigForm');
@@ -6948,10 +7720,14 @@ AMAURI BARROSO DE MOURA"></textarea>
     async function initializePortal() {
       await bootstrapData();
       hMonthPicker.value = currentMonthKey();
+      gMonthPicker.value = currentMonthKey();
       pMonthPicker.value = currentMonthKey();
       document.getElementById('hitachiPayrollMonth').value = currentMonthKey();
       resetHitachiForm();
       resetHitachiCompanyForm();
+      resetManagementLaunchForm();
+      resetManagementObraForm();
+      resetManagementResponsavelForm();
       refreshProtectedViews();
       openView('overview');
       render();
@@ -6961,6 +7737,8 @@ AMAURI BARROSO DE MOURA"></textarea>
       renderPassagens();
       openHitachiView('overview');
       renderHitachi();
+      openManagementView('overview');
+      renderManagement();
       if (passagensApiToken && PASSAGENS_API_ONLY) {
         syncPassagensData().catch(error => console.error(error));
       } else if (passagensApiToken && !passagensRows.length) {

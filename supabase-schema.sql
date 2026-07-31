@@ -84,6 +84,36 @@ create table if not exists public.hitachi_company_docs (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.management_nf_launches (
+  id bigint primary key,
+  month_key text not null,
+  data_lancamento text not null default '',
+  responsavel_id bigint null,
+  responsavel_nome text not null default '',
+  fornecedor text not null default '',
+  obra_id bigint null,
+  obra_nome text not null default '',
+  diretor_responsavel text not null default '',
+  numero_nf text not null default '',
+  valor numeric null,
+  observacao text not null default '',
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.management_nf_obras (
+  id bigint primary key,
+  nome_obra text not null default '',
+  diretor_responsavel text not null default '',
+  prazo_contrato text not null default '',
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.management_nf_responsaveis (
+  id bigint primary key,
+  nome_responsavel text not null default '',
+  created_at timestamptz not null default now()
+);
+
 create table if not exists public.passagens_rows (
   key text primary key,
   tabela text not null default 'passagens',
@@ -110,6 +140,9 @@ alter table public.diarista_cadastros enable row level security;
 alter table public.diarista_month_entries enable row level security;
 alter table public.hitachi_collaborators enable row level security;
 alter table public.hitachi_company_docs enable row level security;
+alter table public.management_nf_launches enable row level security;
+alter table public.management_nf_obras enable row level security;
+alter table public.management_nf_responsaveis enable row level security;
 alter table public.passagens_rows enable row level security;
 alter table public.passagens_complements enable row level security;
 alter table public.passagens_creditos enable row level security;
@@ -165,6 +198,30 @@ with check (true);
 drop policy if exists "anon_full_hitachi_company_docs" on public.hitachi_company_docs;
 create policy "anon_full_hitachi_company_docs"
 on public.hitachi_company_docs
+for all
+to anon
+using (true)
+with check (true);
+
+drop policy if exists "anon_full_management_nf_launches" on public.management_nf_launches;
+create policy "anon_full_management_nf_launches"
+on public.management_nf_launches
+for all
+to anon
+using (true)
+with check (true);
+
+drop policy if exists "anon_full_management_nf_obras" on public.management_nf_obras;
+create policy "anon_full_management_nf_obras"
+on public.management_nf_obras
+for all
+to anon
+using (true)
+with check (true);
+
+drop policy if exists "anon_full_management_nf_responsaveis" on public.management_nf_responsaveis;
+create policy "anon_full_management_nf_responsaveis"
+on public.management_nf_responsaveis
 for all
 to anon
 using (true)
