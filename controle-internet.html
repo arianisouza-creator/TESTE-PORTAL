@@ -1603,7 +1603,7 @@ AMAURI BARROSO DE MOURA"></textarea>
             <p id="gPageSubtitle">Resumo total das notas fiscais, participacao por responsavel e prazo contratual das obras.</p>
           </div>
 
-          <section class="kpis" style="grid-template-columns:repeat(4,1fr)">
+          <section class="kpis" style="grid-template-columns:repeat(2,1fr)">
             <div class="kpi">
               <div class="ktop"><div class="kicon blue" data-icon="clipboard"></div><div class="klabel">Notas fiscais</div></div>
               <div class="kvalue" id="gLaunchCount">0</div>
@@ -1613,16 +1613,6 @@ AMAURI BARROSO DE MOURA"></textarea>
               <div class="ktop"><div class="kicon green" data-icon="dollar"></div><div class="klabel">Valor total</div></div>
               <div class="kvalue" id="gLaunchValue">R$ 0,00</div>
               <div class="kmeta">Soma acumulada das notas</div>
-            </div>
-            <div class="kpi">
-              <div class="ktop"><div class="kicon slate" data-icon="building"></div><div class="klabel">Obras com NF</div></div>
-              <div class="kvalue" id="gTopNfValue">0</div>
-              <div class="kmeta" id="gTopNfMeta">Sem obras com lancamento</div>
-            </div>
-            <div class="kpi">
-              <div class="ktop"><div class="kicon blue" data-icon="barChart3"></div><div class="klabel">Media por obra</div></div>
-              <div class="kvalue" id="gLeadResponsavel">R$ 0,00</div>
-              <div class="kmeta" id="gLeadResponsavelMeta">Valor medio por obra cadastrada</div>
             </div>
           </section>
 
@@ -1650,7 +1640,9 @@ AMAURI BARROSO DE MOURA"></textarea>
               <label>Responsavel
                 <select name="responsavelId" id="managementResponsavelSelect" required></select>
               </label>
-              <label style="grid-column:1 / -1">Empreiteiro / fornecedor<input name="fornecedor" required placeholder="Nome do fornecedor"></label>
+              <label style="grid-column:1 / -1">Empreiteiro / fornecedor
+                <select name="fornecedor" id="managementFornecedorSelect" required></select>
+              </label>
               <label>Obra
                 <select name="obraId" id="managementObraSelect" required></select>
               </label>
@@ -4609,6 +4601,7 @@ AMAURI BARROSO DE MOURA"></textarea>
     function populateManagementSelects() {
       const responsavelSelect = document.getElementById('managementResponsavelSelect');
       const obraSelect = document.getElementById('managementObraSelect');
+      const fornecedorSelect = document.getElementById('managementFornecedorSelect');
       responsavelSelect.innerHTML = `<option value="">Selecionar responsavel</option>${managementResponsaveis
         .slice()
         .sort((a, b) => String(a.nomeResponsavel || '').localeCompare(String(b.nomeResponsavel || '')))
@@ -4618,6 +4611,13 @@ AMAURI BARROSO DE MOURA"></textarea>
         .slice()
         .sort((a, b) => String(a.nomeObra || '').localeCompare(String(b.nomeObra || '')))
         .map(item => `<option value="${item.id}">${escapeHtml(item.nomeObra || 'Sem obra')}</option>`)
+        .join('')}`;
+      const fornecedoresOrdenados = [...new Set([
+        ...managementFornecedores.map(item => String(item.nomeFornecedor || '').trim()),
+        ...managementLaunches.map(item => String(item.fornecedor || '').trim())
+      ].filter(Boolean))].sort((a, b) => a.localeCompare(b));
+      fornecedorSelect.innerHTML = `<option value="">Selecionar fornecedor</option>${fornecedoresOrdenados
+        .map(item => `<option value="${escapeHtml(item)}">${escapeHtml(item)}</option>`)
         .join('')}`;
     }
 
@@ -4715,7 +4715,6 @@ AMAURI BARROSO DE MOURA"></textarea>
         }))
         .sort((a, b) => b.valor - a.valor || a.obraNome.localeCompare(b.obraNome));
       const obraCount = obraStats.length;
-      const avgPerObra = obraCount ? totalValue / obraCount : 0;
       const monthSortValue = value => {
         const text = String(value || '');
         if (/^\d{4}-\d{2}$/.test(text)) return Number(text.replace('-', ''));
@@ -4738,10 +4737,6 @@ AMAURI BARROSO DE MOURA"></textarea>
       document.getElementById('gPageSubtitle').textContent = `Resumo visual das notas fiscais com foco operacional na competencia ${monthLabel(monthKey)}.`;
       document.getElementById('gLaunchCount').textContent = overviewRows.length;
       document.getElementById('gLaunchValue').textContent = brl(totalValue);
-      document.getElementById('gTopNfValue').textContent = String(obraCount);
-      document.getElementById('gTopNfMeta').textContent = obraCount ? `${obraCount} obra(s) com lancamento cadastrado` : 'Sem obras com lancamento';
-      document.getElementById('gLeadResponsavel').textContent = brl(avgPerObra);
-      document.getElementById('gLeadResponsavelMeta').textContent = obraCount ? `Media considerando ${obraCount} obra(s)` : 'Valor medio por obra cadastrada';
       document.getElementById('gCountLabel').textContent = `${controlRows.length} registro${controlRows.length === 1 ? '' : 's'} na competencia`;
       document.getElementById('gObraOverview').innerHTML = obraStats.length ? obraStats.map(obra => {
         const totalNfs = obra.quantidade || 0;
