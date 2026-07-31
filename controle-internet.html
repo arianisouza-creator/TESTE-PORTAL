@@ -1683,6 +1683,11 @@ AMAURI BARROSO DE MOURA"></textarea>
             </div>
           </section>
 
+          <section class="card pad" style="margin-top:14px">
+            <div class="chead"><span class="ti2">Ultima atualizacao por responsavel</span><span class="eyebrow">Competencia selecionada</span></div>
+            <div class="list" id="gRecentUpdates"></div>
+          </section>
+
           <section class="obra-overview-grid" id="gObraOverview"></section>
 
           <section class="evolution-grid" id="gObraEvolution"></section>
@@ -4634,6 +4639,24 @@ AMAURI BARROSO DE MOURA"></textarea>
       return months ? `Faltam ${months} mes(es) e ${days} dia(s)` : `Faltam ${days} dia(s)`;
     }
 
+    function formatManagementUpdate(value, fallbackDate = '') {
+      if (value) {
+        const date = new Date(value);
+        if (!Number.isNaN(date.getTime())) {
+          return date.toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+          }).replace(',', ' as');
+        }
+      }
+      if (fallbackDate) {
+        return `${formatDate(fallbackDate)} sem horario`;
+      }
+      return 'Sem atualizacao registrada';
+    }
+
     function getManagementResponsavelName(id) {
       const item = managementResponsaveis.find(entry => String(entry.id) === String(id));
       return item ? item.nomeResponsavel : '';
@@ -4805,6 +4828,32 @@ AMAURI BARROSO DE MOURA"></textarea>
       document.getElementById('gLaunchCount').textContent = overviewRows.length;
       document.getElementById('gLaunchValue').textContent = brl(totalValue);
       document.getElementById('gCountLabel').textContent = `${controlRows.length} registro${controlRows.length === 1 ? '' : 's'} na competencia`;
+      const latestByResponsavel = controlRows.reduce((acc, item) => {
+        const key = item.responsavelNome || 'Sem responsavel';
+        const current = acc.get(key);
+        const currentStamp = current?.updatedAt || current?.dataLancamento || '';
+        const nextStamp = item.updatedAt || item.dataLancamento || '';
+        if (!current || String(nextStamp) > String(currentStamp)) acc.set(key, item);
+        return acc;
+      }, new Map());
+      const latestEntries = [...latestByResponsavel.entries()]
+        .map(([responsavel, item]) => ({
+          responsavel,
+          updatedAt: item.updatedAt || '',
+          dataLancamento: item.dataLancamento || '',
+          fornecedor: item.fornecedor || '',
+          numeroNf: item.numeroNf || ''
+        }))
+        .sort((a, b) => String(b.updatedAt || b.dataLancamento || '').localeCompare(String(a.updatedAt || a.dataLancamento || '')) || a.responsavel.localeCompare(b.responsavel));
+      document.getElementById('gRecentUpdates').innerHTML = latestEntries.length ? latestEntries.map(item => `
+        <div class="li">
+          <div>
+            <b class="link">${escapeHtml(item.responsavel)}</b>
+            <div class="lisub">${item.numeroNf ? `NF ${escapeHtml(item.numeroNf)}` : 'NF sem numero'}${item.fornecedor ? ` | ${escapeHtml(item.fornecedor)}` : ''}</div>
+          </div>
+          <span class="tag neutral">Ultima atualizacao ${formatManagementUpdate(item.updatedAt, item.dataLancamento)}</span>
+        </div>
+      `).join('') : `<div class="empty-state"><b>Nenhuma atualizacao nesta competencia.</b>Assim que houver lancamentos no mes selecionado, o ultimo registro por responsavel aparece aqui.</div>`;
       document.getElementById('gObraOverview').innerHTML = obraStats.length ? obraStats.map(obra => {
         const totalNfs = obra.quantidade || 0;
         const stops = [];
@@ -7733,6 +7782,7 @@ AMAURI BARROSO DE MOURA"></textarea>
         id: editingManagementLaunchId || createId(),
         monthKey: formData.monthKey || currentManagementMonth(),
         dataLancamento: formData.dataLancamento || '',
+        updatedAt: new Date().toISOString(),
         responsavelId: formData.responsavelId || '',
         responsavelNome: getManagementResponsavelName(formData.responsavelId),
         fornecedor: formData.fornecedor || '',
