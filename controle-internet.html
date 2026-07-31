@@ -149,6 +149,42 @@
     .barlabel{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--body)}
     .track{height:10px;border-radius:999px;background:#eef2f7;overflow:hidden}
     .fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#2f6df3,#1d56ce)}
+    .obra-overview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:16px}
+    .obra-card{display:grid;grid-template-columns:180px 1fr;gap:22px;align-items:center}
+    .pie-card{display:grid;place-items:center;gap:12px}
+    .pie-frame{width:152px;height:152px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 30% 30%,#ffffff 0%,#f7faff 52%,#edf3fb 100%);border:1px solid #e4eaf4;box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 10px 24px rgba(37,99,235,.08)}
+    .pie-chart{width:128px;height:128px;border-radius:50%;position:relative;background:conic-gradient(#dbe5f4 0 360deg);box-shadow:0 8px 18px rgba(15,23,42,.08)}
+    .pie-chart::after{content:'';position:absolute;inset:20px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1px #eef2f7}
+    .pie-center{position:absolute;inset:0;display:grid;place-items:center;text-align:center;z-index:1}
+    .pie-center b{font-size:26px;color:#183975;line-height:1}
+    .pie-center span{font:600 10px "IBM Plex Mono",monospace;color:var(--mut);text-transform:uppercase;letter-spacing:1.2px}
+    .pie-caption{font:600 10px "IBM Plex Mono",monospace;color:var(--mut);letter-spacing:1.3px;text-transform:uppercase}
+    .obra-meta{display:grid;gap:12px}
+    .obra-meta h3{margin:0;color:#183975;font-size:16px}
+    .obra-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .obra-kpi{border:1px solid #e8edf6;border-radius:12px;padding:12px 14px;background:linear-gradient(180deg,#fbfdff,#f5f9ff)}
+    .obra-kpi span{display:block;font:600 10px "IBM Plex Mono",monospace;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+    .obra-kpi b{display:block;color:var(--ink);font-size:18px}
+    .pie-legend{display:grid;gap:10px}
+    .pie-item{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 12px;border:1px solid #e7edf7;border-radius:12px;background:#fbfcff;font-size:12px;color:var(--body)}
+    .pie-item:last-child{padding-bottom:0;border-bottom:0}
+    .pie-left{display:flex;align-items:center;gap:8px;min-width:0}
+    .pie-swatch{width:12px;height:12px;border-radius:999px;flex:0 0 auto;box-shadow:0 0 0 4px rgba(37,99,235,.08)}
+    .pie-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pie-right{display:grid;justify-items:end;gap:2px}
+    .pie-right b{color:#183975}
+    .pie-right small{font:600 10px "IBM Plex Mono",monospace;color:var(--mut);letter-spacing:.8px}
+    .deadline-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .deadline-card{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,#ffffff,#f9fbff);padding:16px;box-shadow:var(--shadow);display:grid;gap:12px}
+    .deadline-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+    .deadline-top h3{margin:0;color:#183975;font-size:16px}
+    .deadline-top small{display:block;margin-top:4px;color:var(--body);font-size:12px}
+    .deadline-badge{display:inline-flex;align-items:center;justify-content:center;min-width:54px;height:28px;border-radius:999px;background:#eef4ff;color:#1d4ed8;font:700 11px "IBM Plex Mono",monospace}
+    .deadline-progress{height:12px;border-radius:999px;background:#edf2f7;overflow:hidden}
+    .deadline-progress span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#60a5fa,#2563eb)}
+    .deadline-foot{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:12px;color:var(--body)}
+    .deadline-foot b{color:#183975}
+    .deadline-months{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:#eef4ff;color:#1d4ed8;font:600 10px "IBM Plex Mono",monospace;letter-spacing:1px;text-transform:uppercase}
     .donut-wrap{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:center}
     .donut{width:150px;height:150px;border-radius:999px;display:grid;place-items:center;background:conic-gradient(var(--green) 0deg,var(--green) 0deg,#edf1f5 0deg 360deg);margin:auto}
     .donut-hole{width:98px;height:98px;border-radius:999px;background:#fff;display:grid;place-items:center;text-align:center}
@@ -1563,31 +1599,22 @@ AMAURI BARROSO DE MOURA"></textarea>
               <div class="kmeta">Soma acumulada das notas</div>
             </div>
             <div class="kpi">
-              <div class="ktop"><div class="kicon slate" data-icon="barChart3"></div><div class="klabel">Maior NF</div></div>
-              <div class="kvalue" id="gTopNfValue">R$ 0,00</div>
-              <div class="kmeta" id="gTopNfMeta">Sem lancamentos</div>
+              <div class="ktop"><div class="kicon slate" data-icon="building"></div><div class="klabel">Obras com NF</div></div>
+              <div class="kvalue" id="gTopNfValue">0</div>
+              <div class="kmeta" id="gTopNfMeta">Sem obras com lancamento</div>
             </div>
             <div class="kpi">
-              <div class="ktop"><div class="kicon blue" data-icon="users"></div><div class="klabel">Responsavel lider</div></div>
-              <div class="kvalue" id="gLeadResponsavel">-</div>
-              <div class="kmeta" id="gLeadResponsavelMeta">Sem participacao registrada</div>
+              <div class="ktop"><div class="kicon blue" data-icon="barChart3"></div><div class="klabel">Media por obra</div></div>
+              <div class="kvalue" id="gLeadResponsavel">R$ 0,00</div>
+              <div class="kmeta" id="gLeadResponsavelMeta">Valor medio por obra cadastrada</div>
             </div>
           </section>
 
-          <section class="dashgrid" style="grid-template-columns:1fr 1fr">
-            <article class="card pad">
-              <div class="chead"><span class="ti2">Valor total por NF</span><span class="eyebrow">Resumo acumulado</span></div>
-              <div class="bars" id="gValueChart"></div>
-            </article>
-            <article class="card pad">
-              <div class="chead"><span class="ti2">Participacao por responsavel</span><span class="eyebrow">Percentual de lancamentos</span></div>
-              <div class="bars" id="gResponsavelChart"></div>
-            </article>
-          </section>
+          <section class="obra-overview-grid" id="gObraOverview"></section>
 
           <section class="card pad" style="margin-top:16px">
             <div class="chead"><span class="ti2">Prazo das obras</span><span class="eyebrow">Passe o mouse para ver os meses restantes</span></div>
-            <div class="bars" id="gObraDeadlines"></div>
+            <div class="deadline-grid" id="gObraDeadlines"></div>
           </section>
         </div>
 
@@ -4602,37 +4629,94 @@ AMAURI BARROSO DE MOURA"></textarea>
       const overviewRows = managementOverviewRows();
       const controlRows = managementFilteredRows(monthKey);
       const totalValue = overviewRows.reduce((sum, item) => sum + (Number(item.valor) || 0), 0);
-      const nfMap = new Map();
-      const respMap = new Map();
+      const responsavelPalette = ['#2563eb', '#22c55e', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#f97316', '#84cc16', '#14b8a6', '#e11d48'];
+      const responsavelColor = name => {
+        const value = String(name || 'sem-responsavel').toUpperCase();
+        let hash = 0;
+        for (let index = 0; index < value.length; index += 1) hash = ((hash * 31) + value.charCodeAt(index)) >>> 0;
+        return responsavelPalette[hash % responsavelPalette.length];
+      };
+      const obraMap = new Map();
       overviewRows.forEach(item => {
-        const nfKey = item.numeroNf || `Sem NF-${item.id}`;
-        const nfCurrent = nfMap.get(nfKey) || { numeroNf: item.numeroNf || 'Sem NF', fornecedor: item.fornecedor || '-', obraNome: item.obraNome || '-', valor: 0, quantidade: 0 };
-        nfCurrent.valor += Number(item.valor) || 0;
-        nfCurrent.quantidade += 1;
-        nfMap.set(nfKey, nfCurrent);
+        const obraKey = item.obraNome || 'Sem obra';
+        const obraCurrent = obraMap.get(obraKey) || {
+          obraNome: obraKey,
+          valor: 0,
+          quantidade: 0,
+          responsaveis: new Map()
+        };
+        obraCurrent.valor += Number(item.valor) || 0;
+        obraCurrent.quantidade += 1;
         const respKey = item.responsavelNome || 'Sem responsavel';
-        const respCurrent = respMap.get(respKey) || { nome: respKey, quantidade: 0, valor: 0 };
+        const respCurrent = obraCurrent.responsaveis.get(respKey) || { nome: respKey, quantidade: 0, valor: 0 };
         respCurrent.quantidade += 1;
         respCurrent.valor += Number(item.valor) || 0;
-        respMap.set(respKey, respCurrent);
+        obraCurrent.responsaveis.set(respKey, respCurrent);
+        obraMap.set(obraKey, obraCurrent);
       });
-      const nfStats = [...nfMap.values()].sort((a, b) => b.valor - a.valor);
-      const respStats = [...respMap.values()].sort((a, b) => b.quantidade - a.quantidade);
-      const topNf = nfStats[0] || null;
-      const leadResp = respStats[0] || null;
-      const maxNfValue = topNf ? topNf.valor : 0;
-      const maxRespCount = leadResp ? leadResp.quantidade : 0;
+      const obraStats = [...obraMap.values()]
+        .map(item => ({
+          ...item,
+          responsaveis: [...item.responsaveis.values()].sort((a, b) => b.quantidade - a.quantidade || a.nome.localeCompare(b.nome))
+        }))
+        .sort((a, b) => b.valor - a.valor || a.obraNome.localeCompare(b.obraNome));
+      const obraCount = obraStats.length;
+      const avgPerObra = obraCount ? totalValue / obraCount : 0;
       document.getElementById('gPageTitle').textContent = `Gerenciamento | ${monthLabel(monthKey)}`;
       document.getElementById('gPageSubtitle').textContent = `Resumo visual das notas fiscais com foco operacional na competencia ${monthLabel(monthKey)}.`;
       document.getElementById('gLaunchCount').textContent = overviewRows.length;
       document.getElementById('gLaunchValue').textContent = brl(totalValue);
-      document.getElementById('gTopNfValue').textContent = topNf ? brl(topNf.valor) : 'R$ 0,00';
-      document.getElementById('gTopNfMeta').textContent = topNf ? `NF ${topNf.numeroNf} | ${topNf.fornecedor}` : 'Sem lancamentos';
-      document.getElementById('gLeadResponsavel').textContent = leadResp ? leadResp.nome : '-';
-      document.getElementById('gLeadResponsavelMeta').textContent = leadResp ? `${leadResp.quantidade} NF(s) | ${overviewRows.length ? Math.round((leadResp.quantidade / overviewRows.length) * 100) : 0}% do total` : 'Sem participacao registrada';
+      document.getElementById('gTopNfValue').textContent = String(obraCount);
+      document.getElementById('gTopNfMeta').textContent = obraCount ? `${obraCount} obra(s) com lancamento cadastrado` : 'Sem obras com lancamento';
+      document.getElementById('gLeadResponsavel').textContent = brl(avgPerObra);
+      document.getElementById('gLeadResponsavelMeta').textContent = obraCount ? `Media considerando ${obraCount} obra(s)` : 'Valor medio por obra cadastrada';
       document.getElementById('gCountLabel').textContent = `${controlRows.length} registro${controlRows.length === 1 ? '' : 's'} na competencia`;
-      document.getElementById('gValueChart').innerHTML = nfStats.length ? nfStats.map(item => `<div class="baritem"><div class="barlabel"><span>NF ${escapeHtml(item.numeroNf)} | ${escapeHtml(item.fornecedor)}</span><b>${brl(item.valor)}</b></div><div class="track"><div class="fill" style="width:${maxNfValue ? (item.valor / maxNfValue) * 100 : 0}%"></div></div><div class="lisub">${escapeHtml(item.obraNome)} | ${item.quantidade} lancamento(s)</div></div>`).join('') : `<div class="empty-state"><b>Nenhuma NF cadastrada.</b>Assim que houver lancamentos, o grafico aparece aqui.</div>`;
-      document.getElementById('gResponsavelChart').innerHTML = respStats.length ? respStats.map(item => `<div class="baritem"><div class="barlabel"><span>${escapeHtml(item.nome)}</span><b>${overviewRows.length ? Math.round((item.quantidade / overviewRows.length) * 100) : 0}%</b></div><div class="track"><div class="fill" style="width:${maxRespCount ? (item.quantidade / maxRespCount) * 100 : 0}%"></div></div><div class="lisub">${item.quantidade} NF(s) | ${brl(item.valor)}</div></div>`).join('') : `<div class="empty-state"><b>Nenhum responsavel encontrado.</b>Cadastre notas para visualizar a participacao.</div>`;
+      document.getElementById('gObraOverview').innerHTML = obraStats.length ? obraStats.map(obra => {
+        const totalNfs = obra.quantidade || 0;
+        const stops = [];
+        let currentDeg = 0;
+        obra.responsaveis.forEach(resp => {
+          const slice = totalNfs ? (resp.quantidade / totalNfs) * 360 : 0;
+          const color = responsavelColor(resp.nome);
+          stops.push(`${color} ${currentDeg.toFixed(2)}deg ${(currentDeg + slice).toFixed(2)}deg`);
+          currentDeg += slice;
+        });
+        const gradient = stops.length ? `conic-gradient(${stops.join(', ')})` : 'conic-gradient(#dbe5f4 0 360deg)';
+        return `
+          <article class="card pad obra-card">
+            <div class="pie-card">
+              <div class="pie-frame">
+                <div class="pie-chart" style="background:${gradient}">
+                  <div class="pie-center"><div><b>${totalNfs}</b><span>NF(s)</span></div></div>
+                </div>
+              </div>
+              <div class="pie-caption">Distribuicao por responsavel</div>
+            </div>
+            <div class="obra-meta">
+              <div>
+                <h3>${escapeHtml(obra.obraNome)}</h3>
+              </div>
+              <div class="obra-kpis">
+                <div class="obra-kpi">
+                  <span>Valor total</span>
+                  <b>${brl(obra.valor)}</b>
+                </div>
+                <div class="obra-kpi">
+                  <span>Notas fiscais</span>
+                  <b>${obra.quantidade}</b>
+                </div>
+              </div>
+              <div class="pie-legend">
+                ${obra.responsaveis.map(resp => {
+                  const pct = totalNfs ? (resp.quantidade / totalNfs) * 100 : 0;
+                  const color = responsavelColor(resp.nome);
+                  return `<div class="pie-item"><div class="pie-left"><span class="pie-swatch" style="background:${color};box-shadow:0 0 0 4px ${color}22"></span><span class="pie-name">${escapeHtml(resp.nome)}</span></div><div class="pie-right"><b>${pct.toFixed(0)}%</b><small>${resp.quantidade} NF(s)</small></div></div>`;
+                }).join('')}
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('') : `<div class="empty-state" style="grid-column:1 / -1"><b>Nenhuma obra com notas cadastradas.</b>Assim que houver lancamentos, o resumo por obra aparece aqui.</div>`;
       document.getElementById('gObraDeadlines').innerHTML = managementObras.length ? managementObras.map(item => {
         const relatedRows = managementLaunches.filter(entry => norm(entry.obraNome) === norm(item.nomeObra));
         const startDate = relatedRows.map(entry => entry.dataLancamento || `${entry.monthKey || ''}-01`).filter(Boolean).sort()[0];
@@ -4643,8 +4727,11 @@ AMAURI BARROSO DE MOURA"></textarea>
         const elapsedDays = end ? Math.min(totalDays, Math.max(0, Math.ceil((today.getTime() - start.getTime()) / 86400000))) : 0;
         const pct = end ? Math.min(100, Math.max(0, (elapsedDays / totalDays) * 100)) : 0;
         const deadline = managementDeadlineLabel(item.prazoContrato);
-        return `<div class="baritem" title="${escapeHtml(deadline)}"><div class="barlabel"><span>${escapeHtml(item.nomeObra || 'Sem obra')}</span><b>${pct.toFixed(0)}%</b></div><div class="track"><div class="fill" style="width:${pct}%"></div></div><div class="lisub">${escapeHtml(deadline)}</div></div>`;
-      }).join('') : `<div class="empty-state"><b>Nenhuma obra cadastrada.</b>Cadastre as obras para acompanhar o prazo final.</div>`;
+        const totalMonths = end ? Math.max(1, Math.ceil(totalDays / 30)) : 0;
+        const remainingDays = end ? Math.max(0, Math.ceil((end.getTime() - today.getTime()) / 86400000)) : 0;
+        const remainingMonths = end ? Math.max(0, Math.floor(remainingDays / 30)) : 0;
+        return `<article class="deadline-card" title="${escapeHtml(deadline)}"><div class="deadline-top"><div><h3>${escapeHtml(item.nomeObra || 'Sem obra')}</h3><small>${escapeHtml(item.diretorResponsavel || 'Diretor nao informado')}</small></div><span class="deadline-badge">${pct.toFixed(0)}%</span></div><div class="deadline-progress"><span style="width:${pct}%"></span></div><div class="deadline-foot"><span>${escapeHtml(deadline)}</span><span class="deadline-months">${totalMonths ? `${remainingMonths} mes(es) restantes` : 'Prazo nao informado'}</span></div></article>`;
+      }).join('') : `<div class="empty-state" style="grid-column:1 / -1"><b>Nenhuma obra cadastrada.</b>Cadastre as obras para acompanhar o prazo final.</div>`;
       document.getElementById('gRows').innerHTML = controlRows.length ? controlRows.map(item => `<tr><td>${monthLabel(item.monthKey)}</td><td>${formatDate(item.dataLancamento) || '-'}</td><td><b class="link">${escapeHtml(item.responsavelNome || '-')}</b></td><td>${escapeHtml(item.fornecedor || '-')}</td><td>${escapeHtml(item.obraNome || '-')}</td><td>${escapeHtml(item.numeroNf || '-')}</td><td><span class="money">${item.valor != null ? brl(Number(item.valor) || 0) : '-'}</span></td><td>${escapeHtml(item.observacao || '-')}</td><td class="actioncell"><div style="display:flex;justify-content:flex-end;gap:8px"><button class="rowact" title="Editar lancamento" aria-label="Editar lancamento" onclick="editManagementLaunch(${item.id})">${icon('edit')}</button><button class="rowact" title="Excluir lancamento" aria-label="Excluir lancamento" onclick="deleteManagementLaunch(${item.id})">${icon('trash')}</button></div></td></tr>`).join('') : `<tr><td colspan="9"><div class="empty-state"><b>Nenhum lancamento nessa competencia.</b>Use os filtros ou cadastre uma nova NF.</div></td></tr>`;
       renderManagementCadastroList();
     }
