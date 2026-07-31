@@ -174,6 +174,22 @@
     .pie-right{display:grid;justify-items:end;gap:2px}
     .pie-right b{color:#183975}
     .pie-right small{font:600 10px "IBM Plex Mono",monospace;color:var(--mut);letter-spacing:.8px}
+    .evolution-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:16px}
+    .evolution-card{border:1px solid var(--line);border-radius:14px;background:#fff;padding:16px;box-shadow:var(--shadow);display:grid;gap:14px}
+    .evolution-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+    .evolution-head h3{margin:0;color:#183975;font-size:16px}
+    .evolution-head small{display:block;margin-top:4px;color:var(--body);font-size:12px}
+    .evolution-badge{display:inline-flex;align-items:center;justify-content:center;min-width:64px;height:30px;border-radius:999px;background:#fff4e8;color:#c96d13;font:700 11px "IBM Plex Mono",monospace}
+    .evolution-chart{width:100%;height:210px;display:block}
+    .evolution-axis{stroke:#e9eef6;stroke-width:1}
+    .evolution-area{fill:rgba(239,68,68,.08)}
+    .evolution-line{fill:none;stroke:#ef4444;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+    .evolution-point{fill:#fff;stroke:#ef4444;stroke-width:2}
+    .evolution-point.is-latest{fill:#ef4444}
+    .evolution-label{font:600 10px "IBM Plex Mono",monospace;fill:#94a3b8}
+    .evolution-value{font:700 11px "IBM Plex Mono",monospace;fill:#183975}
+    .evolution-foot{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:12px;color:var(--body)}
+    .evolution-foot b{color:#183975}
     .deadline-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
     .deadline-card{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,#ffffff,#f9fbff);padding:16px;box-shadow:var(--shadow);display:grid;gap:12px}
     .deadline-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
@@ -1612,6 +1628,8 @@ AMAURI BARROSO DE MOURA"></textarea>
 
           <section class="obra-overview-grid" id="gObraOverview"></section>
 
+          <section class="evolution-grid" id="gObraEvolution"></section>
+
           <section class="card pad" style="margin-top:16px">
             <div class="chead"><span class="ti2">Prazo das obras</span><span class="eyebrow">Passe o mouse para ver os meses restantes</span></div>
             <div class="deadline-grid" id="gObraDeadlines"></div>
@@ -1649,9 +1667,10 @@ AMAURI BARROSO DE MOURA"></textarea>
           <section class="card table-card">
             <div class="pad">
               <div class="chead"><span class="ti2">Lancamentos da competencia</span><span class="eyebrow" id="gCountLabel">0 registros</span></div>
-              <div class="mini-form" style="grid-template-columns:1fr 1fr auto;align-items:end">
+              <div class="mini-form" style="grid-template-columns:1fr 1fr 1fr auto;align-items:end">
                 <label style="margin:0">Filtrar por NF<input id="gFilterNf" placeholder="Ex.: 1417"></label>
                 <label style="margin:0">Filtrar por responsavel<input id="gFilterResp" placeholder="Nome do responsavel"></label>
+                <label style="margin:0">Filtrar por fornecedor<input id="gFilterFornecedor" placeholder="Nome do fornecedor"></label>
                 <button class="ghost" type="button" id="gClearFilters">Limpar filtros</button>
               </div>
             </div>
@@ -1679,7 +1698,7 @@ AMAURI BARROSO DE MOURA"></textarea>
         <div class="view" id="gview-cadastro">
           <div class="hero" style="margin-bottom:14px">
             <h1>Cadastro de gerenciamento</h1>
-            <p>Cadastre apenas obras e responsaveis para alimentar o controle de NF.</p>
+            <p>Cadastre obras, responsaveis e fornecedores para alimentar o controle de NF.</p>
           </div>
 
           <div class="cred-grid">
@@ -1706,6 +1725,17 @@ AMAURI BARROSO DE MOURA"></textarea>
                 </div>
               </form>
             </section>
+
+            <section class="card pad">
+              <div class="chead"><span class="ti2">Empreiteiro / fornecedor</span><span class="eyebrow">Cadastro rapido</span></div>
+              <form id="managementFornecedorForm" class="formgrid">
+                <label>Nome do fornecedor<input name="nomeFornecedor" required placeholder="Nome do empreiteiro / fornecedor"></label>
+                <div style="grid-column:1 / -1;display:flex;justify-content:flex-end;gap:10px">
+                  <button class="ghost" type="button" id="cancelManagementFornecedorEdit" style="display:none">Cancelar edicao</button>
+                  <button class="primary" type="submit" id="saveManagementFornecedorBtn"><span data-icon="plus"></span>Salvar fornecedor</button>
+                </div>
+              </form>
+            </section>
           </div>
 
           <div class="cred-grid" style="margin-top:14px">
@@ -1716,6 +1746,10 @@ AMAURI BARROSO DE MOURA"></textarea>
             <section class="card pad">
               <div class="chead"><span class="ti2">Responsaveis cadastrados</span><span class="eyebrow" id="gResponsaveisCadastroCount">0 registros</span></div>
               <div class="cred-list" id="gResponsaveisCadastroList"></div>
+            </section>
+            <section class="card pad">
+              <div class="chead"><span class="ti2">Fornecedores cadastrados</span><span class="eyebrow" id="gFornecedoresCadastroCount">0 registros</span></div>
+              <div class="cred-list" id="gFornecedoresCadastroList"></div>
             </section>
           </div>
         </div>
@@ -2197,6 +2231,7 @@ AMAURI BARROSO DE MOURA"></textarea>
     let editingManagementLaunchId = null;
     let editingManagementObraId = null;
     let editingManagementResponsavelId = null;
+    let editingManagementFornecedorId = null;
     let editingPassagemKey = '';
     let protectedAuthenticated = false;
     let currentModule = 'internet';
@@ -2224,6 +2259,7 @@ AMAURI BARROSO DE MOURA"></textarea>
     const managementLaunches = [];
     const managementObras = [];
     const managementResponsaveis = [];
+    const managementFornecedores = [];
     const HITACHI_MANUAL_SERVICE_NAMES = [
       'ALBERT VICENTE ZAMBELLO',
       'ALESSANDRA DA SILVA ASSEN',
@@ -4499,6 +4535,7 @@ AMAURI BARROSO DE MOURA"></textarea>
         managementLaunches.splice(0, managementLaunches.length, ...((payload.managementLaunches || []).map(item => ({ ...item }))));
         managementObras.splice(0, managementObras.length, ...((payload.managementObras || []).map(item => ({ ...item }))));
         managementResponsaveis.splice(0, managementResponsaveis.length, ...((payload.managementResponsaveis || []).map(item => ({ ...item }))));
+        managementFornecedores.splice(0, managementFornecedores.length, ...((payload.managementFornecedores || []).map(item => ({ ...item }))));
       } catch (error) {
         console.error('Falha ao ler cache de gerenciamento', error);
       }
@@ -4508,7 +4545,8 @@ AMAURI BARROSO DE MOURA"></textarea>
       localStorage.setItem(MANAGEMENT_CACHE_KEY, JSON.stringify({
         managementLaunches,
         managementObras,
-        managementResponsaveis
+        managementResponsaveis,
+        managementFornecedores
       }));
     }
 
@@ -4560,10 +4598,12 @@ AMAURI BARROSO DE MOURA"></textarea>
     function managementFilteredRows(monthKey = currentManagementMonth()) {
       const nfFilter = norm(document.getElementById('gFilterNf')?.value || '');
       const respFilter = norm(document.getElementById('gFilterResp')?.value || '');
+      const fornecedorFilter = norm(document.getElementById('gFilterFornecedor')?.value || '');
       return managementOverviewRows()
         .filter(item => (item.monthKey || '') === monthKey)
         .filter(item => !nfFilter || norm(item.numeroNf || '').includes(nfFilter))
-        .filter(item => !respFilter || norm(item.responsavelNome || '').includes(respFilter));
+        .filter(item => !respFilter || norm(item.responsavelNome || '').includes(respFilter))
+        .filter(item => !fornecedorFilter || norm(item.fornecedor || '').includes(fornecedorFilter));
     }
 
     function populateManagementSelects() {
@@ -4607,9 +4647,18 @@ AMAURI BARROSO DE MOURA"></textarea>
       document.getElementById('cancelManagementResponsavelEdit').style.display = 'none';
     }
 
+    function resetManagementFornecedorForm() {
+      editingManagementFornecedorId = null;
+      const form = document.getElementById('managementFornecedorForm');
+      form.reset();
+      document.getElementById('saveManagementFornecedorBtn').innerHTML = `${icon('plus')}Salvar fornecedor`;
+      document.getElementById('cancelManagementFornecedorEdit').style.display = 'none';
+    }
+
     function renderManagementCadastroList() {
       document.getElementById('gObrasCadastroCount').textContent = `${managementObras.length} registro${managementObras.length === 1 ? '' : 's'}`;
       document.getElementById('gResponsaveisCadastroCount').textContent = `${managementResponsaveis.length} registro${managementResponsaveis.length === 1 ? '' : 's'}`;
+      document.getElementById('gFornecedoresCadastroCount').textContent = `${managementFornecedores.length} registro${managementFornecedores.length === 1 ? '' : 's'}`;
       document.getElementById('gObrasCadastroList').innerHTML = managementObras.length ? managementObras
         .slice()
         .sort((a, b) => String(a.nomeObra || '').localeCompare(String(b.nomeObra || '')))
@@ -4620,6 +4669,11 @@ AMAURI BARROSO DE MOURA"></textarea>
         .sort((a, b) => String(a.nomeResponsavel || '').localeCompare(String(b.nomeResponsavel || '')))
         .map(item => `<div class="cred-item"><h4>${escapeHtml(item.nomeResponsavel || 'Sem nome')}</h4><div class="cred-row"><span>Lancamentos vinculados</span><b>${managementLaunches.filter(entry => String(entry.responsavelId) === String(item.id)).length}</b></div><div style="margin-top:10px;display:flex;justify-content:flex-end;gap:8px"><button class="inline-btn" type="button" onclick="editManagementResponsavel(${item.id})">Editar</button><button class="inline-btn danger" type="button" onclick="deleteManagementResponsavel(${item.id})">Excluir</button></div></div>`)
         .join('') : `<div class="empty-state"><b>Nenhum responsavel cadastrado.</b>Inclua quem faz os lancamentos para usar no formulario.</div>`;
+      document.getElementById('gFornecedoresCadastroList').innerHTML = managementFornecedores.length ? managementFornecedores
+        .slice()
+        .sort((a, b) => String(a.nomeFornecedor || '').localeCompare(String(b.nomeFornecedor || '')))
+        .map(item => `<div class="cred-item"><h4>${escapeHtml(item.nomeFornecedor || 'Sem nome')}</h4><div class="cred-row"><span>Lancamentos vinculados</span><b>${managementLaunches.filter(entry => norm(entry.fornecedor || '') === norm(item.nomeFornecedor || '')).length}</b></div><div style="margin-top:10px;display:flex;justify-content:flex-end;gap:8px"><button class="inline-btn" type="button" onclick="editManagementFornecedor(${item.id})">Editar</button><button class="inline-btn danger" type="button" onclick="deleteManagementFornecedor(${item.id})">Excluir</button></div></div>`)
+        .join('') : `<div class="empty-state"><b>Nenhum fornecedor cadastrado.</b>Inclua os empreiteiros / fornecedores usados nos lancamentos.</div>`;
     }
 
     function renderManagement() {
@@ -4662,6 +4716,24 @@ AMAURI BARROSO DE MOURA"></textarea>
         .sort((a, b) => b.valor - a.valor || a.obraNome.localeCompare(b.obraNome));
       const obraCount = obraStats.length;
       const avgPerObra = obraCount ? totalValue / obraCount : 0;
+      const monthSortValue = value => {
+        const text = String(value || '');
+        if (/^\d{4}-\d{2}$/.test(text)) return Number(text.replace('-', ''));
+        if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return Number(text.slice(0, 7).replace('-', ''));
+        return 0;
+      };
+      const shortMonthLabel = value => {
+        const text = String(value || '');
+        if (/^\d{4}-\d{2}$/.test(text)) {
+          const [year, month] = text.split('-').map(Number);
+          return `${String(month).padStart(2, '0')}/${String(year).slice(-2)}`;
+        }
+        if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+          const [year, month] = text.split('-').map(Number);
+          return `${String(month).padStart(2, '0')}/${String(year).slice(-2)}`;
+        }
+        return text || '-';
+      };
       document.getElementById('gPageTitle').textContent = `Gerenciamento | ${monthLabel(monthKey)}`;
       document.getElementById('gPageSubtitle').textContent = `Resumo visual das notas fiscais com foco operacional na competencia ${monthLabel(monthKey)}.`;
       document.getElementById('gLaunchCount').textContent = overviewRows.length;
@@ -4717,6 +4789,67 @@ AMAURI BARROSO DE MOURA"></textarea>
           </article>
         `;
       }).join('') : `<div class="empty-state" style="grid-column:1 / -1"><b>Nenhuma obra com notas cadastradas.</b>Assim que houver lancamentos, o resumo por obra aparece aqui.</div>`;
+      document.getElementById('gObraEvolution').innerHTML = obraStats.length ? obraStats.map(obra => {
+        const monthMap = new Map();
+        overviewRows
+          .filter(item => (item.obraNome || 'Sem obra') === obra.obraNome)
+          .forEach(item => {
+            const refMonth = /^\d{4}-\d{2}$/.test(String(item.monthKey || ''))
+              ? item.monthKey
+              : (item.dataLancamento ? String(item.dataLancamento).slice(0, 7) : '');
+            if (!refMonth) return;
+            monthMap.set(refMonth, (monthMap.get(refMonth) || 0) + 1);
+          });
+        const monthly = [...monthMap.entries()]
+          .map(([refMonth, quantidade]) => ({ refMonth, quantidade }))
+          .sort((a, b) => monthSortValue(a.refMonth) - monthSortValue(b.refMonth));
+        const chartWidth = 540;
+        const chartHeight = 170;
+        const left = 26;
+        const right = 16;
+        const top = 16;
+        const bottom = 28;
+        const innerWidth = chartWidth - left - right;
+        const innerHeight = chartHeight - top - bottom;
+        const maxValue = Math.max(1, ...monthly.map(item => item.quantidade));
+        const points = monthly.map((item, index) => {
+          const x = monthly.length === 1 ? left + innerWidth / 2 : left + (innerWidth * index) / (monthly.length - 1);
+          const y = top + innerHeight - ((item.quantidade / maxValue) * innerHeight);
+          return { ...item, x, y };
+        });
+        const linePoints = points.map(point => `${point.x},${point.y}`).join(' ');
+        const areaPoints = points.length
+          ? `${left},${top + innerHeight} ${linePoints} ${points[points.length - 1].x},${top + innerHeight}`
+          : '';
+        const gridLines = Array.from({ length: maxValue + 1 }, (_, index) => {
+          const value = maxValue - index;
+          const y = top + (innerHeight * index) / maxValue;
+          return `<line class="evolution-axis" x1="${left}" y1="${y}" x2="${chartWidth - right}" y2="${y}"></line><text class="evolution-label" x="${left - 8}" y="${y + 4}" text-anchor="end">${value}</text>`;
+        }).join('');
+        return `
+          <article class="evolution-card">
+            <div class="evolution-head">
+              <div>
+                <h3>${escapeHtml(obra.obraNome)}</h3>
+                <small>Evolucao mensal de notas fiscais lancadas</small>
+              </div>
+              <span class="evolution-badge">${obra.quantidade} NF(s)</span>
+            </div>
+            <svg class="evolution-chart" viewBox="0 0 ${chartWidth} ${chartHeight}" preserveAspectRatio="none" role="img" aria-label="Evolucao mensal de ${escapeHtml(obra.obraNome)}">
+              ${gridLines}
+              ${areaPoints ? `<polygon class="evolution-area" points="${areaPoints}"></polygon>` : ''}
+              ${linePoints ? `<polyline class="evolution-line" points="${linePoints}"></polyline>` : ''}
+              ${points.map((point, index) => `<circle class="evolution-point${index === points.length - 1 ? ' is-latest' : ''}" cx="${point.x}" cy="${point.y}" r="${index === points.length - 1 ? 5 : 4}"><title>${shortMonthLabel(point.refMonth)}: ${point.quantidade} NF(s)</title></circle>`).join('')}
+              ${points.map(point => `<text class="evolution-label" x="${point.x}" y="${chartHeight - 8}" text-anchor="middle">${shortMonthLabel(point.refMonth)}</text>`).join('')}
+              ${points.length ? `<text class="evolution-value" x="${points[points.length - 1].x}" y="${Math.max(14, points[points.length - 1].y - 10)}" text-anchor="middle">${points[points.length - 1].quantidade}</text>` : ''}
+            </svg>
+            <div class="evolution-foot">
+              <span>${monthly.length ? `${shortMonthLabel(monthly[0].refMonth)} ate ${shortMonthLabel(monthly[monthly.length - 1].refMonth)}` : 'Sem historico mensal'}</span>
+              <b>${monthly.length ? `${monthly[monthly.length - 1].quantidade} NF(s) no ultimo mes` : '0 NF(s)'}</b>
+            </div>
+          </article>
+        `;
+      }).join('') : `<div class="empty-state" style="grid-column:1 / -1"><b>Nenhuma evolucao mensal disponivel.</b>Assim que houver mais de um lancamento por obra, o historico aparece aqui.</div>`;
       document.getElementById('gObraDeadlines').innerHTML = managementObras.length ? managementObras.map(item => {
         const relatedRows = managementLaunches.filter(entry => norm(entry.obraNome) === norm(item.nomeObra));
         const startDate = relatedRows.map(entry => entry.dataLancamento || `${entry.monthKey || ''}-01`).filter(Boolean).sort()[0];
@@ -4827,6 +4960,29 @@ AMAURI BARROSO DE MOURA"></textarea>
       renderManagement();
     }
     window.deleteManagementResponsavel = deleteManagementResponsavel;
+
+    function editManagementFornecedor(id) {
+      const item = managementFornecedores.find(entry => entry.id === id);
+      if (!item) return;
+      editingManagementFornecedorId = id;
+      openManagementView('cadastro');
+      const form = document.getElementById('managementFornecedorForm');
+      form.elements.nomeFornecedor.value = item.nomeFornecedor || '';
+      document.getElementById('saveManagementFornecedorBtn').innerHTML = `${icon('save')}Salvar alteracoes`;
+      document.getElementById('cancelManagementFornecedorEdit').style.display = '';
+    }
+    window.editManagementFornecedor = editManagementFornecedor;
+
+    function deleteManagementFornecedor(id) {
+      const item = managementFornecedores.find(entry => entry.id === id);
+      if (!item || !window.confirm(`Excluir o fornecedor ${item.nomeFornecedor || '-'}?`)) return;
+      const index = managementFornecedores.findIndex(entry => entry.id === id);
+      if (index < 0) return;
+      managementFornecedores.splice(index, 1);
+      saveManagementCache();
+      renderManagement();
+    }
+    window.deleteManagementFornecedor = deleteManagementFornecedor;
 
     function renderHitachiDocumentLine(label, fileLabel, storageKey, pageNumber = null, options = {}) {
       if (!fileLabel) return '';
@@ -7010,9 +7166,11 @@ AMAURI BARROSO DE MOURA"></textarea>
     document.getElementById('gMonthPicker').addEventListener('change', renderManagement);
     document.getElementById('gFilterNf').addEventListener('input', renderManagement);
     document.getElementById('gFilterResp').addEventListener('input', renderManagement);
+    document.getElementById('gFilterFornecedor').addEventListener('input', renderManagement);
     document.getElementById('gClearFilters').addEventListener('click', () => {
       document.getElementById('gFilterNf').value = '';
       document.getElementById('gFilterResp').value = '';
+      document.getElementById('gFilterFornecedor').value = '';
       renderManagement();
     });
     document.getElementById('diaristaMonthForm').addEventListener('submit', async event => {
@@ -7391,6 +7549,7 @@ AMAURI BARROSO DE MOURA"></textarea>
     document.getElementById('cancelManagementLaunchEdit').addEventListener('click', resetManagementLaunchForm);
     document.getElementById('cancelManagementObraEdit').addEventListener('click', resetManagementObraForm);
     document.getElementById('cancelManagementResponsavelEdit').addEventListener('click', resetManagementResponsavelForm);
+    document.getElementById('cancelManagementFornecedorEdit').addEventListener('click', resetManagementFornecedorForm);
     document.getElementById('managementLaunchForm').addEventListener('submit', event => {
       event.preventDefault();
       const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
@@ -7460,6 +7619,27 @@ AMAURI BARROSO DE MOURA"></textarea>
       }
       saveManagementCache();
       resetManagementResponsavelForm();
+      renderManagement();
+    });
+    document.getElementById('managementFornecedorForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
+      const payload = {
+        id: editingManagementFornecedorId || createId(),
+        nomeFornecedor: formData.nomeFornecedor || ''
+      };
+      const index = managementFornecedores.findIndex(item => item.id === payload.id);
+      if (index >= 0) {
+        const previousName = managementFornecedores[index]?.nomeFornecedor || '';
+        managementFornecedores[index] = payload;
+        managementLaunches.forEach(item => {
+          if (norm(item.fornecedor || '') === norm(previousName)) item.fornecedor = payload.nomeFornecedor;
+        });
+      } else {
+        managementFornecedores.push(payload);
+      }
+      saveManagementCache();
+      resetManagementFornecedorForm();
       renderManagement();
     });
     document.getElementById('hitachiPayrollImport').addEventListener('click', importHitachiPayrollFile);
@@ -7610,6 +7790,7 @@ AMAURI BARROSO DE MOURA"></textarea>
       resetManagementLaunchForm();
       resetManagementObraForm();
       resetManagementResponsavelForm();
+      resetManagementFornecedorForm();
       refreshProtectedViews();
       openView('overview');
       render();
