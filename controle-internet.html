@@ -2529,6 +2529,51 @@ AMAURI BARROSO DE MOURA"></textarea>
       node.style.color = tone === 'error' ? '#c2410c' : tone === 'success' ? '#15803d' : '';
     }
 
+    async function requestPassagensApiWithFallback(baseUrl, token, page = 1, perPage = 200) {
+      const cleanBaseUrl = String(baseUrl || '').trim().replace(/\/+$/, '');
+      const cleanToken = String(token || '').trim();
+      const headers = {
+        Authorization: `Bearer ${cleanToken}`
+      };
+      const attempts = [
+        `${cleanBaseUrl}/v1/passagens?per_page=${perPage}&page=${page}&order_by=data_viagem&order_dir=DESC`,
+        `${cleanBaseUrl}/v1/passagens?per_page=${perPage}&page=${page}&order_by=data_prevista&order_dir=DESC`,
+        `${cleanBaseUrl}/v1/passagens?per_page=${perPage}&page=${page}&order_dir=DESC`,
+        `${cleanBaseUrl}/v1/passagens?per_page=${perPage}&page=${page}&fonte=todas`,
+        `${cleanBaseUrl}/v1/passagens?per_page=${perPage}&page=${page}`
+      ];
+
+      let lastStatus = 0;
+      let lastDetail = '';
+      for (const url of attempts) {
+        let response;
+        try {
+          response = await fetch(url, { headers });
+        } catch (error) {
+          lastDetail = 'Falha de rede ao acessar a API. Confira internet, CORS ou bloqueio do navegador.';
+          continue;
+        }
+
+        if (response.ok) {
+          const payload = await response.json();
+          return { payload, url };
+        }
+
+        lastStatus = response.status;
+        try {
+          lastDetail = (await response.text()).trim();
+        } catch (error) {
+          lastDetail = '';
+        }
+
+        if (response.status !== 500) {
+          break;
+        }
+      }
+
+      throw new Error(`API Passagens respondeu ${lastStatus || 500}${lastDetail ? ` - ${lastDetail}` : ''}`);
+    }
+
     async function validatePassagensApiConfig(baseUrl, token) {
       const cleanBaseUrl = String(baseUrl || '').trim().replace(/\/+$/, '');
       const cleanToken = String(token || '').trim();
@@ -2538,26 +2583,7 @@ AMAURI BARROSO DE MOURA"></textarea>
       if (!cleanToken) {
         throw new Error('Informe o token Bearer da API de passagens.');
       }
-      let response;
-      try {
-        response = await fetch(`${cleanBaseUrl}/v1/passagens?per_page=1&page=1&order_by=data_viagem&order_dir=DESC`, {
-          headers: {
-            Authorization: `Bearer ${cleanToken}`
-          }
-        });
-      } catch (error) {
-        throw new Error('Falha de rede ao acessar a API. Confira internet, CORS ou bloqueio do navegador.');
-      }
-      if (!response.ok) {
-        let detail = '';
-        try {
-          detail = (await response.text()).trim();
-        } catch (error) {
-          detail = '';
-        }
-        throw new Error(`API Passagens respondeu ${response.status}${detail ? ` - ${detail}` : ''}`);
-      }
-      const payload = await response.json();
+      const { payload } = await requestPassagensApiWithFallback(cleanBaseUrl, cleanToken, 1, 1);
       return {
         total: Number(payload.total || 0),
         totalPages: Number(payload.total_pages || 0)
@@ -6927,18 +6953,11 @@ AMAURI BARROSO DE MOURA"></textarea>
       button.innerHTML = `${icon('refresh')}Sincronizando...`;
       try {
         setPassagensConfigFeedback('Conexao validada. Buscando registros da API...', 'success');
-        const headers = {
-          Authorization: `Bearer ${passagensApiToken}`
-        };
         const rows = [];
         let page = 1;
         let totalPages = 1;
         do {
-          const response = await fetch(`${passagensApiBaseUrl}/v1/passagens?per_page=200&page=${page}&order_by=data_viagem&order_dir=DESC`, { headers });
-          if (!response.ok) {
-            throw new Error(`API Passagens respondeu ${response.status}`);
-          }
-          const payload = await response.json();
+          const { payload } = await requestPassagensApiWithFallback(passagensApiBaseUrl, passagensApiToken, page, 200);
           rows.push(...(payload.data || []).map(item => ({ ...item })));
           totalPages = Number(payload.total_pages || 1);
           page += 1;
