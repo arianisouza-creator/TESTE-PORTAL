@@ -4758,38 +4758,34 @@ AMAURI BARROSO DE MOURA"></textarea>
           return docsByName.get(key);
         };
 
-        const scopes = [
-          { escopo: 'holerite', field: 'holerite', label: 'holerite' },
-          { escopo: 'cartao_ponto', field: 'cartaoPonto', label: 'cartao ponto' }
-        ];
+        const zipBlob = await fetchHitachiApiExportZip(obraId, monthKey, 'por_colaborador');
+        const zip = await JSZip.loadAsync(await zipBlob.arrayBuffer());
+        const pdfEntries = Object.values(zip.files).filter(entry => !entry.dir && entry.name.toLowerCase().endsWith('.pdf'));
+        for (const entry of pdfEntries) {
+          const lowerName = entry.name.toLowerCase();
+          const isHolerite = lowerName.includes('holerite');
+          const isCartaoPonto = lowerName.includes('cartao_ponto') || lowerName.includes('cartao ponto');
+          if (!isHolerite && !isCartaoPonto) continue;
 
-        for (const scope of scopes) {
-          let zipBlob;
-          try {
-            zipBlob = await fetchHitachiApiExportZip(obraId, monthKey, scope.escopo);
-          } catch (error) {
-            console.warn(`Falha ao buscar ${scope.escopo} na API`, error);
-            continue;
-          }
-          const zip = await JSZip.loadAsync(await zipBlob.arrayBuffer());
-          const pdfEntries = Object.values(zip.files).filter(entry => !entry.dir && entry.name.toLowerCase().endsWith('.pdf'));
-          for (const entry of pdfEntries) {
-            const buffer = await entry.async('uint8array');
-            const collaboratorName = await extractCollaboratorFromPdfBuffer(buffer, entry.name.split('/').pop() || entry.name, rows);
-            const key = normalizePersonName(collaboratorName);
-            if (!key) continue;
-            const signed = pdfHasDigitalSignature(buffer);
-            const docs = ensureDocEntry(key);
-            docs[scope.field] = {
-              status: signed ? 'OK' : 'PENDENTE',
-              label: `${entry.name}${signed ? ' | assinado' : ' | sem assinatura digital'}`
-            };
-            if (signed) {
-              const storageKey = `hitachi|${monthKey}|${key}|${scope.field}`;
-              const blob = new Blob([buffer], { type: 'application/pdf' });
-              await saveHitachiDocumentBlob(storageKey, blob, { fileName: entry.name });
-              docs[scope.field].storageKey = storageKey;
-            }
+          const folderName = entry.name.includes('/') ? entry.name.split('/')[0] : '';
+          const fileName = entry.name.split('/').pop() || entry.name;
+          const buffer = await entry.async('uint8array');
+          const collaboratorName = folderName.trim() || await extractCollaboratorFromPdfBuffer(buffer, fileName, rows);
+          const key = normalizePersonName(collaboratorName);
+          if (!key) continue;
+
+          const signed = pdfHasDigitalSignature(buffer);
+          const docs = ensureDocEntry(key);
+          const field = isHolerite ? 'holerite' : 'cartaoPonto';
+          docs[field] = {
+            status: signed ? 'OK' : 'PENDENTE',
+            label: `${entry.name}${signed ? ' | assinado' : ' | sem assinatura digital'}`
+          };
+          if (signed) {
+            const storageKey = `hitachi|${monthKey}|${key}|${field}`;
+            const blob = new Blob([buffer], { type: 'application/pdf' });
+            await saveHitachiDocumentBlob(storageKey, blob, { fileName: entry.name });
+            docs[field].storageKey = storageKey;
           }
         }
 
