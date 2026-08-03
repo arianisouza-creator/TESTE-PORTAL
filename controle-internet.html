@@ -255,6 +255,8 @@
     .cell-select.ok{background:rgba(31,157,87,.10);border-color:rgba(31,157,87,.18);color:#197a45}
     .cell-select.warn{background:rgba(217,145,26,.12);border-color:rgba(217,145,26,.20);color:#b8780f}
     .cell-select.neutral{background:#eef0f3;border-color:#dde2e8;color:#667085}
+    .cell-doc-actions{margin-top:6px;display:flex;justify-content:flex-start}
+    .cell-doc-actions .doc-open-btn,.cell-doc-actions .doc-delete-btn{padding:5px 10px;font-size:10px}
     .bullet{width:7px;height:7px;border-radius:999px;background:currentColor}
     .actioncell{text-align:right}
     .detail-grid{display:grid;grid-template-columns:1fr 300px;gap:14px}
@@ -5339,6 +5341,14 @@ AMAURI BARROSO DE MOURA"></textarea>
       return `<div class="docline"><small>${label}: ${fileLabel}</small>${actions}</div>`;
     }
 
+    function renderHitachiCellOpenButton(storageKey, pageNumber = null, options = {}) {
+      const requireOk = !!options.requireOk;
+      const status = options.status || '';
+      if (!storageKey) return '';
+      if (requireOk && status !== 'OK') return '';
+      return `<div class="cell-doc-actions"><button class="doc-open-btn" type="button" onclick='openStoredHitachiDocument(${JSON.stringify(storageKey)}, ${pageNumber == null ? 'null' : Number(pageNumber)})'>Abrir documento</button></div>`;
+    }
+
     async function updateHitachiInline(id, field, value) {
       const item = hitachiCollaborators.find(entry => entry.id === id);
       if (!item) return;
@@ -5515,6 +5525,7 @@ AMAURI BARROSO DE MOURA"></textarea>
               <option value="PENDENTE" ${row.holerite === 'PENDENTE' ? 'selected' : ''}>PENDENTE</option>
               <option value="N/A" ${row.holerite === 'N/A' ? 'selected' : ''}>N/A</option>
             </select>
+            ${renderHitachiCellOpenButton(row.holeriteStorageKey, null, { requireOk: true, status: row.holerite })}
           </td>
           <td>
             <select class="cell-select ${statusTone(row.cartaoPonto)}" onchange="updateHitachiInline(${row.id}, 'cartaoPonto', this.value)">
@@ -5522,6 +5533,7 @@ AMAURI BARROSO DE MOURA"></textarea>
               <option value="PENDENTE" ${row.cartaoPonto === 'PENDENTE' ? 'selected' : ''}>PENDENTE</option>
               <option value="N/A" ${row.cartaoPonto === 'N/A' ? 'selected' : ''}>N/A</option>
             </select>
+            ${renderHitachiCellOpenButton(row.cartaoPontoStorageKey, null, { requireOk: true, status: row.cartaoPonto })}
           </td>
           <td>
             <select class="cell-select ${statusTone(row.comprovantePagamento)}" onchange="updateHitachiInline(${row.id}, 'comprovantePagamento', this.value)">
@@ -5529,6 +5541,7 @@ AMAURI BARROSO DE MOURA"></textarea>
               <option value="PENDENTE" ${row.comprovantePagamento === 'PENDENTE' ? 'selected' : ''}>PENDENTE</option>
               <option value="N/A" ${row.comprovantePagamento === 'N/A' ? 'selected' : ''}>N/A</option>
             </select>
+            ${renderHitachiCellOpenButton(row.comprovantePagamentoStorageKey, row.comprovantePagamentoPage, { status: row.comprovantePagamento })}
           </td>
           <td>
             <select class="cell-select ${statusTone(row.comprovanteAdiantamento)}" onchange="updateHitachiInline(${row.id}, 'comprovanteAdiantamento', this.value)">
@@ -5536,6 +5549,7 @@ AMAURI BARROSO DE MOURA"></textarea>
               <option value="PENDENTE" ${row.comprovanteAdiantamento === 'PENDENTE' ? 'selected' : ''}>PENDENTE</option>
               <option value="N/A" ${row.comprovanteAdiantamento === 'N/A' ? 'selected' : ''}>N/A</option>
             </select>
+            ${renderHitachiCellOpenButton(row.comprovanteAdiantamentoStorageKey, row.comprovanteAdiantamentoPage, { status: row.comprovanteAdiantamento })}
           </td>
           <td>
             <select class="cell-select ${statusTone(row.kitRescisao)}" onchange="updateHitachiInline(${row.id}, 'kitRescisao', this.value)">
