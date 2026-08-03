@@ -4719,10 +4719,45 @@ AMAURI BARROSO DE MOURA"></textarea>
 
     async function fetchHitachiApiExportZip(idObra, monthKey, escopo) {
       const exportPayload = await exportacaoApiRequest(`/v1/exportar/individual?id_obra=${encodeURIComponent(idObra)}&competencia=${encodeURIComponent(monthKey)}&escopo=${encodeURIComponent(escopo)}`);
-      if (!exportPayload || Number(exportPayload.status) !== 1 || !exportPayload.download_url) {
+      if (!exportPayload || Number(exportPayload.status) !== 1) {
         throw new Error(exportPayload?.mensagem || `Nao foi possivel exportar ${escopo} pela API.`);
       }
-      return exportacaoApiRequest(`/${String(exportPayload.download_url).replace(/^\/+/, '')}`, { responseType: 'blob' });
+      const candidates = [];
+      if (exportPayload.download_url) {
+        candidates.push(`${EXPORTACAO_API_BASE_URL}/${String(exportPayload.download_url).replace(/^\/+/, '')}`);
+      }
+      if (exportPayload.url_temporaria) {
+        candidates.push(String(exportPayload.url_temporaria));
+      }
+      if (exportPayload.arquivo_local) {
+        candidates.push(`${EXPORTACAO_API_BASE_URL}/v1/exportar/individual/download?arquivo=${encodeURIComponent(String(exportPayload.arquivo_local))}`);
+      }
+
+      let lastError = '';
+      for (const url of candidates) {
+        try {
+          const response = await fetch(url, {
+            headers: {
+              Authorization: `Bearer ${EXPORTACAO_API_TOKEN}`
+            }
+          });
+          if (!response.ok) {
+            let detail = '';
+            try {
+              detail = (await response.text()).trim();
+            } catch (error) {
+              detail = '';
+            }
+            lastError = `${response.status}${detail ? ` - ${detail}` : ''}`;
+            continue;
+          }
+          return response.blob();
+        } catch (error) {
+          lastError = error?.message || 'Falha ao baixar o ZIP exportado.';
+        }
+      }
+
+      throw new Error(`Nao foi possivel baixar o ZIP exportado${lastError ? `. ${lastError}` : ''}`);
     }
 
     async function importHitachiApiDocuments() {
