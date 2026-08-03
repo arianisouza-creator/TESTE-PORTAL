@@ -4722,19 +4722,57 @@ AMAURI BARROSO DE MOURA"></textarea>
       if (!exportPayload || Number(exportPayload.status) !== 1) {
         throw new Error(exportPayload?.mensagem || `Nao foi possivel exportar ${escopo} pela API.`);
       }
+      const apiOrigin = (() => {
+        try {
+          return new URL(EXPORTACAO_API_BASE_URL).origin;
+        } catch (error) {
+          return '';
+        }
+      })();
+      const withTokenQuery = url => {
+        if (!EXPORTACAO_API_TOKEN) return url;
+        try {
+          const parsed = new URL(url);
+          if (!parsed.searchParams.get('token')) parsed.searchParams.set('token', EXPORTACAO_API_TOKEN);
+          return parsed.toString();
+        } catch (error) {
+          return url;
+        }
+      };
+      const resolveDownloadUrl = value => {
+        const raw = String(value || '').trim();
+        if (!raw) return '';
+        if (/^https?:\/\//i.test(raw)) return raw;
+        if (raw.startsWith('/')) {
+          if (apiOrigin) return `${apiOrigin}${raw}`;
+          return `${EXPORTACAO_API_BASE_URL.replace(/\/+$/, '')}${raw}`;
+        }
+        return `${EXPORTACAO_API_BASE_URL}/${raw.replace(/^\/+/, '')}`;
+      };
       const candidates = [];
       if (exportPayload.download_url) {
-        candidates.push(`${EXPORTACAO_API_BASE_URL}/${String(exportPayload.download_url).replace(/^\/+/, '')}`);
+        const resolved = resolveDownloadUrl(exportPayload.download_url);
+        if (resolved) {
+          candidates.push(resolved);
+          candidates.push(withTokenQuery(resolved));
+        }
       }
       if (exportPayload.url_temporaria) {
-        candidates.push(String(exportPayload.url_temporaria));
+        const resolved = resolveDownloadUrl(exportPayload.url_temporaria);
+        if (resolved) {
+          candidates.push(resolved);
+          candidates.push(withTokenQuery(resolved));
+        }
       }
       if (exportPayload.arquivo_local) {
-        candidates.push(`${EXPORTACAO_API_BASE_URL}/v1/exportar/individual/download?arquivo=${encodeURIComponent(String(exportPayload.arquivo_local))}`);
+        const directUrl = `${EXPORTACAO_API_BASE_URL}/v1/exportar/individual/download?arquivo=${encodeURIComponent(String(exportPayload.arquivo_local))}`;
+        candidates.push(directUrl);
+        candidates.push(withTokenQuery(directUrl));
       }
 
       let lastError = '';
-      for (const url of candidates) {
+      const uniqueCandidates = [...new Set(candidates.filter(Boolean))];
+      for (const url of uniqueCandidates) {
         try {
           const response = await fetch(url, {
             headers: {
