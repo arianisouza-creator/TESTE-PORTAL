@@ -69,11 +69,55 @@ create table if not exists public.hitachi_collaborators (
   colaborador text not null default '',
   situacao text not null default 'Ativo',
   holerite text not null default 'OK',
+  cartao_ponto text not null default 'OK',
   comprovante_pagamento text not null default 'OK',
   comprovante_adiantamento text not null default 'OK',
   kit_rescisao text not null default 'N/A',
+  holerite_arquivo text not null default '',
+  cartao_ponto_arquivo text not null default '',
+  comprovante_pagamento_arquivo text not null default '',
+  comprovante_pagamento_page integer null,
+  comprovante_adiantamento_arquivo text not null default '',
+  comprovante_adiantamento_page integer null,
+  holerite_storage_key text not null default '',
+  cartao_ponto_storage_key text not null default '',
+  comprovante_pagamento_storage_key text not null default '',
+  comprovante_adiantamento_storage_key text not null default '',
   created_at timestamptz not null default now()
 );
+
+alter table if exists public.hitachi_collaborators
+add column if not exists cartao_ponto text not null default 'OK';
+
+alter table if exists public.hitachi_collaborators
+add column if not exists holerite_arquivo text not null default '';
+
+alter table if exists public.hitachi_collaborators
+add column if not exists cartao_ponto_arquivo text not null default '';
+
+alter table if exists public.hitachi_collaborators
+add column if not exists comprovante_pagamento_arquivo text not null default '';
+
+alter table if exists public.hitachi_collaborators
+add column if not exists comprovante_pagamento_page integer null;
+
+alter table if exists public.hitachi_collaborators
+add column if not exists comprovante_adiantamento_arquivo text not null default '';
+
+alter table if exists public.hitachi_collaborators
+add column if not exists comprovante_adiantamento_page integer null;
+
+alter table if exists public.hitachi_collaborators
+add column if not exists holerite_storage_key text not null default '';
+
+alter table if exists public.hitachi_collaborators
+add column if not exists cartao_ponto_storage_key text not null default '';
+
+alter table if exists public.hitachi_collaborators
+add column if not exists comprovante_pagamento_storage_key text not null default '';
+
+alter table if exists public.hitachi_collaborators
+add column if not exists comprovante_adiantamento_storage_key text not null default '';
 
 create table if not exists public.hitachi_company_docs (
   id bigint primary key,

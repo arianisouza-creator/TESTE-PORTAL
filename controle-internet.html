@@ -1453,6 +1453,7 @@
                     <th>Empresa</th>
                     <th>Situacao</th>
                     <th>Holerite</th>
+                    <th>Cartao ponto</th>
                     <th>Comprovante</th>
                     <th>Adiantamento</th>
                     <th>Kit rescisao</th>
@@ -1525,20 +1526,26 @@ AMAURI BARROSO DE MOURA"></textarea>
             <section class="card pad" style="margin-bottom:14px">
               <div class="chead"><span class="ti2">Importar documentos dos colaboradores</span><span class="eyebrow">Vinculo automatico</span></div>
               <div class="import-doc-grid">
-                <label>Arquivo holerite (ZIP)<input id="hitachiDocsZip" type="file" accept=".zip,application/zip"></label>
+                <label>Obra para buscar na API
+                  <select id="hitachiDocsObra">
+                    <option value="">Selecione a obra</option>
+                  </select>
+                </label>
                 <label>Comprovantes de pagamento (1 ou mais PDFs)
                   <input id="hitachiDocsPagamento" type="file" accept="application/pdf" multiple>
                 </label>
                 <label>Comprovantes de adiantamento (1 ou mais PDFs)
                   <input id="hitachiDocsAdiantamento" type="file" accept="application/pdf" multiple>
                 </label>
+                <button class="ghost" type="button" id="hitachiDocsLoadObras"><span data-icon="refresh"></span>Atualizar obras</button>
+                <button class="soft" type="button" id="hitachiDocsImportApi"><span data-icon="folder"></span>Buscar holerite e cartao ponto na API</button>
                 <button class="soft" type="button" id="hitachiDocsImport"><span data-icon="folder"></span>Importar documentos</button>
               </div>
               <div class="import-help">
                 <b>Como o portal vai conferir</b>
-                O ZIP de holerites sera cruzado pelo nome do colaborador e o sistema vai verificar se o PDF tem assinatura digital. Os comprovantes em PDF serao lidos por pagina para localizar o nome de cada colaborador e atualizar os status automaticamente. Voce pode selecionar varios PDFs nos dois campos de comprovantes.
+                Holerite e cartao ponto serao buscados pela API da obra e competencia selecionadas. O portal valida assinatura digital antes de marcar como <b>OK</b>. Os comprovantes em PDF continuam manuais e sao lidos por pagina para localizar o nome de cada colaborador. Voce pode selecionar varios PDFs nos dois campos de comprovantes.
               </div>
-              <div class="upload-note" id="hitachiDocsSummary">Carregue o ZIP de holerites e os PDFs de comprovantes para atualizar os status do mes selecionado.</div>
+              <div class="upload-note" id="hitachiDocsSummary">Escolha a obra para buscar holerite e cartao ponto pela API. Comprovante de pagamento e adiantamento continuam manuais.</div>
             </section>
 
             <section class="card pad">
@@ -1563,6 +1570,13 @@ AMAURI BARROSO DE MOURA"></textarea>
                 </label>
                 <label>Holerite
                   <select name="holerite">
+                    <option value="OK">OK</option>
+                    <option value="PENDENTE">PENDENTE</option>
+                    <option value="N/A">N/A</option>
+                  </select>
+                </label>
+                <label>Cartao ponto
+                  <select name="cartaoPonto">
                     <option value="OK">OK</option>
                     <option value="PENDENTE">PENDENTE</option>
                     <option value="N/A">N/A</option>
@@ -1929,6 +1943,13 @@ AMAURI BARROSO DE MOURA"></textarea>
         </label>
         <label>Holerite
           <select name="holerite">
+            <option value="OK">OK</option>
+            <option value="PENDENTE">PENDENTE</option>
+            <option value="N/A">N/A</option>
+          </select>
+        </label>
+        <label>Cartao ponto
+          <select name="cartaoPonto">
             <option value="OK">OK</option>
             <option value="PENDENTE">PENDENTE</option>
             <option value="N/A">N/A</option>
@@ -2304,11 +2325,14 @@ AMAURI BARROSO DE MOURA"></textarea>
     const PROTECTED_PASS = 'mse2026';
     const portalConfig = window.PORTAL_CONFIG || {};
     const supabaseConfig = portalConfig.supabase || {};
+    const exportacaoConfig = portalConfig.exportacao || {};
     const passagensConfig = portalConfig.passagens || {};
     const SUPABASE_URL = (supabaseConfig.url || '').replace(/\/+$/, '');
     const SUPABASE_ANON_KEY = supabaseConfig.anonKey || '';
     const REMOTE_ENABLED = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
     const PASSAGENS_API_ONLY = passagensConfig.useApiOnly !== false;
+    const EXPORTACAO_API_BASE_URL = (exportacaoConfig.baseUrl || 'https://portalmse.com.br/microservices/exportacao_api').trim().replace(/\/+$/, '');
+    const EXPORTACAO_API_TOKEN = (exportacaoConfig.token || '').trim();
     const LOCAL_CACHE_KEY = 'portal-mse-cache-v2';
     const MANAGEMENT_CACHE_KEY = 'portal-mse-management-v1';
     const monthPicker = document.getElementById('monthPicker');
@@ -2324,6 +2348,7 @@ AMAURI BARROSO DE MOURA"></textarea>
     const managementObras = [];
     const managementResponsaveis = [];
     const managementFornecedores = [];
+    const hitachiExportacaoObras = [];
     const HITACHI_MANUAL_SERVICE_NAMES = [
       'ALBERT VICENTE ZAMBELLO',
       'ALESSANDRA DA SILVA ASSEN',
@@ -2539,6 +2564,57 @@ AMAURI BARROSO DE MOURA"></textarea>
       };
     }
 
+    async function exportacaoApiRequest(path, { responseType = 'json' } = {}) {
+      if (!EXPORTACAO_API_BASE_URL) throw new Error('Base da API de exportacao nao configurada no Streamlit.');
+      if (!EXPORTACAO_API_TOKEN) throw new Error('Token da API de exportacao nao configurado no Streamlit.');
+      let response;
+      try {
+        response = await fetch(`${EXPORTACAO_API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`, {
+          headers: {
+            Authorization: `Bearer ${EXPORTACAO_API_TOKEN}`
+          }
+        });
+      } catch (error) {
+        throw new Error('Falha de rede ao acessar a API de exportacao.');
+      }
+      if (!response.ok) {
+        let detail = '';
+        try {
+          detail = (await response.text()).trim();
+        } catch (error) {
+          detail = '';
+        }
+        throw new Error(`API de exportacao respondeu ${response.status}${detail ? ` - ${detail}` : ''}`);
+      }
+      if (responseType === 'blob') return response.blob();
+      return response.json();
+    }
+
+    async function loadHitachiExportacaoObras(force = false) {
+      if (hitachiExportacaoObras.length && !force) return hitachiExportacaoObras;
+      const payload = await exportacaoApiRequest('/v1/obras');
+      hitachiExportacaoObras.splice(0, hitachiExportacaoObras.length, ...((payload.data || [])
+        .filter(item => item && item.id && item.nome)
+        .map(item => ({
+          id: Number(item.id),
+          nome: String(item.nome || '').trim(),
+          tipo: String(item.tipo_obra || '').trim()
+        }))
+        .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))));
+      populateHitachiObraSelect();
+      return hitachiExportacaoObras;
+    }
+
+    function populateHitachiObraSelect() {
+      const select = document.getElementById('hitachiDocsObra');
+      if (!select) return;
+      const currentValue = select.value;
+      select.innerHTML = `<option value="">Selecione a obra</option>${hitachiExportacaoObras.map(item => `<option value="${item.id}">${item.nome}</option>`).join('')}`;
+      if (currentValue && hitachiExportacaoObras.some(item => String(item.id) === String(currentValue))) {
+        select.value = currentValue;
+      }
+    }
+
     function emptyPayload() {
       return {
         contracts: [],
@@ -2682,13 +2758,16 @@ AMAURI BARROSO DE MOURA"></textarea>
         colaborador: item.colaborador || '',
         situacao: item.situacao || 'Ativo',
         holerite: item.holerite || 'OK',
+        cartaoPonto: item.cartaoPonto ?? item.cartao_ponto ?? 'OK',
         comprovantePagamento: item.comprovantePagamento ?? item.comprovante_pagamento ?? 'OK',
         comprovanteAdiantamento: item.comprovanteAdiantamento ?? item.comprovante_adiantamento ?? 'OK',
         kitRescisao: item.kitRescisao ?? item.kit_rescisao ?? 'N/A',
-        holeriteArquivo: item.holeriteArquivo || '',
+        holeriteArquivo: item.holeriteArquivo ?? item.holerite_arquivo ?? '',
+        cartaoPontoArquivo: item.cartaoPontoArquivo ?? item.cartao_ponto_arquivo ?? '',
         comprovantePagamentoArquivo: item.comprovantePagamentoArquivo || '',
         comprovanteAdiantamentoArquivo: item.comprovanteAdiantamentoArquivo || '',
-        holeriteStorageKey: item.holeriteStorageKey || '',
+        holeriteStorageKey: item.holeriteStorageKey ?? item.holerite_storage_key ?? '',
+        cartaoPontoStorageKey: item.cartaoPontoStorageKey ?? item.cartao_ponto_storage_key ?? '',
         comprovantePagamentoStorageKey: item.comprovantePagamentoStorageKey || '',
         comprovantePagamentoPage: item.comprovantePagamentoPage ?? null,
         comprovanteAdiantamentoStorageKey: item.comprovanteAdiantamentoStorageKey || '',
@@ -2983,9 +3062,20 @@ AMAURI BARROSO DE MOURA"></textarea>
           colaborador: item.colaborador || '',
           situacao: item.situacao || 'Ativo',
           holerite: item.holerite || 'OK',
+          cartao_ponto: item.cartaoPonto || 'OK',
           comprovante_pagamento: item.comprovantePagamento || 'OK',
           comprovante_adiantamento: item.comprovanteAdiantamento || 'OK',
-          kit_rescisao: item.kitRescisao || 'N/A'
+          kit_rescisao: item.kitRescisao || 'N/A',
+          holerite_arquivo: item.holeriteArquivo || '',
+          cartao_ponto_arquivo: item.cartaoPontoArquivo || '',
+          comprovante_pagamento_arquivo: item.comprovantePagamentoArquivo || '',
+          comprovante_pagamento_page: item.comprovantePagamentoPage ?? null,
+          comprovante_adiantamento_arquivo: item.comprovanteAdiantamentoArquivo || '',
+          comprovante_adiantamento_page: item.comprovanteAdiantamentoPage ?? null,
+          holerite_storage_key: item.holeriteStorageKey || '',
+          cartao_ponto_storage_key: item.cartaoPontoStorageKey || '',
+          comprovante_pagamento_storage_key: item.comprovantePagamentoStorageKey || '',
+          comprovante_adiantamento_storage_key: item.comprovanteAdiantamentoStorageKey || ''
         }]
       });
     }
@@ -3655,7 +3745,6 @@ AMAURI BARROSO DE MOURA"></textarea>
     }
 
     async function importHitachiDocumentFiles() {
-      const zipInput = document.getElementById('hitachiDocsZip');
       const pagamentoInput = document.getElementById('hitachiDocsPagamento');
       const adiantamentoInput = document.getElementById('hitachiDocsAdiantamento');
       const summaryBox = document.getElementById('hitachiDocsSummary');
@@ -3667,12 +3756,11 @@ AMAURI BARROSO DE MOURA"></textarea>
         return;
       }
 
-      const holeriteZip = zipInput.files && zipInput.files[0];
       const pagamentoFiles = [...(pagamentoInput.files || [])];
       const adiantamentoFiles = [...(adiantamentoInput.files || [])];
 
-      if (!holeriteZip && !pagamentoFiles.length && !adiantamentoFiles.length) {
-        summaryBox.textContent = 'Selecione ao menos um ZIP ou PDF para importar os documentos.';
+      if (!pagamentoFiles.length && !adiantamentoFiles.length) {
+        summaryBox.textContent = 'Selecione ao menos um PDF manual de pagamento ou adiantamento.';
         return;
       }
 
@@ -3699,31 +3787,6 @@ AMAURI BARROSO DE MOURA"></textarea>
           docStorageCache.set(cacheKey, storageKey);
           return storageKey;
         };
-
-        if (holeriteZip) {
-          if (!window.JSZip) throw new Error('Leitor de ZIP indisponivel no navegador.');
-          const zip = await JSZip.loadAsync(await holeriteZip.arrayBuffer());
-          const pdfEntries = Object.values(zip.files).filter(entry => !entry.dir && entry.name.toLowerCase().endsWith('.pdf') && entry.name.toLowerCase().includes('holerite'));
-          for (const entry of pdfEntries) {
-            const folderName = entry.name.split('/')[0] || '';
-            const collaboratorName = folderName.trim();
-            const key = normalizePersonName(collaboratorName);
-            if (!key) continue;
-            const buffer = await entry.async('uint8array');
-            const signed = pdfHasDigitalSignature(buffer);
-            const docs = ensureDocEntry(key);
-            docs.holerite = {
-              status: signed ? 'OK' : 'PENDENTE',
-              label: `${entry.name}${signed ? ' | assinado' : ' | sem assinatura digital'}`
-            };
-            if (signed) {
-              const blob = new Blob([buffer], { type: 'application/pdf' });
-              const storageKey = `hitachi|${monthKey}|${key}|holerite`;
-              await saveHitachiDocumentBlob(storageKey, blob, { fileName: entry.name });
-              docs.holerite.storageKey = storageKey;
-            }
-          }
-        }
 
         for (const file of pagamentoFiles) {
           const storageKey = await ensureUploadedPdfStorage(file);
@@ -3763,12 +3826,15 @@ AMAURI BARROSO DE MOURA"></textarea>
           return {
             ...row,
             holerite: docs.holerite ? docs.holerite.status : (row.holerite || 'PENDENTE'),
+            cartaoPonto: docs.cartaoPonto ? docs.cartaoPonto.status : (row.cartaoPonto || (row.situacao === 'Ativo' ? 'PENDENTE' : 'N/A')),
             comprovantePagamento: docs.comprovantePagamento ? docs.comprovantePagamento.status : (row.comprovantePagamento || 'PENDENTE'),
             comprovanteAdiantamento: docs.comprovanteAdiantamento ? docs.comprovanteAdiantamento.status : (row.comprovanteAdiantamento || 'PENDENTE'),
             holeriteArquivo: docs.holerite ? docs.holerite.label : (row.holeriteArquivo || ''),
+            cartaoPontoArquivo: docs.cartaoPonto ? docs.cartaoPonto.label : (row.cartaoPontoArquivo || ''),
             comprovantePagamentoArquivo: docs.comprovantePagamento ? docs.comprovantePagamento.label : (row.comprovantePagamentoArquivo || ''),
             comprovanteAdiantamentoArquivo: docs.comprovanteAdiantamento ? docs.comprovanteAdiantamento.label : (row.comprovanteAdiantamentoArquivo || ''),
             holeriteStorageKey: docs.holerite && docs.holerite.status === 'OK' ? (docs.holerite.storageKey || '') : (row.holeriteStorageKey || ''),
+            cartaoPontoStorageKey: docs.cartaoPonto && docs.cartaoPonto.status === 'OK' ? (docs.cartaoPonto.storageKey || '') : (row.cartaoPontoStorageKey || ''),
             comprovantePagamentoStorageKey: docs.comprovantePagamento ? (docs.comprovantePagamento.storageKey || '') : (row.comprovantePagamentoStorageKey || ''),
             comprovantePagamentoPage: docs.comprovantePagamento ? (docs.comprovantePagamento.pageNumber ?? null) : (row.comprovantePagamentoPage ?? null),
             comprovanteAdiantamentoStorageKey: docs.comprovanteAdiantamento ? (docs.comprovanteAdiantamento.storageKey || '') : (row.comprovanteAdiantamentoStorageKey || ''),
@@ -3778,10 +3844,10 @@ AMAURI BARROSO DE MOURA"></textarea>
 
         await saveHitachiDocsBatch(payloads);
         const okHolerite = payloads.filter(item => item.holerite === 'OK').length;
+        const okCartaoPonto = payloads.filter(item => item.cartaoPonto === 'OK').length;
         const okPagamento = payloads.filter(item => item.comprovantePagamento === 'OK').length;
         const okAdiantamento = payloads.filter(item => item.comprovanteAdiantamento === 'OK').length;
-        summaryBox.textContent = `Documentos processados em ${monthLabel(monthKey)}: ${okHolerite}/${payloads.length} holerite(s) OK, ${okPagamento}/${payloads.length} comprovante(s) de pagamento OK e ${okAdiantamento}/${payloads.length} comprovante(s) de adiantamento OK.`;
-        zipInput.value = '';
+        summaryBox.textContent = `Documentos processados em ${monthLabel(monthKey)}: ${okHolerite}/${payloads.length} holerite(s) OK, ${okCartaoPonto}/${payloads.length} cartao(s) ponto OK, ${okPagamento}/${payloads.length} comprovante(s) de pagamento OK e ${okAdiantamento}/${payloads.length} comprovante(s) de adiantamento OK.`;
         pagamentoInput.value = '';
         adiantamentoInput.value = '';
       } catch (error) {
@@ -3865,6 +3931,7 @@ AMAURI BARROSO DE MOURA"></textarea>
             colaborador: entry.colaborador,
             situacao,
             holerite: 'OK',
+            cartaoPonto: existing?.cartaoPonto || previous?.cartaoPonto || 'PENDENTE',
             comprovantePagamento: existing?.comprovantePagamento || previous?.comprovantePagamento || 'PENDENTE',
             comprovanteAdiantamento: existing?.comprovanteAdiantamento || previous?.comprovanteAdiantamento || 'N/A',
             kitRescisao: situacao === 'Ativo' ? (existing?.kitRescisao || previous?.kitRescisao || 'N/A') : (existing?.kitRescisao || previous?.kitRescisao || 'PENDENTE'),
@@ -3890,6 +3957,7 @@ AMAURI BARROSO DE MOURA"></textarea>
             colaborador: previous.colaborador,
             situacao: 'Inativo',
             holerite: 'N/A',
+            cartaoPonto: existing?.cartaoPonto || previous?.cartaoPonto || 'N/A',
             comprovantePagamento: existing?.comprovantePagamento || 'N/A',
             comprovanteAdiantamento: existing?.comprovanteAdiantamento || 'N/A',
             kitRescisao: existing?.kitRescisao || previous.kitRescisao || 'N/A',
@@ -3950,6 +4018,7 @@ AMAURI BARROSO DE MOURA"></textarea>
           colaborador,
           situacao: existing?.situacao || 'Ativo',
           holerite: existing?.holerite || 'PENDENTE',
+          cartaoPonto: existing?.cartaoPonto || 'PENDENTE',
           comprovantePagamento: existing?.comprovantePagamento || 'PENDENTE',
           comprovanteAdiantamento: existing?.comprovanteAdiantamento || 'N/A',
           kitRescisao: existing?.kitRescisao || 'N/A',
@@ -3974,6 +4043,7 @@ AMAURI BARROSO DE MOURA"></textarea>
     function hitachiDocStatuses(row) {
       const docs = [
         row.holerite,
+        row.cartaoPonto,
         row.comprovantePagamento,
         row.comprovanteAdiantamento
       ];
@@ -4428,6 +4498,7 @@ AMAURI BARROSO DE MOURA"></textarea>
       form.elements.empresa.value = 'MSE ENGENHARIA';
       form.elements.situacao.value = 'Ativo';
       form.elements.holerite.value = 'OK';
+      form.elements.cartaoPonto.value = 'OK';
       form.elements.comprovantePagamento.value = 'OK';
       form.elements.comprovanteAdiantamento.value = 'OK';
       form.elements.kitRescisao.value = 'N/A';
@@ -4462,6 +4533,7 @@ AMAURI BARROSO DE MOURA"></textarea>
       form.elements.colaborador.value = item.colaborador || '';
       form.elements.situacao.value = item.situacao || 'Ativo';
       form.elements.holerite.value = item.holerite || 'OK';
+      form.elements.cartaoPonto.value = item.cartaoPonto || 'OK';
       form.elements.comprovantePagamento.value = item.comprovantePagamento || 'OK';
       form.elements.comprovanteAdiantamento.value = item.comprovanteAdiantamento || 'OK';
       form.elements.kitRescisao.value = item.kitRescisao || 'N/A';
@@ -4517,6 +4589,7 @@ AMAURI BARROSO DE MOURA"></textarea>
       const items = [];
       summary.rows.forEach(row => {
         if (row.holerite === 'PENDENTE') items.push({ tipo: 'Colaborador', empresa: row.empresa, nome: row.colaborador, campo: 'Holerite' });
+        if (row.cartaoPonto === 'PENDENTE') items.push({ tipo: 'Colaborador', empresa: row.empresa, nome: row.colaborador, campo: 'Cartao ponto' });
         if (row.comprovantePagamento === 'PENDENTE') items.push({ tipo: 'Colaborador', empresa: row.empresa, nome: row.colaborador, campo: 'Comprovante de pagamento' });
         if (row.comprovanteAdiantamento === 'PENDENTE') items.push({ tipo: 'Colaborador', empresa: row.empresa, nome: row.colaborador, campo: 'Comprovante de adiantamento' });
         if (row.kitRescisao === 'PENDENTE') items.push({ tipo: 'Colaborador', empresa: row.empresa, nome: row.colaborador, campo: 'Kit rescisao' });
@@ -4588,6 +4661,132 @@ AMAURI BARROSO DE MOURA"></textarea>
       overviewEditingHitachiCompanyId = id;
       populateHitachiCompanyEditForm(document.getElementById('hitachiCompanyEditForm'), item);
       openModalById('hitachiCompanyModal');
+    }
+
+    function detectCollaboratorFromFilename(fileName, rows) {
+      const normalizedName = norm(String(fileName || '').replace(/\.pdf$/i, '').replace(/[_\-]+/g, ' '));
+      if (!normalizedName) return '';
+      const candidates = rows
+        .map(row => row.colaborador)
+        .filter(Boolean)
+        .sort((a, b) => norm(b).length - norm(a).length);
+      for (const name of candidates) {
+        if (normalizedName.includes(norm(name))) return name;
+      }
+      return '';
+    }
+
+    async function extractCollaboratorFromPdfBuffer(buffer, fileName, rows) {
+      const blob = new Blob([buffer], { type: 'application/pdf' });
+      const file = new File([blob], fileName || 'documento.pdf', { type: 'application/pdf' });
+      const pages = await readPdfPages(file);
+      const textCombined = pages.map(page => page.text).join('\n');
+      return (
+        detectCollaboratorFromFilename(fileName, rows) ||
+        extractPagamentoName(textCombined) ||
+        extractAdiantamentoName(textCombined) ||
+        detectCollaboratorFromPageText(textCombined, rows)
+      );
+    }
+
+    async function fetchHitachiApiExportZip(idObra, monthKey, escopo) {
+      const exportPayload = await exportacaoApiRequest(`/v1/exportar/individual?id_obra=${encodeURIComponent(idObra)}&competencia=${encodeURIComponent(monthKey)}&escopo=${encodeURIComponent(escopo)}`);
+      if (!exportPayload || Number(exportPayload.status) !== 1 || !exportPayload.download_url) {
+        throw new Error(exportPayload?.mensagem || `Nao foi possivel exportar ${escopo} pela API.`);
+      }
+      return exportacaoApiRequest(`/${String(exportPayload.download_url).replace(/^\/+/, '')}`, { responseType: 'blob' });
+    }
+
+    async function importHitachiApiDocuments() {
+      const summaryBox = document.getElementById('hitachiDocsSummary');
+      const obraSelect = document.getElementById('hitachiDocsObra');
+      const monthKey = currentHitachiMonth();
+      const rows = hitachiRowsForMonth(monthKey);
+      const obraId = obraSelect.value;
+
+      if (!rows.length) {
+        summaryBox.textContent = 'Nao ha colaboradores cadastrados nesse mes para vincular os documentos.';
+        return;
+      }
+      if (!obraId) {
+        summaryBox.textContent = 'Selecione a obra antes de buscar os documentos na API.';
+        return;
+      }
+      if (!window.JSZip) {
+        summaryBox.textContent = 'Leitor de ZIP indisponivel no navegador.';
+        return;
+      }
+
+      summaryBox.textContent = 'Buscando holerite e cartao ponto na API...';
+      try {
+        const docsByName = new Map();
+        const ensureDocEntry = key => {
+          if (!docsByName.has(key)) {
+            docsByName.set(key, {
+              holerite: null,
+              cartaoPonto: null
+            });
+          }
+          return docsByName.get(key);
+        };
+
+        const scopes = [
+          { escopo: 'holerite', field: 'holerite', label: 'holerite' },
+          { escopo: 'cartao_ponto', field: 'cartaoPonto', label: 'cartao ponto' }
+        ];
+
+        for (const scope of scopes) {
+          let zipBlob;
+          try {
+            zipBlob = await fetchHitachiApiExportZip(obraId, monthKey, scope.escopo);
+          } catch (error) {
+            console.warn(`Falha ao buscar ${scope.escopo} na API`, error);
+            continue;
+          }
+          const zip = await JSZip.loadAsync(await zipBlob.arrayBuffer());
+          const pdfEntries = Object.values(zip.files).filter(entry => !entry.dir && entry.name.toLowerCase().endsWith('.pdf'));
+          for (const entry of pdfEntries) {
+            const buffer = await entry.async('uint8array');
+            const collaboratorName = await extractCollaboratorFromPdfBuffer(buffer, entry.name.split('/').pop() || entry.name, rows);
+            const key = normalizePersonName(collaboratorName);
+            if (!key) continue;
+            const signed = pdfHasDigitalSignature(buffer);
+            const docs = ensureDocEntry(key);
+            docs[scope.field] = {
+              status: signed ? 'OK' : 'PENDENTE',
+              label: `${entry.name}${signed ? ' | assinado' : ' | sem assinatura digital'}`
+            };
+            if (signed) {
+              const storageKey = `hitachi|${monthKey}|${key}|${scope.field}`;
+              const blob = new Blob([buffer], { type: 'application/pdf' });
+              await saveHitachiDocumentBlob(storageKey, blob, { fileName: entry.name });
+              docs[scope.field].storageKey = storageKey;
+            }
+          }
+        }
+
+        const payloads = rows.map(row => {
+          const key = normalizePersonName(row.colaborador);
+          const docs = docsByName.get(key) || {};
+          return {
+            ...row,
+            holerite: docs.holerite ? docs.holerite.status : (row.holerite || 'PENDENTE'),
+            cartaoPonto: docs.cartaoPonto ? docs.cartaoPonto.status : (row.cartaoPonto || (row.situacao === 'Ativo' ? 'PENDENTE' : 'N/A')),
+            holeriteArquivo: docs.holerite ? docs.holerite.label : (row.holeriteArquivo || ''),
+            cartaoPontoArquivo: docs.cartaoPonto ? docs.cartaoPonto.label : (row.cartaoPontoArquivo || ''),
+            holeriteStorageKey: docs.holerite && docs.holerite.status === 'OK' ? (docs.holerite.storageKey || '') : (row.holeriteStorageKey || ''),
+            cartaoPontoStorageKey: docs.cartaoPonto && docs.cartaoPonto.status === 'OK' ? (docs.cartaoPonto.storageKey || '') : (row.cartaoPontoStorageKey || '')
+          };
+        });
+
+        await saveHitachiDocsBatch(payloads);
+        const okHolerite = payloads.filter(item => item.holerite === 'OK').length;
+        const okCartaoPonto = payloads.filter(item => item.cartaoPonto === 'OK').length;
+        summaryBox.textContent = `API processada em ${monthLabel(monthKey)}: ${okHolerite}/${payloads.length} holerite(s) OK e ${okCartaoPonto}/${payloads.length} cartao(s) ponto OK.`;
+      } catch (error) {
+        console.error(error);
+        summaryBox.textContent = `Nao foi possivel buscar os documentos pela API agora. ${error.message || ''}`.trim();
+      }
     }
     window.editHitachiCompanyDoc = editHitachiCompanyDoc;
 
@@ -5123,6 +5322,7 @@ AMAURI BARROSO DE MOURA"></textarea>
       }
       if (field === 'situacao' && value === 'Inativo') {
         payload.holerite = payload.holerite === 'OK' ? 'N/A' : payload.holerite;
+        payload.cartaoPonto = payload.cartaoPonto === 'OK' ? 'N/A' : payload.cartaoPonto;
       }
       await saveHitachiCollaborator(payload);
     }
@@ -5133,6 +5333,7 @@ AMAURI BARROSO DE MOURA"></textarea>
       if (!item) return;
       const labels = {
         holerite: 'holerite',
+        cartaoPonto: 'cartao ponto',
         comprovantePagamento: 'comprovante de pagamento',
         comprovanteAdiantamento: 'comprovante de adiantamento'
       };
@@ -5144,6 +5345,9 @@ AMAURI BARROSO DE MOURA"></textarea>
         payload.holerite = payload.situacao === 'Ativo' ? 'PENDENTE' : 'N/A';
         payload.holeriteArquivo = '';
         payload.holeriteStorageKey = '';
+      }
+      if (docType === 'cartaoPonto') {
+        payload.cartaoPonto = payload.situacao === 'Ativo' ? 'PENDENTE' : 'N/A';
       }
       if (docType === 'comprovantePagamento') {
         payload.comprovantePagamento = 'PENDENTE';
@@ -5264,6 +5468,7 @@ AMAURI BARROSO DE MOURA"></textarea>
             <span class="company">${row.colaborador}</span>
             <div class="docmeta">
               ${renderHitachiDocumentLine('Holerite', row.holeriteArquivo, row.holeriteStorageKey, null, { requireOk: true, status: row.holerite, rowId: row.id, docType: 'holerite' })}
+              ${renderHitachiDocumentLine('Cartao ponto', row.cartaoPontoArquivo, row.cartaoPontoStorageKey, null, { requireOk: true, status: row.cartaoPonto, rowId: row.id, docType: 'cartaoPonto' })}
               ${renderHitachiDocumentLine('Comprovante pgto', row.comprovantePagamentoArquivo, row.comprovantePagamentoStorageKey, row.comprovantePagamentoPage, { rowId: row.id, docType: 'comprovantePagamento' })}
               ${renderHitachiDocumentLine('Comprovante adiant.', row.comprovanteAdiantamentoArquivo, row.comprovanteAdiantamentoStorageKey, row.comprovanteAdiantamentoPage, { rowId: row.id, docType: 'comprovanteAdiantamento' })}
             </div>
@@ -5283,6 +5488,13 @@ AMAURI BARROSO DE MOURA"></textarea>
               <option value="OK" ${row.holerite === 'OK' ? 'selected' : ''}>OK</option>
               <option value="PENDENTE" ${row.holerite === 'PENDENTE' ? 'selected' : ''}>PENDENTE</option>
               <option value="N/A" ${row.holerite === 'N/A' ? 'selected' : ''}>N/A</option>
+            </select>
+          </td>
+          <td>
+            <select class="cell-select ${statusTone(row.cartaoPonto)}" onchange="updateHitachiInline(${row.id}, 'cartaoPonto', this.value)">
+              <option value="OK" ${row.cartaoPonto === 'OK' ? 'selected' : ''}>OK</option>
+              <option value="PENDENTE" ${row.cartaoPonto === 'PENDENTE' ? 'selected' : ''}>PENDENTE</option>
+              <option value="N/A" ${row.cartaoPonto === 'N/A' ? 'selected' : ''}>N/A</option>
             </select>
           </td>
           <td>
@@ -5308,7 +5520,7 @@ AMAURI BARROSO DE MOURA"></textarea>
           </td>
           <td class="actioncell"><button class="rowact" title="Editar colaborador" aria-label="Editar colaborador" onclick="editHitachiRow(${row.id})">${icon('edit')}</button></td>
         </tr>
-      `).join('') : `<tr><td colspan="8"><div class="empty-state"><b>Nenhum colaborador encontrado.</b>Ajuste os filtros ou cadastre o mes.</div></td></tr>`;
+      `).join('') : `<tr><td colspan="9"><div class="empty-state"><b>Nenhum colaborador encontrado.</b>Ajuste os filtros ou cadastre o mes.</div></td></tr>`;
 
       const companyBody = document.getElementById('hCompanyRows');
       companyBody.innerHTML = summary.companyDocs.length ? summary.companyDocs.map(row => `
@@ -7869,6 +8081,18 @@ AMAURI BARROSO DE MOURA"></textarea>
     });
     document.getElementById('hitachiPayrollImport').addEventListener('click', importHitachiPayrollFile);
     document.getElementById('hitachiManualSeed').addEventListener('click', seedHitachiManualServiceList);
+    document.getElementById('hitachiDocsLoadObras').addEventListener('click', async () => {
+      const summaryBox = document.getElementById('hitachiDocsSummary');
+      summaryBox.textContent = 'Atualizando lista de obras da API...';
+      try {
+        await loadHitachiExportacaoObras(true);
+        summaryBox.textContent = `Lista de obras atualizada: ${hitachiExportacaoObras.length} obra(s) disponivel(is).`;
+      } catch (error) {
+        console.error(error);
+        summaryBox.textContent = `Nao foi possivel carregar as obras da API. ${error.message || ''}`.trim();
+      }
+    });
+    document.getElementById('hitachiDocsImportApi').addEventListener('click', importHitachiApiDocuments);
     document.getElementById('hitachiDocsImport').addEventListener('click', importHitachiDocumentFiles);
     document.getElementById('openHitachiPendencias').addEventListener('click', () => {
       refreshHitachiPendenciasModal();
@@ -7940,6 +8164,7 @@ AMAURI BARROSO DE MOURA"></textarea>
         colaborador: formData.colaborador,
         situacao: formData.situacao,
         holerite: formData.holerite,
+        cartaoPonto: formData.cartaoPonto,
         comprovantePagamento: formData.comprovantePagamento,
         comprovanteAdiantamento: formData.comprovanteAdiantamento,
         kitRescisao: formData.kitRescisao
@@ -7970,6 +8195,7 @@ AMAURI BARROSO DE MOURA"></textarea>
         colaborador: formData.colaborador,
         situacao: formData.situacao,
         holerite: formData.holerite,
+        cartaoPonto: formData.cartaoPonto,
         comprovantePagamento: formData.comprovantePagamento,
         comprovanteAdiantamento: formData.comprovanteAdiantamento,
         kitRescisao: formData.kitRescisao,
@@ -7981,6 +8207,7 @@ AMAURI BARROSO DE MOURA"></textarea>
       payload.colaborador = formData.colaborador;
       payload.situacao = formData.situacao;
       payload.holerite = formData.holerite;
+      payload.cartaoPonto = formData.cartaoPonto;
       payload.comprovantePagamento = formData.comprovantePagamento;
       payload.comprovanteAdiantamento = formData.comprovanteAdiantamento;
       payload.kitRescisao = formData.kitRescisao;
@@ -8012,6 +8239,7 @@ AMAURI BARROSO DE MOURA"></textarea>
       document.getElementById('hitachiPayrollMonth').value = currentMonthKey();
       resetHitachiForm();
       resetHitachiCompanyForm();
+      loadHitachiExportacaoObras().catch(error => console.warn('Falha ao carregar obras da API de exportacao', error));
       resetManagementLaunchForm();
       resetManagementObraForm();
       resetManagementResponsavelForm();

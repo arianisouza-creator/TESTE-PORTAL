@@ -23,6 +23,16 @@ def load_portal_config() -> dict:
             "url": st.secrets.get("supabase_url", os.getenv("SUPABASE_URL", "")).strip(),
             "anonKey": st.secrets.get("supabase_anon_key", os.getenv("SUPABASE_ANON_KEY", "")).strip(),
         },
+        "exportacao": {
+            "baseUrl": st.secrets.get(
+                "exportacao_api_base_url",
+                os.getenv(
+                    "EXPORTACAO_API_BASE_URL",
+                    "https://portalmse.com.br/microservices/exportacao_api",
+                ),
+            ).strip(),
+            "token": st.secrets.get("exportacao_api_token", os.getenv("EXPORTACAO_API_TOKEN", "")).strip(),
+        },
         "passagens": {
             "baseUrl": st.secrets.get(
                 "passagens_api_base_url",
