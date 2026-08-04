@@ -4742,6 +4742,30 @@ AMAURI BARROSO DE MOURA"></textarea>
       return '';
     }
 
+    function detectHitachiApiDocumentType(pathName) {
+      const normalizedPath = norm(String(pathName || ''))
+        .replace(/[_\-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (!normalizedPath) return '';
+      if (
+        normalizedPath.includes('cartao ponto') ||
+        normalizedPath.includes('cartao de ponto') ||
+        normalizedPath.includes('espelho de ponto') ||
+        normalizedPath.includes('espelho ponto')
+      ) {
+        return 'cartaoPonto';
+      }
+      if (
+        normalizedPath.includes('holerite') ||
+        normalizedPath.includes('contra cheque') ||
+        normalizedPath.includes('contracheque')
+      ) {
+        return 'holerite';
+      }
+      return '';
+    }
+
     async function extractCollaboratorFromPdfBuffer(buffer, fileName, rows) {
       const blob = new Blob([buffer], { type: 'application/pdf' });
       const file = new File([blob], fileName || 'documento.pdf', { type: 'application/pdf' });
@@ -4873,11 +4897,16 @@ AMAURI BARROSO DE MOURA"></textarea>
         const zipBlob = await fetchHitachiApiExportZip(obraId, monthKey, 'por_colaborador');
         const zip = await JSZip.loadAsync(await zipBlob.arrayBuffer());
         const pdfEntries = Object.values(zip.files).filter(entry => !entry.dir && entry.name.toLowerCase().endsWith('.pdf'));
+        let detectedHolerites = 0;
+        let detectedCartoes = 0;
+        let matchedDocuments = 0;
         for (const entry of pdfEntries) {
-          const lowerName = entry.name.toLowerCase();
-          const isHolerite = lowerName.includes('holerite');
-          const isCartaoPonto = lowerName.includes('cartao_ponto') || lowerName.includes('cartao ponto');
-          if (!isHolerite && !isCartaoPonto) continue;
+          const docType = detectHitachiApiDocumentType(entry.name);
+          if (!docType) continue;
+          const isHolerite = docType === 'holerite';
+          const isCartaoPonto = docType === 'cartaoPonto';
+          if (isHolerite) detectedHolerites += 1;
+          if (isCartaoPonto) detectedCartoes += 1;
 
           const folderName = detectCollaboratorFromZipPath(entry.name, rows);
           const fileName = entry.name.split('/').pop() || entry.name;
@@ -4889,7 +4918,8 @@ AMAURI BARROSO DE MOURA"></textarea>
           const signed = pdfHasDigitalSignature(buffer);
           const docs = ensureDocEntry(key);
           if (!docs.displayName) docs.displayName = collaboratorName;
-          const field = isHolerite ? 'holerite' : 'cartaoPonto';
+          const field = docType;
+          matchedDocuments += 1;
           docs[field] = {
             status: signed ? 'OK' : 'PENDENTE',
             label: `${entry.name}${signed ? ' | assinado' : ' | sem assinatura digital'}`
@@ -4947,7 +4977,7 @@ AMAURI BARROSO DE MOURA"></textarea>
         await saveHitachiDocsBatch(finalPayloads);
         const okHolerite = finalPayloads.filter(item => item.holerite === 'OK').length;
         const okCartaoPonto = finalPayloads.filter(item => item.cartaoPonto === 'OK').length;
-        summaryBox.textContent = `API processada em ${monthLabel(monthKey)}: ${okHolerite}/${finalPayloads.length} holerite(s) OK e ${okCartaoPonto}/${finalPayloads.length} cartao(s) ponto OK.${extraPayloads.length ? ` ${extraPayloads.length} colaborador(es) foram adicionados a partir da API porque ainda nao estavam no cadastro do mes.` : ''}`;
+        summaryBox.textContent = `API processada em ${monthLabel(monthKey)}: ZIP com ${pdfEntries.length} PDF(s), ${detectedHolerites} holerite(s), ${detectedCartoes} cartao(s) ponto e ${matchedDocuments} documento(s) vinculado(s) a ${docsByName.size} colaborador(es). Resultado final: ${okHolerite}/${finalPayloads.length} holerite(s) OK e ${okCartaoPonto}/${finalPayloads.length} cartao(s) ponto OK.${extraPayloads.length ? ` ${extraPayloads.length} colaborador(es) foram adicionados a partir da API porque ainda nao estavam no cadastro do mes.` : ''}`;
       } catch (error) {
         console.error(error);
         summaryBox.textContent = `Nao foi possivel buscar os documentos pela API agora. ${error.message || ''}`.trim();
