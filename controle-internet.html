@@ -3449,11 +3449,8 @@ AMAURI BARROSO DE MOURA"></textarea>
     function extractHitachiPayrollEntries(text) {
       const entries = [];
       const seen = new Set();
-      const normalized = stripAccents(text || '').replace(/\s+/g, ' ').trim();
-      if (!normalized) return entries;
-
-      const markerRegex = /CPF\s*\:\s*Situa[^:]{0,20}\:/gi;
-      const markers = [...normalized.matchAll(markerRegex)];
+      const rawText = String(text || '');
+      const normalizedText = stripAccents(rawText);
       const pushEntry = (colaboradorRaw, situacaoRaw) => {
         const colaborador = (colaboradorRaw || '').replace(/\s+/g, ' ').trim();
         const situacaoFolha = (situacaoRaw || '').replace(/\s+/g, ' ').trim();
@@ -3463,63 +3460,53 @@ AMAURI BARROSO DE MOURA"></textarea>
         entries.push({ colaborador, situacaoFolha });
       };
 
-      markers.forEach((marker, index) => {
-        const markerStart = marker.index ?? -1;
-        if (markerStart < 0) return;
-        const previousMarker = index > 0 ? markers[index - 1] : null;
-        const previousStart = previousMarker
-          ? ((previousMarker.index ?? 0) + (previousMarker[0] || '').length)
-          : 0;
-        const segment = normalized.slice(previousStart, markerStart).trim();
-        if (!segment) return;
+      if (!normalizedText.trim()) return entries;
 
-        const statusMatch = segment.match(/([A-Za-z]+)\s*$/);
-        const situacaoFolha = statusMatch ? statusMatch[1] : '';
-        const withoutStatus = statusMatch ? segment.slice(0, statusMatch.index).trim() : segment;
+      const linePatterns = [
+        /Empr\.\:\s*(\d{3,6})\s*([A-Z][A-Z\s'`.\-]+?)\s+Situacao\:\s*([A-Za-z]+)/i,
+        /(\d{3,6})\s*([A-Z][A-Z\s'`.\-]+?)\s+Situacao\:\s*([A-Za-z]+)\s+CPF\:/i
+      ];
 
-        let colaborador = '';
-        let nameMatch = withoutStatus.match(/(\d{3,6})\s+([A-Z][A-Z\s'`.\-]+?)\s*Empr\.\:/i);
-        if (nameMatch) {
-          colaborador = nameMatch[2];
-        } else {
-          nameMatch = withoutStatus.match(/Empr\.\:\s*(\d{3,6})\s+([A-Z][A-Z\s'`.\-]+?)\s*Adm\:/i);
-          if (nameMatch) colaborador = nameMatch[2];
-        }
-
-        if (!colaborador) return;
-        pushEntry(colaborador, situacaoFolha);
-      });
+      normalizedText
+        .split(/\n+/)
+        .map(line => line.replace(/\s+/g, ' ').trim())
+        .filter(Boolean)
+        .forEach(line => {
+          for (const pattern of linePatterns) {
+            const match = line.match(pattern);
+            if (!match) continue;
+            pushEntry(match[2], match[3]);
+            break;
+          }
+        });
 
       if (entries.length) {
         return entries;
       }
 
+      const blockPattern = /Empr\.\:\s*(\d{3,6})\s*([A-Z][A-Z\s'`.\-]+?)\s+Situacao\:\s*([A-Za-z]+)\s+CPF\:/gi;
+      let match;
+      while ((match = blockPattern.exec(normalizedText)) !== null) {
+        pushEntry(match[2], match[3]);
+      }
+
+      if (entries.length) {
+        return entries;
+      }
+
+      const compactText = normalizedText.replace(/\s+/g, ' ').trim();
       const fallbackPatterns = [
-        /(\d{3,6})\s+([A-Z][A-Z\s'`.\-]+?)\s*Empr\.\:\s*\d{2}\/\d{2}\/\d{4}\s*Adm\:\s*[0-9.\-]+\s*([A-Za-z\s'`.\-]+?)\s*CPF\s*\:\s*Situa[^:]{0,20}\:/gi,
-        /Empr\.\:\s*(\d{3,6})\s+([A-Z][A-Z\s'`.\-]+?)\s*Adm\:\s*\d{2}\/\d{2}\/\d{4}\s*[0-9.\-]+\s*([A-Za-z\s'`.\-]+?)\s*CPF\s*\:\s*Situa[^:]{0,20}\:/gi,
-        /(\d{3,6})\s+([A-Z][A-Z\s'`.\-]+?)\s*Empr\.\:\s*[0-9\/]+\s*Adm\:\s*[0-9.\-]+\s*([A-Za-z]+)\s*CPF\s*\:\s*Situa[^:]{0,20}\:/gi
+        /Empr\.\:\s*(\d{3,6})\s*([A-Z][A-Z\s'`.\-]+?)\s+Situacao\:\s*([A-Za-z]+)\s+CPF\:/gi,
+        /(\d{3,6})\s*([A-Z][A-Z\s'`.\-]+?)\s+Situacao\:\s*([A-Za-z]+)\s+CPF\:/gi
       ];
 
       fallbackPatterns.forEach(regex => {
-        let match;
-        while ((match = regex.exec(normalized)) !== null) {
-          const colaborador = (match[2] || '').replace(/\s+/g, ' ').trim();
-          const situacaoFolha = (match[3] || '').replace(/\s+/g, ' ').trim();
-          pushEntry(colaborador, situacaoFolha);
+        let fallbackMatch;
+        while ((fallbackMatch = regex.exec(compactText)) !== null) {
+          pushEntry(fallbackMatch[2], fallbackMatch[3]);
         }
       });
 
-      if (!entries.length) {
-        const lineBased = String(text || '')
-          .split(/\n+/)
-          .map(line => stripAccents(line).replace(/\s+/g, ' ').trim())
-          .filter(Boolean);
-        lineBased.forEach(line => {
-          const match = line.match(/(\d{3,6})\s+([A-Z][A-Z\s'`.\-]+?)\s*Empr\.\:.*?Adm\:\s*[0-9.\-]+\s*([A-Za-z]+)\s*CPF\s*\:\s*Situa[^:]{0,20}\:/i);
-          if (!match) return;
-          pushEntry(match[2], match[3]);
-        });
-      }
       return entries;
     }
 
@@ -3590,7 +3577,7 @@ AMAURI BARROSO DE MOURA"></textarea>
         }
       });
 
-      return selected.join(' ');
+      return selected.join('\n');
     }
 
     async function readPdfText(file) {
@@ -3647,7 +3634,7 @@ AMAURI BARROSO DE MOURA"></textarea>
 
       return {
         metaText: metaChunks.join(' '),
-        hitachiText: selected.join(' '),
+        hitachiText: selected.join('\n'),
         foundHitachi
       };
     }
@@ -5039,7 +5026,7 @@ AMAURI BARROSO DE MOURA"></textarea>
         const pendingRows = rows.filter(row => hitachiDocStatuses(row).some(status => status === 'PENDENTE'));
         const pendingNeedHolerite = pendingRows.some(row => row.holerite === 'PENDENTE');
         const pendingNeedCartao = pendingRows.some(row => row.cartaoPonto === 'PENDENTE');
-        const pendingNeedRescisorios = pendingRows.some(row => row.documentosRescisorios === 'PENDENTE');
+        const pendingNeedRescisorios = rows.length > 0;
         if (!pendingRows.length) {
           summaryBox.textContent = `Nao ha documentos pendentes para buscar na API em ${monthLabel(monthKey)}.`;
           return;
@@ -5141,13 +5128,15 @@ AMAURI BARROSO DE MOURA"></textarea>
             situacao: docs.documentosRescisorios ? 'Rescindido' : row.situacao,
             holerite: row.holerite === 'PENDENTE' && docs.holerite ? docs.holerite.status : row.holerite,
             cartaoPonto: row.cartaoPonto === 'PENDENTE' && docs.cartaoPonto ? docs.cartaoPonto.status : row.cartaoPonto,
-            documentosRescisorios: row.documentosRescisorios === 'PENDENTE' && docs.documentosRescisorios ? docs.documentosRescisorios.status : row.documentosRescisorios,
+            documentosRescisorios: docs.documentosRescisorios ? docs.documentosRescisorios.status : row.documentosRescisorios,
             holeriteArquivo: row.holerite === 'PENDENTE' && docs.holerite ? docs.holerite.label : (row.holeriteArquivo || ''),
             cartaoPontoArquivo: row.cartaoPonto === 'PENDENTE' && docs.cartaoPonto ? docs.cartaoPonto.label : (row.cartaoPontoArquivo || ''),
-            documentosRescisoriosArquivo: row.documentosRescisorios === 'PENDENTE' && docs.documentosRescisorios ? docs.documentosRescisorios.label : (row.documentosRescisoriosArquivo || ''),
+            documentosRescisoriosArquivo: docs.documentosRescisorios ? docs.documentosRescisorios.label : (row.documentosRescisoriosArquivo || ''),
             holeriteStorageKey: row.holerite === 'PENDENTE' && docs.holerite && docs.holerite.status === 'OK' ? (docs.holerite.storageKey || '') : (row.holeriteStorageKey || ''),
             cartaoPontoStorageKey: row.cartaoPonto === 'PENDENTE' && docs.cartaoPonto && docs.cartaoPonto.status === 'OK' ? (docs.cartaoPonto.storageKey || '') : (row.cartaoPontoStorageKey || ''),
-            documentosRescisoriosStorageKey: row.documentosRescisorios === 'PENDENTE' && docs.documentosRescisorios && docs.documentosRescisorios.status === 'OK' ? (docs.documentosRescisorios.storageKey || '') : (row.documentosRescisoriosStorageKey || ''),
+            documentosRescisoriosStorageKey: docs.documentosRescisorios
+              ? (docs.documentosRescisorios.status === 'OK' ? (docs.documentosRescisorios.storageKey || '') : '')
+              : (row.documentosRescisoriosStorageKey || ''),
             kitRescisao: 'N/A'
           });
         });
