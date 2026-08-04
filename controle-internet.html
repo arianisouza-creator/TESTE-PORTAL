@@ -4869,6 +4869,22 @@ AMAURI BARROSO DE MOURA"></textarea>
       throw new Error(`Nao foi possivel baixar o ZIP exportado${lastError ? `. ${lastError}` : ''}`);
     }
 
+    async function extractPdfEntriesFromZipBlob(zipBlob) {
+      let zip = await JSZip.loadAsync(await zipBlob.arrayBuffer());
+      let allEntries = Object.values(zip.files);
+      let pdfEntries = allEntries.filter(entry => !entry.dir && entry.name.toLowerCase().endsWith('.pdf'));
+      if (!pdfEntries.length) {
+        const nestedZipEntry = allEntries.find(entry => !entry.dir && entry.name.toLowerCase().endsWith('.zip'));
+        if (nestedZipEntry) {
+          const nestedBuffer = await nestedZipEntry.async('arraybuffer');
+          zip = await JSZip.loadAsync(nestedBuffer);
+          allEntries = Object.values(zip.files);
+          pdfEntries = allEntries.filter(entry => !entry.dir && entry.name.toLowerCase().endsWith('.pdf'));
+        }
+      }
+      return { allEntries, pdfEntries };
+    }
+
     async function importHitachiApiDocuments() {
       const summaryBox = document.getElementById('hitachiDocsSummary');
       const obraSelect = document.getElementById('hitachiDocsObra');
@@ -4903,19 +4919,15 @@ AMAURI BARROSO DE MOURA"></textarea>
           return docsByName.get(key);
         };
 
-        const zipBlob = await fetchHitachiApiExportZip(obraId, monthKey, 'por_colaborador');
-        let zip = await JSZip.loadAsync(await zipBlob.arrayBuffer());
-        let allEntries = Object.values(zip.files);
-        let pdfEntries = allEntries.filter(entry => !entry.dir && entry.name.toLowerCase().endsWith('.pdf'));
-        if (!pdfEntries.length) {
-          const nestedZipEntry = allEntries.find(entry => !entry.dir && entry.name.toLowerCase().endsWith('.zip'));
-          if (nestedZipEntry) {
-            const nestedBuffer = await nestedZipEntry.async('arraybuffer');
-            zip = await JSZip.loadAsync(nestedBuffer);
-            allEntries = Object.values(zip.files);
-            pdfEntries = allEntries.filter(entry => !entry.dir && entry.name.toLowerCase().endsWith('.pdf'));
-          }
-        }
+        const zipHolerite = await fetchHitachiApiExportZip(obraId, monthKey, 'holerite');
+        const zipCartao = await fetchHitachiApiExportZip(obraId, monthKey, 'cartao_ponto');
+        const holeriteBundle = await extractPdfEntriesFromZipBlob(zipHolerite);
+        const cartaoBundle = await extractPdfEntriesFromZipBlob(zipCartao);
+        const allEntries = [...holeriteBundle.allEntries, ...cartaoBundle.allEntries];
+        const pdfEntries = [
+          ...holeriteBundle.pdfEntries.map(entry => ({ entry, forcedType: 'holerite' })),
+          ...cartaoBundle.pdfEntries.map(entry => ({ entry, forcedType: 'cartaoPonto' }))
+        ];
         if (!pdfEntries.length) {
           const previewEntries = allEntries
             .filter(entry => !entry.dir)
@@ -4928,8 +4940,9 @@ AMAURI BARROSO DE MOURA"></textarea>
         let detectedHolerites = 0;
         let detectedCartoes = 0;
         let matchedDocuments = 0;
-        for (const entry of pdfEntries) {
-          const docType = detectHitachiApiDocumentType(entry.name);
+        for (const item of pdfEntries) {
+          const entry = item.entry;
+          const docType = item.forcedType || detectHitachiApiDocumentType(entry.name);
           if (!docType) continue;
           const isHolerite = docType === 'holerite';
           const isCartaoPonto = docType === 'cartaoPonto';
