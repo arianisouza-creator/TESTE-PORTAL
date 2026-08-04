@@ -4885,6 +4885,19 @@ AMAURI BARROSO DE MOURA"></textarea>
       return { allEntries, pdfEntries };
     }
 
+    async function fetchHitachiApiExportZipOptional(idObra, monthKey, escopo) {
+      try {
+        const blob = await fetchHitachiApiExportZip(idObra, monthKey, escopo);
+        return { blob, missing: false, error: '' };
+      } catch (error) {
+        const message = String(error?.message || '');
+        if (message.includes('422')) {
+          return { blob: null, missing: true, error: message };
+        }
+        throw error;
+      }
+    }
+
     async function importHitachiApiDocuments() {
       const summaryBox = document.getElementById('hitachiDocsSummary');
       const obraSelect = document.getElementById('hitachiDocsObra');
@@ -4919,10 +4932,23 @@ AMAURI BARROSO DE MOURA"></textarea>
           return docsByName.get(key);
         };
 
-        const zipHolerite = await fetchHitachiApiExportZip(obraId, monthKey, 'holerite');
-        const zipCartao = await fetchHitachiApiExportZip(obraId, monthKey, 'cartao_ponto');
-        const holeriteBundle = await extractPdfEntriesFromZipBlob(zipHolerite);
-        const cartaoBundle = await extractPdfEntriesFromZipBlob(zipCartao);
+        const holeriteExport = await fetchHitachiApiExportZipOptional(obraId, monthKey, 'holerite');
+        const cartaoExport = await fetchHitachiApiExportZipOptional(obraId, monthKey, 'cartao_ponto');
+        if (!holeriteExport.blob && !cartaoExport.blob) {
+          const missingScopes = [
+            holeriteExport.missing ? 'holerite' : '',
+            cartaoExport.missing ? 'cartao ponto' : ''
+          ].filter(Boolean).join(' e ');
+          summaryBox.textContent = `Nao foi possivel importar documentos da API para ${monthLabel(monthKey)}. A API informou que nao ha ${missingScopes || 'documentos'} cadastrado(s) para essa obra/competencia.`;
+          return;
+        }
+
+        const holeriteBundle = holeriteExport.blob
+          ? await extractPdfEntriesFromZipBlob(holeriteExport.blob)
+          : { allEntries: [], pdfEntries: [] };
+        const cartaoBundle = cartaoExport.blob
+          ? await extractPdfEntriesFromZipBlob(cartaoExport.blob)
+          : { allEntries: [], pdfEntries: [] };
         const allEntries = [...holeriteBundle.allEntries, ...cartaoBundle.allEntries];
         const pdfEntries = [
           ...holeriteBundle.pdfEntries.map(entry => ({ entry, forcedType: 'holerite' })),
@@ -5018,7 +5044,11 @@ AMAURI BARROSO DE MOURA"></textarea>
         await saveHitachiDocsBatch(finalPayloads);
         const okHolerite = finalPayloads.filter(item => item.holerite === 'OK').length;
         const okCartaoPonto = finalPayloads.filter(item => item.cartaoPonto === 'OK').length;
-        summaryBox.textContent = `API processada em ${monthLabel(monthKey)}: ZIP com ${pdfEntries.length} PDF(s), ${detectedHolerites} holerite(s), ${detectedCartoes} cartao(s) ponto e ${matchedDocuments} documento(s) vinculado(s) a ${docsByName.size} colaborador(es). Resultado final: ${okHolerite}/${finalPayloads.length} holerite(s) OK e ${okCartaoPonto}/${finalPayloads.length} cartao(s) ponto OK.${extraPayloads.length ? ` ${extraPayloads.length} colaborador(es) foram adicionados a partir da API porque ainda nao estavam no cadastro do mes.` : ''}`;
+        const missingNotes = [
+          holeriteExport.missing ? 'holerite indisponivel na API para esta competencia' : '',
+          cartaoExport.missing ? 'cartao ponto indisponivel na API para esta competencia' : ''
+        ].filter(Boolean).join(' | ');
+        summaryBox.textContent = `API processada em ${monthLabel(monthKey)}: ZIP com ${pdfEntries.length} PDF(s), ${detectedHolerites} holerite(s), ${detectedCartoes} cartao(s) ponto e ${matchedDocuments} documento(s) vinculado(s) a ${docsByName.size} colaborador(es). Resultado final: ${okHolerite}/${finalPayloads.length} holerite(s) OK e ${okCartaoPonto}/${finalPayloads.length} cartao(s) ponto OK.${extraPayloads.length ? ` ${extraPayloads.length} colaborador(es) foram adicionados a partir da API porque ainda nao estavam no cadastro do mes.` : ''}${missingNotes ? ` ${missingNotes}.` : ''}`;
       } catch (error) {
         console.error(error);
         summaryBox.textContent = `Nao foi possivel buscar os documentos pela API agora. ${error.message || ''}`.trim();
