@@ -4118,6 +4118,12 @@ AMAURI BARROSO DE MOURA"></textarea>
       return value === 'Rescindido' || value === 'Demitido';
     }
 
+    function hitachiApiDocNeedsImport(status, storageKey, fileLabel) {
+      if (status === 'PENDENTE') return true;
+      if (status === 'OK' && (!storageKey || !fileLabel)) return true;
+      return false;
+    }
+
     function applyHitachiSituationRules(item = {}) {
       const payload = { ...item };
       const situacao = payload.situacao || 'Ativo';
@@ -5023,9 +5029,13 @@ AMAURI BARROSO DE MOURA"></textarea>
       summaryBox.textContent = 'Buscando holerite e cartao ponto na API...';
       try {
         const docsByName = new Map();
-        const pendingRows = rows.filter(row => hitachiDocStatuses(row).some(status => status === 'PENDENTE'));
-        const pendingNeedHolerite = pendingRows.some(row => row.holerite === 'PENDENTE');
-        const pendingNeedCartao = pendingRows.some(row => row.cartaoPonto === 'PENDENTE');
+        const pendingRows = rows.filter(row => (
+          hitachiApiDocNeedsImport(row.holerite, row.holeriteStorageKey, row.holeriteArquivo) ||
+          hitachiApiDocNeedsImport(row.cartaoPonto, row.cartaoPontoStorageKey, row.cartaoPontoArquivo) ||
+          hitachiApiDocNeedsImport(row.documentosRescisorios, row.documentosRescisoriosStorageKey, row.documentosRescisoriosArquivo)
+        ));
+        const pendingNeedHolerite = pendingRows.some(row => hitachiApiDocNeedsImport(row.holerite, row.holeriteStorageKey, row.holeriteArquivo));
+        const pendingNeedCartao = pendingRows.some(row => hitachiApiDocNeedsImport(row.cartaoPonto, row.cartaoPontoStorageKey, row.cartaoPontoArquivo));
         const pendingNeedRescisorios = rows.length > 0;
         if (!pendingRows.length) {
           summaryBox.textContent = `Nao ha documentos pendentes para buscar na API em ${monthLabel(monthKey)}.`;
@@ -5126,14 +5136,18 @@ AMAURI BARROSO DE MOURA"></textarea>
           return applyHitachiSituationRules({
             ...row,
             situacao: docs.documentosRescisorios ? 'Rescindido' : row.situacao,
-            holerite: row.holerite === 'PENDENTE' && docs.holerite ? docs.holerite.status : row.holerite,
-            cartaoPonto: row.cartaoPonto === 'PENDENTE' && docs.cartaoPonto ? docs.cartaoPonto.status : row.cartaoPonto,
+            holerite: docs.holerite ? docs.holerite.status : row.holerite,
+            cartaoPonto: docs.cartaoPonto ? docs.cartaoPonto.status : row.cartaoPonto,
             documentosRescisorios: docs.documentosRescisorios ? docs.documentosRescisorios.status : row.documentosRescisorios,
-            holeriteArquivo: row.holerite === 'PENDENTE' && docs.holerite ? docs.holerite.label : (row.holeriteArquivo || ''),
-            cartaoPontoArquivo: row.cartaoPonto === 'PENDENTE' && docs.cartaoPonto ? docs.cartaoPonto.label : (row.cartaoPontoArquivo || ''),
+            holeriteArquivo: docs.holerite ? docs.holerite.label : (row.holeriteArquivo || ''),
+            cartaoPontoArquivo: docs.cartaoPonto ? docs.cartaoPonto.label : (row.cartaoPontoArquivo || ''),
             documentosRescisoriosArquivo: docs.documentosRescisorios ? docs.documentosRescisorios.label : (row.documentosRescisoriosArquivo || ''),
-            holeriteStorageKey: row.holerite === 'PENDENTE' && docs.holerite && docs.holerite.status === 'OK' ? (docs.holerite.storageKey || '') : (row.holeriteStorageKey || ''),
-            cartaoPontoStorageKey: row.cartaoPonto === 'PENDENTE' && docs.cartaoPonto && docs.cartaoPonto.status === 'OK' ? (docs.cartaoPonto.storageKey || '') : (row.cartaoPontoStorageKey || ''),
+            holeriteStorageKey: docs.holerite
+              ? (docs.holerite.status === 'OK' ? (docs.holerite.storageKey || '') : '')
+              : (row.holeriteStorageKey || ''),
+            cartaoPontoStorageKey: docs.cartaoPonto
+              ? (docs.cartaoPonto.status === 'OK' ? (docs.cartaoPonto.storageKey || '') : '')
+              : (row.cartaoPontoStorageKey || ''),
             documentosRescisoriosStorageKey: docs.documentosRescisorios
               ? (docs.documentosRescisorios.status === 'OK' ? (docs.documentosRescisorios.storageKey || '') : '')
               : (row.documentosRescisoriosStorageKey || ''),
