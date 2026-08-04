@@ -3465,15 +3465,75 @@ AMAURI BARROSO DE MOURA"></textarea>
       const entries = [];
       const seen = new Set();
       const normalized = stripAccents(text || '').replace(/\s+/g, ' ').trim();
-      const regex = /(\d{3,6})\s+([A-Z][A-Z\s'`.\-]+?)Empr\.\:\s*\d{2}\/\d{2}\/\d{4}Adm\:\s*[0-9.\-]+\s*([A-Za-z\s'`.\-]+?)\s*CPF\s*\:\s*Situa[^:]{0,20}\:/gi;
-      let match;
-      while ((match = regex.exec(normalized)) !== null) {
-        const colaborador = (match[2] || '').replace(/\s+/g, ' ').trim();
-        const situacaoFolha = (match[3] || '').replace(/\s+/g, ' ').trim();
+      if (!normalized) return entries;
+
+      const markerRegex = /CPF\s*\:\s*Situa[^:]{0,20}\:/gi;
+      const markers = [...normalized.matchAll(markerRegex)];
+      const pushEntry = (colaboradorRaw, situacaoRaw) => {
+        const colaborador = (colaboradorRaw || '').replace(/\s+/g, ' ').trim();
+        const situacaoFolha = (situacaoRaw || '').replace(/\s+/g, ' ').trim();
         const key = normalizePersonName(colaborador);
-        if (!key || seen.has(key)) continue;
+        if (!key || seen.has(key)) return;
         seen.add(key);
         entries.push({ colaborador, situacaoFolha });
+      };
+
+      markers.forEach((marker, index) => {
+        const markerStart = marker.index ?? -1;
+        if (markerStart < 0) return;
+        const previousMarker = index > 0 ? markers[index - 1] : null;
+        const previousStart = previousMarker
+          ? ((previousMarker.index ?? 0) + (previousMarker[0] || '').length)
+          : 0;
+        const segment = normalized.slice(previousStart, markerStart).trim();
+        if (!segment) return;
+
+        const statusMatch = segment.match(/([A-Za-z]+)\s*$/);
+        const situacaoFolha = statusMatch ? statusMatch[1] : '';
+        const withoutStatus = statusMatch ? segment.slice(0, statusMatch.index).trim() : segment;
+
+        let colaborador = '';
+        let nameMatch = withoutStatus.match(/(\d{3,6})\s+([A-Z][A-Z\s'`.\-]+?)\s*Empr\.\:/i);
+        if (nameMatch) {
+          colaborador = nameMatch[2];
+        } else {
+          nameMatch = withoutStatus.match(/Empr\.\:\s*(\d{3,6})\s+([A-Z][A-Z\s'`.\-]+?)\s*Adm\:/i);
+          if (nameMatch) colaborador = nameMatch[2];
+        }
+
+        if (!colaborador) return;
+        pushEntry(colaborador, situacaoFolha);
+      });
+
+      if (entries.length) {
+        return entries;
+      }
+
+      const fallbackPatterns = [
+        /(\d{3,6})\s+([A-Z][A-Z\s'`.\-]+?)\s*Empr\.\:\s*\d{2}\/\d{2}\/\d{4}\s*Adm\:\s*[0-9.\-]+\s*([A-Za-z\s'`.\-]+?)\s*CPF\s*\:\s*Situa[^:]{0,20}\:/gi,
+        /Empr\.\:\s*(\d{3,6})\s+([A-Z][A-Z\s'`.\-]+?)\s*Adm\:\s*\d{2}\/\d{2}\/\d{4}\s*[0-9.\-]+\s*([A-Za-z\s'`.\-]+?)\s*CPF\s*\:\s*Situa[^:]{0,20}\:/gi,
+        /(\d{3,6})\s+([A-Z][A-Z\s'`.\-]+?)\s*Empr\.\:\s*[0-9\/]+\s*Adm\:\s*[0-9.\-]+\s*([A-Za-z]+)\s*CPF\s*\:\s*Situa[^:]{0,20}\:/gi
+      ];
+
+      fallbackPatterns.forEach(regex => {
+        let match;
+        while ((match = regex.exec(normalized)) !== null) {
+          const colaborador = (match[2] || '').replace(/\s+/g, ' ').trim();
+          const situacaoFolha = (match[3] || '').replace(/\s+/g, ' ').trim();
+          pushEntry(colaborador, situacaoFolha);
+        }
+      });
+
+      if (!entries.length) {
+        const lineBased = String(text || '')
+          .split(/\n+/)
+          .map(line => stripAccents(line).replace(/\s+/g, ' ').trim())
+          .filter(Boolean);
+        lineBased.forEach(line => {
+          const match = line.match(/(\d{3,6})\s+([A-Z][A-Z\s'`.\-]+?)\s*Empr\.\:.*?Adm\:\s*[0-9.\-]+\s*([A-Za-z]+)\s*CPF\s*\:\s*Situa[^:]{0,20}\:/i);
+          if (!match) return;
+          pushEntry(match[2], match[3]);
+        });
       }
       return entries;
     }
@@ -3587,26 +3647,17 @@ AMAURI BARROSO DE MOURA"></textarea>
         if (hitachiCostCenter) {
           activeCostCenter = hitachiCostCenter;
           foundHitachi = true;
-          selected.push(flat);
+          selected.push(pageText);
           continue;
         }
 
         if (!activeCostCenter) continue;
 
-        const sameCostCenter =
-          flat.includes(`CC:${activeCostCenter}`) ||
-          flat.includes(`CC: ${activeCostCenter}`) ||
-          flat.includes(`Depto:5042`) ||
-          flat.includes(`Depto: 5042`);
-
-        if (sameCostCenter) {
-          selected.push(flat);
-          continue;
-        }
-
         if (foundHitachi && hasAnyCostCenterHeader) {
           break;
         }
+
+        selected.push(pageText);
       }
 
       return {
