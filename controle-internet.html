@@ -4704,6 +4704,32 @@ AMAURI BARROSO DE MOURA"></textarea>
       return '';
     }
 
+    function detectCollaboratorFromZipPath(pathName, rows) {
+      const segments = String(pathName || '')
+        .split('/')
+        .map(item => item.trim())
+        .filter(Boolean);
+      if (!segments.length) return '';
+
+      const folderSegments = segments.slice(0, -1);
+      const candidates = rows
+        .map(row => row.colaborador)
+        .filter(Boolean);
+      const candidateMap = new Map(candidates.map(name => [normalizePersonName(name), name]));
+
+      for (const segment of folderSegments.slice().reverse()) {
+        const exact = candidateMap.get(normalizePersonName(segment));
+        if (exact) return exact;
+      }
+
+      for (const segment of folderSegments.slice().reverse()) {
+        const inferred = detectCollaboratorFromFilename(segment, rows);
+        if (inferred) return inferred;
+      }
+
+      return '';
+    }
+
     async function extractCollaboratorFromPdfBuffer(buffer, fileName, rows) {
       const blob = new Blob([buffer], { type: 'application/pdf' });
       const file = new File([blob], fileName || 'documento.pdf', { type: 'application/pdf' });
@@ -4840,7 +4866,7 @@ AMAURI BARROSO DE MOURA"></textarea>
           const isCartaoPonto = lowerName.includes('cartao_ponto') || lowerName.includes('cartao ponto');
           if (!isHolerite && !isCartaoPonto) continue;
 
-          const folderName = entry.name.includes('/') ? entry.name.split('/')[0] : '';
+          const folderName = detectCollaboratorFromZipPath(entry.name, rows);
           const fileName = entry.name.split('/').pop() || entry.name;
           const buffer = await entry.async('uint8array');
           const collaboratorName = folderName.trim() || await extractCollaboratorFromPdfBuffer(buffer, fileName, rows);
