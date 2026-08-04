@@ -2664,7 +2664,9 @@ AMAURI BARROSO DE MOURA"></textarea>
       };
     }
 
-    function serializeState() {
+    function serializeState(options = {}) {
+      const forLocalCache = Boolean(options.forLocalCache);
+      const persistPassagensRows = !(forLocalCache && PASSAGENS_API_ONLY);
       return {
         contracts: contracts.map(item => ({ ...item })),
         monthEntries: Object.entries(monthOverrides).flatMap(([monthKey, entries]) =>
@@ -2706,7 +2708,7 @@ AMAURI BARROSO DE MOURA"></textarea>
         hitachiCollaborators: hitachiCollaborators.map(item => ({ ...item })),
         hitachiCompanyDocs: hitachiCompanyDocs.map(item => ({ ...item })),
         hitachiRecipients,
-        passagensRows: passagensRows.map(item => ({ ...item })),
+        passagensRows: persistPassagensRows ? passagensRows.map(item => ({ ...item })) : [],
         passagensCreditos: passagensCreditos.map(item => ({ ...item })),
         passagensComplements: Object.entries(passagensComplements).map(([key, value]) => ({
           key,
@@ -2714,7 +2716,7 @@ AMAURI BARROSO DE MOURA"></textarea>
         })),
         passagensHospedagens: passagensHospedagens.map(item => ({ ...item })),
         passagensCarros: passagensCarros.map(item => ({ ...item })),
-        passagensApiToken,
+        passagensApiToken: forLocalCache ? '' : passagensApiToken,
         passagensApiBaseUrl,
         passagensLastSync
       };
@@ -2886,7 +2888,7 @@ AMAURI BARROSO DE MOURA"></textarea>
 
     function saveLocalCache() {
       try {
-        window.localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(serializeState()));
+        window.localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(serializeState({ forLocalCache: true })));
       } catch (error) {
         console.warn('Nao foi possivel salvar cache local.', error);
       }
