@@ -3635,7 +3635,7 @@ AMAURI BARROSO DE MOURA"></textarea>
 
     function pdfHasDigitalSignature(buffer) {
       const text = binaryPdfText(buffer);
-      return /\/FT\s*\/Sig|\/Type\s*\/Sig|Assinatura Digital/i.test(text);
+      return /\/FT\s*\/Sig|\/Type\s*\/Sig|Assinatura Digital|\/ByteRange\s*\[|adbe\.pkcs7|DocuSign|ICP-Brasil/i.test(text);
     }
 
     const HITACHI_DOC_DB = 'portal-mse-hitachi-docs';
@@ -4727,6 +4727,18 @@ AMAURI BARROSO DE MOURA"></textarea>
         if (inferred) return inferred;
       }
 
+      for (const segment of folderSegments.slice().reverse()) {
+        const cleaned = String(segment || '')
+          .replace(/[_\-]+/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+        if (!cleaned) continue;
+        if (/^documentos exportados/i.test(cleaned)) continue;
+        if (/^holerite$/i.test(cleaned)) continue;
+        if (/^cartao[\s_]*ponto$/i.test(cleaned)) continue;
+        return cleaned;
+      }
+
       return '';
     }
 
@@ -4850,6 +4862,7 @@ AMAURI BARROSO DE MOURA"></textarea>
         const ensureDocEntry = key => {
           if (!docsByName.has(key)) {
             docsByName.set(key, {
+              displayName: '',
               holerite: null,
               cartaoPonto: null
             });
@@ -4875,6 +4888,7 @@ AMAURI BARROSO DE MOURA"></textarea>
 
           const signed = pdfHasDigitalSignature(buffer);
           const docs = ensureDocEntry(key);
+          if (!docs.displayName) docs.displayName = collaboratorName;
           const field = isHolerite ? 'holerite' : 'cartaoPonto';
           docs[field] = {
             status: signed ? 'OK' : 'PENDENTE',
@@ -4888,6 +4902,7 @@ AMAURI BARROSO DE MOURA"></textarea>
           }
         }
 
+        const currentRowMap = new Map(rows.map(row => [normalizePersonName(row.colaborador), row]));
         const payloads = rows.map(row => {
           const key = normalizePersonName(row.colaborador);
           const docs = docsByName.get(key) || {};
@@ -4902,10 +4917,37 @@ AMAURI BARROSO DE MOURA"></textarea>
           };
         });
 
-        await saveHitachiDocsBatch(payloads);
-        const okHolerite = payloads.filter(item => item.holerite === 'OK').length;
-        const okCartaoPonto = payloads.filter(item => item.cartaoPonto === 'OK').length;
-        summaryBox.textContent = `API processada em ${monthLabel(monthKey)}: ${okHolerite}/${payloads.length} holerite(s) OK e ${okCartaoPonto}/${payloads.length} cartao(s) ponto OK.`;
+        const extraPayloads = [...docsByName.entries()]
+          .filter(([key]) => !currentRowMap.has(key))
+          .map(([key, docs]) => ({
+            id: createId(),
+            monthKey,
+            empresa: rows[0]?.empresa || 'MSE SERVICE',
+            colaborador: docs.displayName || key,
+            situacao: 'Ativo',
+            holerite: docs.holerite ? docs.holerite.status : 'PENDENTE',
+            cartaoPonto: docs.cartaoPonto ? docs.cartaoPonto.status : 'PENDENTE',
+            comprovantePagamento: 'PENDENTE',
+            comprovanteAdiantamento: 'PENDENTE',
+            kitRescisao: 'N/A',
+            holeriteArquivo: docs.holerite ? docs.holerite.label : '',
+            cartaoPontoArquivo: docs.cartaoPonto ? docs.cartaoPonto.label : '',
+            comprovantePagamentoArquivo: '',
+            comprovanteAdiantamentoArquivo: '',
+            holeriteStorageKey: docs.holerite && docs.holerite.status === 'OK' ? (docs.holerite.storageKey || '') : '',
+            cartaoPontoStorageKey: docs.cartaoPonto && docs.cartaoPonto.status === 'OK' ? (docs.cartaoPonto.storageKey || '') : '',
+            comprovantePagamentoStorageKey: '',
+            comprovantePagamentoPage: null,
+            comprovanteAdiantamentoStorageKey: '',
+            comprovanteAdiantamentoPage: null
+          }));
+
+        const finalPayloads = [...payloads, ...extraPayloads];
+
+        await saveHitachiDocsBatch(finalPayloads);
+        const okHolerite = finalPayloads.filter(item => item.holerite === 'OK').length;
+        const okCartaoPonto = finalPayloads.filter(item => item.cartaoPonto === 'OK').length;
+        summaryBox.textContent = `API processada em ${monthLabel(monthKey)}: ${okHolerite}/${finalPayloads.length} holerite(s) OK e ${okCartaoPonto}/${finalPayloads.length} cartao(s) ponto OK.${extraPayloads.length ? ` ${extraPayloads.length} colaborador(es) foram adicionados a partir da API porque ainda nao estavam no cadastro do mes.` : ''}`;
       } catch (error) {
         console.error(error);
         summaryBox.textContent = `Nao foi possivel buscar os documentos pela API agora. ${error.message || ''}`.trim();
