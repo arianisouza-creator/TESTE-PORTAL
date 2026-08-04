@@ -2805,7 +2805,7 @@ AMAURI BARROSO DE MOURA"></textarea>
         comprovantePagamentoPage: item.comprovantePagamentoPage ?? null,
         comprovanteAdiantamentoStorageKey: item.comprovanteAdiantamentoStorageKey || '',
         comprovanteAdiantamentoPage: item.comprovanteAdiantamentoPage ?? null
-      })).map(applyHitachiSituationRules));
+      })).map(applyHitachiSituationRules)));
 
       hitachiCompanyDocs.splice(0, hitachiCompanyDocs.length, ...((payload.hitachiCompanyDocs || []).map(item => ({
         id: Number(item.id),
