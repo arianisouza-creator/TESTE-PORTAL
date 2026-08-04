@@ -4786,6 +4786,7 @@ AMAURI BARROSO DE MOURA"></textarea>
       if (!exportPayload || Number(exportPayload.status) !== 1) {
         throw new Error(exportPayload?.mensagem || `Nao foi possivel exportar ${escopo} pela API.`);
       }
+      const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
       const apiOrigin = (() => {
         try {
           return new URL(EXPORTACAO_API_BASE_URL).origin;
@@ -4836,26 +4837,32 @@ AMAURI BARROSO DE MOURA"></textarea>
 
       let lastError = '';
       const uniqueCandidates = [...new Set(candidates.filter(Boolean))];
-      for (const url of uniqueCandidates) {
-        try {
-          const response = await fetch(url, {
-            headers: {
-              Authorization: `Bearer ${EXPORTACAO_API_TOKEN}`
+      const downloadAttempts = 5;
+      for (let attempt = 0; attempt < downloadAttempts; attempt += 1) {
+        for (const url of uniqueCandidates) {
+          try {
+            const response = await fetch(url, {
+              headers: {
+                Authorization: `Bearer ${EXPORTACAO_API_TOKEN}`
+              }
+            });
+            if (!response.ok) {
+              let detail = '';
+              try {
+                detail = (await response.text()).trim();
+              } catch (error) {
+                detail = '';
+              }
+              lastError = `${response.status}${detail ? ` - ${detail}` : ''}`;
+              continue;
             }
-          });
-          if (!response.ok) {
-            let detail = '';
-            try {
-              detail = (await response.text()).trim();
-            } catch (error) {
-              detail = '';
-            }
-            lastError = `${response.status}${detail ? ` - ${detail}` : ''}`;
-            continue;
+            return response.blob();
+          } catch (error) {
+            lastError = error?.message || 'Falha ao baixar o ZIP exportado.';
           }
-          return response.blob();
-        } catch (error) {
-          lastError = error?.message || 'Falha ao baixar o ZIP exportado.';
+        }
+        if (attempt < downloadAttempts - 1) {
+          await delay(1500);
         }
       }
 
