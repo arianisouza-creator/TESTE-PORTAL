@@ -4869,17 +4869,34 @@ AMAURI BARROSO DE MOURA"></textarea>
       throw new Error(`Nao foi possivel baixar o ZIP exportado${lastError ? `. ${lastError}` : ''}`);
     }
 
+    function isLikelyHitachiApiDocumentEntry(entry) {
+      if (!entry || entry.dir) return false;
+      const name = String(entry.name || '');
+      const normalizedName = norm(name).replace(/[_\-]+/g, ' ').replace(/\s+/g, ' ').trim();
+      if (!normalizedName) return false;
+      return (
+        normalizedName.endsWith('.pdf') ||
+        normalizedName.includes('holerite') ||
+        normalizedName.includes('contra cheque') ||
+        normalizedName.includes('contracheque') ||
+        normalizedName.includes('cartao ponto') ||
+        normalizedName.includes('cartao de ponto') ||
+        normalizedName.includes('espelho de ponto') ||
+        normalizedName.includes('espelho ponto')
+      );
+    }
+
     async function extractPdfEntriesFromZipBlob(zipBlob) {
       let zip = await JSZip.loadAsync(await zipBlob.arrayBuffer());
       let allEntries = Object.values(zip.files);
-      let pdfEntries = allEntries.filter(entry => !entry.dir && entry.name.toLowerCase().endsWith('.pdf'));
+      let pdfEntries = allEntries.filter(entry => isLikelyHitachiApiDocumentEntry(entry));
       if (!pdfEntries.length) {
         const nestedZipEntry = allEntries.find(entry => !entry.dir && entry.name.toLowerCase().endsWith('.zip'));
         if (nestedZipEntry) {
           const nestedBuffer = await nestedZipEntry.async('arraybuffer');
           zip = await JSZip.loadAsync(nestedBuffer);
           allEntries = Object.values(zip.files);
-          pdfEntries = allEntries.filter(entry => !entry.dir && entry.name.toLowerCase().endsWith('.pdf'));
+          pdfEntries = allEntries.filter(entry => isLikelyHitachiApiDocumentEntry(entry));
         }
       }
       return { allEntries, pdfEntries };
