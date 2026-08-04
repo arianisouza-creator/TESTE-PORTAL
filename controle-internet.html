@@ -4897,6 +4897,10 @@ AMAURI BARROSO DE MOURA"></textarea>
         const zipBlob = await fetchHitachiApiExportZip(obraId, monthKey, 'por_colaborador');
         const zip = await JSZip.loadAsync(await zipBlob.arrayBuffer());
         const pdfEntries = Object.values(zip.files).filter(entry => !entry.dir && entry.name.toLowerCase().endsWith('.pdf'));
+        if (!pdfEntries.length) {
+          summaryBox.textContent = `API processada em ${monthLabel(monthKey)}: o ZIP retornado pela API veio sem PDFs. Nenhum holerite ou cartao ponto novo foi importado, entao os status existentes do mes foram mantidos.`;
+          return;
+        }
         let detectedHolerites = 0;
         let detectedCartoes = 0;
         let matchedDocuments = 0;
