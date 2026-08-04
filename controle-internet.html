@@ -4904,10 +4904,25 @@ AMAURI BARROSO DE MOURA"></textarea>
         };
 
         const zipBlob = await fetchHitachiApiExportZip(obraId, monthKey, 'por_colaborador');
-        const zip = await JSZip.loadAsync(await zipBlob.arrayBuffer());
-        const pdfEntries = Object.values(zip.files).filter(entry => !entry.dir && entry.name.toLowerCase().endsWith('.pdf'));
+        let zip = await JSZip.loadAsync(await zipBlob.arrayBuffer());
+        let allEntries = Object.values(zip.files);
+        let pdfEntries = allEntries.filter(entry => !entry.dir && entry.name.toLowerCase().endsWith('.pdf'));
         if (!pdfEntries.length) {
-          summaryBox.textContent = `API processada em ${monthLabel(monthKey)}: o ZIP retornado pela API veio sem PDFs. Nenhum holerite ou cartao ponto novo foi importado, entao os status existentes do mes foram mantidos.`;
+          const nestedZipEntry = allEntries.find(entry => !entry.dir && entry.name.toLowerCase().endsWith('.zip'));
+          if (nestedZipEntry) {
+            const nestedBuffer = await nestedZipEntry.async('arraybuffer');
+            zip = await JSZip.loadAsync(nestedBuffer);
+            allEntries = Object.values(zip.files);
+            pdfEntries = allEntries.filter(entry => !entry.dir && entry.name.toLowerCase().endsWith('.pdf'));
+          }
+        }
+        if (!pdfEntries.length) {
+          const previewEntries = allEntries
+            .filter(entry => !entry.dir)
+            .slice(0, 8)
+            .map(entry => entry.name)
+            .join(' | ');
+          summaryBox.textContent = `API processada em ${monthLabel(monthKey)}: o ZIP retornado pela API veio sem PDFs. Arquivos encontrados: ${previewEntries || 'nenhum arquivo listado'}. Nenhum holerite ou cartao ponto novo foi importado, entao os status existentes do mes foram mantidos.`;
           return;
         }
         let detectedHolerites = 0;
