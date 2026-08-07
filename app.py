@@ -44,6 +44,12 @@ def load_portal_config() -> dict:
             "token": st.secrets.get("passagens_api_token", os.getenv("PASSAGENS_API_TOKEN", "")).strip(),
             "useApiOnly": True,
         },
+        "cotacoes": {
+            "baseUrl": st.secrets.get(
+                "cotacoes_api_base_url",
+                os.getenv("COTACOES_API_BASE_URL", ""),
+            ).strip().rstrip("/"),
+        },
     }
 
 

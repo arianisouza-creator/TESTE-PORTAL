@@ -2464,12 +2464,14 @@ AMAURI BARROSO DE MOURA"></textarea>
     const supabaseConfig = portalConfig.supabase || {};
     const exportacaoConfig = portalConfig.exportacao || {};
     const passagensConfig = portalConfig.passagens || {};
+    const cotacoesConfig = portalConfig.cotacoes || {};
     const SUPABASE_URL = (supabaseConfig.url || '').replace(/\/+$/, '');
     const SUPABASE_ANON_KEY = supabaseConfig.anonKey || '';
     const REMOTE_ENABLED = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
     const PASSAGENS_API_ONLY = passagensConfig.useApiOnly !== false;
     const EXPORTACAO_API_BASE_URL = (exportacaoConfig.baseUrl || 'https://portalmse.com.br/microservices/exportacao_api').trim().replace(/\/+$/, '');
     const EXPORTACAO_API_TOKEN = (exportacaoConfig.token || '').trim();
+    const COTACOES_API_BASE_URL = (cotacoesConfig.baseUrl || '').trim().replace(/\/+$/, '');
     const LOCAL_CACHE_KEY = 'portal-mse-cache-v2';
     const MANAGEMENT_CACHE_KEY = 'portal-mse-management-v1';
     const monthPicker = document.getElementById('monthPicker');
@@ -5552,6 +5554,38 @@ AMAURI BARROSO DE MOURA"></textarea>
         status: managementApiConfig.siteUrl && managementApiConfig.usuario && managementApiConfig.senhaMask
           ? 'Teste simulado pronto para backend'
           : 'Configure site, login e senha'
+      };
+    }
+
+    async function cotacoesApiRequest(path, { method = 'GET', body = null } = {}) {
+      if (!COTACOES_API_BASE_URL) throw new Error('API externa nao configurada. Usando sandbox local.');
+      const response = await fetch(`${COTACOES_API_BASE_URL}${path}`, {
+        method,
+        headers: body ? { 'Content-Type': 'application/json' } : {},
+        body: body ? JSON.stringify(body) : undefined
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload.detail || payload.message || 'Falha ao consultar API de cotacoes.');
+      }
+      return payload;
+    }
+
+    function normalizeBackendQuote(quote) {
+      if (!quote) return null;
+      return {
+        id: quote.id || createId(),
+        createdAt: quote.createdAt || new Date().toISOString(),
+        companhia: quote.companhia || managementApiConfig.companhia || 'Nao configurada',
+        origem: quote.origem || '',
+        destino: quote.destino || '',
+        dataIda: quote.dataIda || '',
+        dataVolta: quote.dataVolta || '',
+        adultos: quote.adultos || 1,
+        cabine: quote.cabine || 'Economica',
+        comando: quote.comando || '',
+        resultado: quote.menorPreco != null ? `${brl(Number(quote.menorPreco))} | ${quote.localizadorTeste || 'API'}` : (quote.resultado || '-'),
+        status: quote.status || 'Retorno da API'
       };
     }
 
@@ -8790,10 +8824,10 @@ AMAURI BARROSO DE MOURA"></textarea>
       resetManagementFornecedorForm();
       renderManagement();
     });
-    document.getElementById('managementApiConfigForm').addEventListener('submit', event => {
+    document.getElementById('managementApiConfigForm').addEventListener('submit', async event => {
       event.preventDefault();
       const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
-      Object.assign(managementApiConfig, {
+      const nextConfig = {
         companhia: formData.companhia || 'LATAM',
         siteUrl: formData.siteUrl || '',
         usuario: formData.usuario || '',
@@ -8802,22 +8836,48 @@ AMAURI BARROSO DE MOURA"></textarea>
         status: formData.status || 'Configurado',
         observacao: formData.observacao || '',
         updatedAt: new Date().toISOString()
-      });
+      };
+      try {
+        const payload = await cotacoesApiRequest('/api/cotacoes/config', {
+          method: 'POST',
+          body: {
+            ...nextConfig,
+            senha: formData.senha || ''
+          }
+        });
+        Object.assign(managementApiConfig, payload.config || nextConfig);
+        setSyncStatus(`Conector ${managementApiConfig.companhia} salvo na API`);
+      } catch (error) {
+        console.warn(error);
+        Object.assign(managementApiConfig, nextConfig);
+        setSyncStatus(`Conector ${managementApiConfig.companhia} salvo em sandbox local`);
+      }
       saveManagementCache();
       renderManagementApi();
-      setSyncStatus(`Conector ${managementApiConfig.companhia} salvo para teste`);
     });
-    document.getElementById('managementApiQuoteForm').addEventListener('submit', event => {
+    document.getElementById('managementApiQuoteForm').addEventListener('submit', async event => {
       event.preventDefault();
       const form = event.currentTarget;
       const formData = Object.fromEntries(new FormData(form).entries());
-      managementApiQuotes.unshift(buildManagementApiQuote(formData));
+      let quote = null;
+      try {
+        const payload = await cotacoesApiRequest('/api/cotacoes/teste', {
+          method: 'POST',
+          body: formData
+        });
+        quote = normalizeBackendQuote(payload.quote);
+        setSyncStatus('Cotacao registrada pela API');
+      } catch (error) {
+        console.warn(error);
+        quote = buildManagementApiQuote(formData);
+        setSyncStatus('Cotacao de teste registrada em sandbox local');
+      }
+      if (quote) managementApiQuotes.unshift(quote);
       if (managementApiQuotes.length > 25) managementApiQuotes.splice(25);
       saveManagementCache();
       form.reset();
       form.elements.adultos.value = 1;
       renderManagementApi();
-      setSyncStatus('Cotacao de teste registrada na aba API');
     });
     document.getElementById('hitachiPayrollImport').addEventListener('click', importHitachiPayrollFile);
     document.getElementById('hitachiManualSeed').addEventListener('click', seedHitachiManualServiceList);

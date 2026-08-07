@@ -4,6 +4,7 @@ __pycache__/
 mingit/
 mingit.zip
 portal_data.db
+cotacoes_data*.json
 .venv/
 venv/
 env/

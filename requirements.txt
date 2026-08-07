@@ -3,3 +3,5 @@ pypdf
 streamlit
 fpdf
 openpyxl
+fastapi
+uvicorn
