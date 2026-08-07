@@ -41,6 +41,7 @@ class QuoteResult(BaseModel):
     moeda: str = Field(default="BRL")
     menorPreco: float
     localizadorTeste: str = Field(default="")
+    detalhes: list[dict] = Field(default_factory=list)
     status: str
 
 
