@@ -391,6 +391,7 @@
           <button class="subitem on" id="navInternet" type="button">Internet</button>
           <button class="subitem" id="navDiarista" type="button">Diarista</button>
           <button class="subitem" id="navPassagens" type="button">Passagens</button>
+          <button class="subitem" id="navApi" type="button">API</button>
         </div>
       </div>
       <div class="grp">Disciplinas</div>
@@ -2395,15 +2396,16 @@ AMAURI BARROSO DE MOURA"></textarea>
     }
     function switchModule(moduleName) {
       currentModule = moduleName;
-      const isAdminModule = moduleName === 'internet' || moduleName === 'diarista' || moduleName === 'passagens';
+      const isAdminModule = moduleName === 'internet' || moduleName === 'diarista' || moduleName === 'passagens' || moduleName === 'api';
       document.getElementById('moduleInternet').classList.toggle('on', moduleName === 'internet');
       document.getElementById('moduleDiarista').classList.toggle('on', moduleName === 'diarista');
       document.getElementById('modulePassagens').classList.toggle('on', moduleName === 'passagens');
       document.getElementById('moduleHitachi').classList.toggle('on', moduleName === 'hitachi');
-      document.getElementById('moduleManagement').classList.toggle('on', moduleName === 'management');
+      document.getElementById('moduleManagement').classList.toggle('on', moduleName === 'management' || moduleName === 'api');
       document.getElementById('navInternet').classList.toggle('on', moduleName === 'internet');
       document.getElementById('navDiarista').classList.toggle('on', moduleName === 'diarista');
       document.getElementById('navPassagens').classList.toggle('on', moduleName === 'passagens');
+      document.getElementById('navApi').classList.toggle('on', moduleName === 'api');
       document.getElementById('navHitachi').classList.toggle('on', moduleName === 'hitachi');
       document.getElementById('navGerenciamento').classList.toggle('on', moduleName === 'management');
       document.getElementById('adminToggle').classList.toggle('on', isAdminModule);
@@ -2412,6 +2414,7 @@ AMAURI BARROSO DE MOURA"></textarea>
       if (moduleName === 'hitachi' || moduleName === 'management') {
         document.getElementById('docsBlock').classList.add('open');
       }
+      if (moduleName === 'api') openManagementView('api');
       document.getElementById('dMonthMirror').value = currentMonthKey();
     }
     function refreshProtectedViews() {
@@ -8284,6 +8287,7 @@ AMAURI BARROSO DE MOURA"></textarea>
     document.getElementById('navInternet').addEventListener('click', () => switchModule('internet'));
     document.getElementById('navDiarista').addEventListener('click', () => switchModule('diarista'));
     document.getElementById('navPassagens').addEventListener('click', () => switchModule('passagens'));
+    document.getElementById('navApi').addEventListener('click', () => switchModule('api'));
     document.getElementById('navHitachi').addEventListener('click', () => switchModule('hitachi'));
     document.getElementById('navGerenciamento').addEventListener('click', () => {
       switchModule('management');
