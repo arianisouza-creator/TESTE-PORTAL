@@ -1255,6 +1255,50 @@
               </footer>
             </form>
           </section>
+          <section class="card pad" style="margin-top:14px">
+            <div class="chead"><span class="ti2">Novo hotel manual</span><span class="eyebrow">Hospedagem</span></div>
+            <form id="passagensHotelManualForm" class="formgrid">
+              <label>Cartao ou faturado<input name="cartaoOuFaturado" placeholder="Ex.: Cartao, Faturado"></label>
+              <label>Obra<input name="obra" required placeholder="Ex.: LMS"></label>
+              <label>Colaborador<input name="nome" required placeholder="Nome do hospede"></label>
+              <label>Hotel<input name="hotel" required placeholder="Ex.: Hotel Central"></label>
+              <label>Cidade<input name="cidade" placeholder="Ex.: Sao Paulo"></label>
+              <label>Check in<input name="checkIn" type="date"></label>
+              <label>Check out<input name="checkOut" type="date"></label>
+              <label>Numero de diarias<input name="numeroDiarias" type="number" min="1" placeholder="Calculado se vazio"></label>
+              <label>Valor diaria<input name="valorDiaria" placeholder="Ex.: 250,00"></label>
+              <label>Valor total diarias<input name="valorTotalDiarias" placeholder="Ex.: 750,00"></label>
+              <label>Valor total<input name="valorTotal" placeholder="Ex.: 820,00"></label>
+              <label>Itinerario<input name="itinerario" placeholder="Ex.: GRU - AMS"></label>
+              <label>Motivo<input name="motivo" placeholder="Ex.: Visita tecnica"></label>
+              <label>Numero do pedido<input name="numeroPedido" placeholder="Ex.: 110766"></label>
+              <label class="checklabel"><input name="pago" type="checkbox">Pago</label>
+              <label style="grid-column:1 / -1">Observacao<input name="observacao" placeholder="Informacoes adicionais da hospedagem"></label>
+              <footer style="grid-column:1 / -1">
+                <button class="primary" type="submit"><span data-icon="plus"></span>Salvar hotel manual</button>
+              </footer>
+            </form>
+          </section>
+          <section class="card pad" style="margin-top:14px">
+            <div class="chead"><span class="ti2">Novo carro manual</span><span class="eyebrow">Locacao</span></div>
+            <form id="passagensCarroManualForm" class="formgrid">
+              <label>Motorista / Colaborador<input name="motorista" required placeholder="Nome do motorista"></label>
+              <label>Obra<input name="obra" required placeholder="Ex.: LMS"></label>
+              <label>Cidade<input name="cidade" placeholder="Ex.: Rio de Janeiro"></label>
+              <label>Retirada<input name="retirada" type="date"></label>
+              <label>Devolucao<input name="devolucao" type="date"></label>
+              <label>Numero de diarias<input name="numeroDiarias" type="number" min="1" placeholder="Calculado se vazio"></label>
+              <label>Valor total<input name="valorTotal" placeholder="Ex.: 980,00"></label>
+              <label>Numero da reserva<input name="numeroReserva" placeholder="Ex.: RES123"></label>
+              <label>Motivo<input name="motivo" placeholder="Ex.: Deslocamento em obra"></label>
+              <label>Numero do pedido<input name="numeroPedido" placeholder="Ex.: 110766"></label>
+              <label class="checklabel"><input name="pago" type="checkbox">Pago</label>
+              <label style="grid-column:1 / -1">Observacao<input name="observacao" placeholder="Informacoes adicionais da locacao"></label>
+              <footer style="grid-column:1 / -1">
+                <button class="primary" type="submit"><span data-icon="plus"></span>Salvar carro manual</button>
+              </footer>
+            </form>
+          </section>
           <section class="card table-card" style="margin-top:14px">
             <div class="pad">
               <div class="chead"><span class="ti2">Cadastros do mes</span><span class="eyebrow" id="pCadastroCount">0 registros</span></div>
@@ -1678,6 +1722,7 @@ AMAURI BARROSO DE MOURA"></textarea>
           <button class="toplink on" data-g-view="overview">Visao Geral</button>
           <button class="toplink" data-g-view="controle">Controle de NF</button>
           <button class="toplink" data-g-view="cadastro">Cadastro</button>
+          <button class="toplink" data-g-view="api">API</button>
         </div>
 
         <div class="view on" id="gview-overview">
@@ -1832,6 +1877,93 @@ AMAURI BARROSO DE MOURA"></textarea>
               <div class="cred-list" id="gFornecedoresCadastroList"></div>
             </section>
           </div>
+        </div>
+
+        <div class="view" id="gview-api">
+          <div class="hero" style="margin-bottom:14px">
+            <h1>API de Cotacoes</h1>
+            <p>Configure o acesso autorizado da companhia aerea e rode testes de cotacao antes de ligar o robo no backend.</p>
+          </div>
+
+          <div class="cred-grid">
+            <section class="card pad">
+              <div class="chead"><span class="ti2">Conector da companhia</span><span class="eyebrow" id="gApiStatus">Nao configurado</span></div>
+              <form id="managementApiConfigForm" class="formgrid">
+                <label>Companhia
+                  <select name="companhia" required>
+                    <option value="LATAM">LATAM</option>
+                    <option value="Azul">Azul</option>
+                    <option value="GOL">GOL</option>
+                    <option value="Outra">Outra</option>
+                  </select>
+                </label>
+                <label>Site de acesso<input name="siteUrl" type="url" required placeholder="https://www.companhia.com.br"></label>
+                <label>Usuario / login<input name="usuario" required placeholder="Seu login autorizado"></label>
+                <label>Senha<input name="senha" type="password" required placeholder="Sua senha"></label>
+                <label>Ambiente
+                  <select name="ambiente">
+                    <option value="Teste">Teste</option>
+                    <option value="Producao">Producao</option>
+                  </select>
+                </label>
+                <label>Status
+                  <select name="status">
+                    <option value="Configurado">Configurado</option>
+                    <option value="Pendente">Pendente</option>
+                    <option value="Bloqueado por validacao manual">Bloqueado por validacao manual</option>
+                  </select>
+                </label>
+                <label style="grid-column:1 / -1">Observacao<input name="observacao" placeholder="Ex.: login exige token manual no primeiro acesso"></label>
+                <footer style="grid-column:1 / -1">
+                  <button class="primary" type="submit"><span data-icon="save"></span>Salvar conector</button>
+                </footer>
+              </form>
+            </section>
+
+            <section class="card pad">
+              <div class="chead"><span class="ti2">Teste de cotacao</span><span class="eyebrow">Sandbox local</span></div>
+              <form id="managementApiQuoteForm" class="formgrid">
+                <label>Origem<input name="origem" required placeholder="Ex.: GRU"></label>
+                <label>Destino<input name="destino" required placeholder="Ex.: REC"></label>
+                <label>Data de ida<input name="dataIda" type="date" required></label>
+                <label>Data de volta<input name="dataVolta" type="date"></label>
+                <label>Adultos<input name="adultos" type="number" min="1" value="1" required></label>
+                <label>Cabine
+                  <select name="cabine">
+                    <option value="Economica">Economica</option>
+                    <option value="Executiva">Executiva</option>
+                  </select>
+                </label>
+                <label style="grid-column:1 / -1">Comando<input name="comando" placeholder="Ex.: menor preco com bagagem"></label>
+                <footer style="grid-column:1 / -1">
+                  <button class="primary" type="submit"><span data-icon="refresh"></span>Testar cotacao</button>
+                </footer>
+              </form>
+            </section>
+          </div>
+
+          <section class="card table-card" style="margin-top:14px">
+            <div class="pad">
+              <div class="chead"><span class="ti2">Ultimos testes</span><span class="eyebrow" id="gApiQuoteCount">0 registros</span></div>
+            </div>
+            <div style="overflow:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Companhia</th>
+                    <th>Trecho</th>
+                    <th>Periodo</th>
+                    <th>Passageiros</th>
+                    <th>Resultado</th>
+                    <th>Status</th>
+                    <th>Acoes</th>
+                  </tr>
+                </thead>
+                <tbody id="gApiQuoteRows"></tbody>
+              </table>
+            </div>
+          </section>
         </div>
       </section>
     </main>
@@ -2350,6 +2482,8 @@ AMAURI BARROSO DE MOURA"></textarea>
     const managementObras = [];
     const managementResponsaveis = [];
     const managementFornecedores = [];
+    const managementApiConfig = {};
+    const managementApiQuotes = [];
     const hitachiExportacaoObras = [];
     const HITACHI_MANUAL_SERVICE_NAMES = [
       'ALBERT VICENTE ZAMBELLO',
@@ -5211,6 +5345,15 @@ AMAURI BARROSO DE MOURA"></textarea>
         managementObras.splice(0, managementObras.length, ...((payload.managementObras || []).map(item => ({ ...item }))));
         managementResponsaveis.splice(0, managementResponsaveis.length, ...((payload.managementResponsaveis || []).map(item => ({ ...item }))));
         managementFornecedores.splice(0, managementFornecedores.length, ...((payload.managementFornecedores || []).map(item => ({ ...item }))));
+        Object.assign(managementApiConfig, payload.managementApiConfig || {});
+        let migratedApiSecret = false;
+        if (managementApiConfig.senha) {
+          managementApiConfig.senhaMask = managementApiConfig.senhaMask || maskSecret(managementApiConfig.senha);
+          delete managementApiConfig.senha;
+          migratedApiSecret = true;
+        }
+        managementApiQuotes.splice(0, managementApiQuotes.length, ...((payload.managementApiQuotes || []).map(item => ({ ...item }))));
+        if (migratedApiSecret) saveManagementCache();
       } catch (error) {
         console.error('Falha ao ler cache de gerenciamento', error);
       }
@@ -5221,7 +5364,9 @@ AMAURI BARROSO DE MOURA"></textarea>
         managementLaunches,
         managementObras,
         managementResponsaveis,
-        managementFornecedores
+        managementFornecedores,
+        managementApiConfig,
+        managementApiQuotes
       }));
     }
 
@@ -5354,6 +5499,89 @@ AMAURI BARROSO DE MOURA"></textarea>
       form.reset();
       document.getElementById('saveManagementFornecedorBtn').innerHTML = `${icon('plus')}Salvar fornecedor`;
       document.getElementById('cancelManagementFornecedorEdit').style.display = 'none';
+    }
+
+    function maskSecret(value) {
+      const text = String(value || '');
+      if (!text) return '';
+      return text.length <= 4 ? '****' : `${'*'.repeat(Math.max(4, text.length - 4))}${text.slice(-4)}`;
+    }
+
+    function syncManagementApiForm() {
+      const form = document.getElementById('managementApiConfigForm');
+      if (!form) return;
+      form.elements.companhia.value = managementApiConfig.companhia || 'LATAM';
+      form.elements.siteUrl.value = managementApiConfig.siteUrl || '';
+      form.elements.usuario.value = managementApiConfig.usuario || '';
+      form.elements.senha.value = '';
+      form.elements.senha.placeholder = managementApiConfig.senhaMask ? `Salva como ${managementApiConfig.senhaMask}` : 'Sua senha';
+      form.elements.ambiente.value = managementApiConfig.ambiente || 'Teste';
+      form.elements.status.value = managementApiConfig.status || 'Pendente';
+      form.elements.observacao.value = managementApiConfig.observacao || '';
+    }
+
+    function buildManagementApiQuote(formData) {
+      const base = [
+        formData.origem,
+        formData.destino,
+        formData.dataIda,
+        formData.dataVolta,
+        formData.adultos,
+        managementApiConfig.companhia
+      ].join('|');
+      let hash = 0;
+      for (let index = 0; index < base.length; index += 1) hash = ((hash * 31) + base.charCodeAt(index)) >>> 0;
+      const adultos = Math.max(1, Number(formData.adultos || 1));
+      const valor = 650 + (hash % 1800) + (adultos - 1) * 420;
+      const localizadorTeste = `TST${String(hash).slice(-5).padStart(5, '0')}`;
+      return {
+        id: createId(),
+        createdAt: new Date().toISOString(),
+        companhia: managementApiConfig.companhia || 'Nao configurada',
+        origem: String(formData.origem || '').toUpperCase(),
+        destino: String(formData.destino || '').toUpperCase(),
+        dataIda: formData.dataIda || '',
+        dataVolta: formData.dataVolta || '',
+        adultos,
+        cabine: formData.cabine || 'Economica',
+        comando: formData.comando || '',
+        resultado: `${brl(valor)} | ${localizadorTeste}`,
+        status: managementApiConfig.siteUrl && managementApiConfig.usuario && managementApiConfig.senhaMask
+          ? 'Teste simulado pronto para backend'
+          : 'Configure site, login e senha'
+      };
+    }
+
+    function deleteManagementApiQuote(id) {
+      const index = managementApiQuotes.findIndex(item => String(item.id) === String(id));
+      if (index < 0) return;
+      managementApiQuotes.splice(index, 1);
+      saveManagementCache();
+      renderManagementApi();
+    }
+    window.deleteManagementApiQuote = deleteManagementApiQuote;
+
+    function renderManagementApi() {
+      const status = managementApiConfig.status || 'Nao configurado';
+      const companhia = managementApiConfig.companhia || '';
+      document.getElementById('gApiStatus').textContent = companhia ? `${companhia} | ${status}` : status;
+      syncManagementApiForm();
+      document.getElementById('gApiQuoteCount').textContent = `${managementApiQuotes.length} registro${managementApiQuotes.length === 1 ? '' : 's'}`;
+      document.getElementById('gApiQuoteRows').innerHTML = managementApiQuotes.length ? managementApiQuotes
+        .slice()
+        .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))
+        .map(item => `
+          <tr>
+            <td>${formatManagementUpdate(item.createdAt)}</td>
+            <td>${escapeHtml(item.companhia || '-')}</td>
+            <td><b class="link">${escapeHtml(item.origem || '-')} - ${escapeHtml(item.destino || '-')}</b></td>
+            <td>${formatDate(item.dataIda) || '-'}${item.dataVolta ? ` ate ${formatDate(item.dataVolta)}` : ''}</td>
+            <td>${item.adultos || 1} | ${escapeHtml(item.cabine || 'Economica')}</td>
+            <td><span class="money">${escapeHtml(item.resultado || '-')}</span></td>
+            <td><span class="tag neutral">${escapeHtml(item.status || '-')}</span></td>
+            <td class="actioncell"><button class="rowact" title="Excluir teste" aria-label="Excluir teste" onclick="deleteManagementApiQuote(${item.id})">${icon('trash')}</button></td>
+          </tr>
+        `).join('') : `<tr><td colspan="8"><div class="empty-state"><b>Nenhum teste registrado.</b>Configure o conector e rode uma cotacao de teste.</div></td></tr>`;
     }
 
     function renderManagementCadastroList() {
@@ -5589,6 +5817,7 @@ AMAURI BARROSO DE MOURA"></textarea>
       }).join('') : `<div class="empty-state" style="grid-column:1 / -1"><b>Nenhuma obra cadastrada.</b>Cadastre as obras para acompanhar o prazo final.</div>`;
       document.getElementById('gRows').innerHTML = controlRows.length ? controlRows.map(item => `<tr><td>${monthLabel(item.monthKey)}</td><td>${formatDate(item.dataLancamento) || '-'}</td><td><b class="link">${escapeHtml(item.responsavelNome || '-')}</b></td><td>${escapeHtml(item.fornecedor || '-')}</td><td>${escapeHtml(item.obraNome || '-')}</td><td>${escapeHtml(item.numeroNf || '-')}</td><td><span class="money">${item.valor != null ? brl(Number(item.valor) || 0) : '-'}</span></td><td>${escapeHtml(item.observacao || '-')}</td><td class="actioncell"><div style="display:flex;justify-content:flex-end;gap:8px"><button class="rowact" title="Editar lancamento" aria-label="Editar lancamento" onclick="editManagementLaunch(${item.id})">${icon('edit')}</button><button class="rowact" title="Excluir lancamento" aria-label="Excluir lancamento" onclick="deleteManagementLaunch(${item.id})">${icon('trash')}</button></div></td></tr>`).join('') : `<tr><td colspan="9"><div class="empty-state"><b>Nenhum lancamento nessa competencia.</b>Use os filtros ou cadastre uma nova NF.</div></td></tr>`;
       renderManagementCadastroList();
+      renderManagementApi();
     }
 
     function editManagementLaunch(id) {
@@ -8197,6 +8426,64 @@ AMAURI BARROSO DE MOURA"></textarea>
       renderPassagens();
       setSyncStatus('Cadastro manual de passagem salvo para teste');
     });
+    document.getElementById('passagensHotelManualForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const formData = Object.fromEntries(new FormData(form).entries());
+      const numeroDiarias = Number(formData.numeroDiarias || countDiarias(formData.checkIn, formData.checkOut));
+      const valorDiaria = parseMoney(formData.valorDiaria);
+      passagensHospedagens.push({
+        id: createId(),
+        passagemKey: '',
+        cartaoOuFaturado: formData.cartaoOuFaturado || '',
+        obra: formData.obra || '',
+        nome: formData.nome || '',
+        hotel: formData.hotel || '',
+        cidade: formData.cidade || '',
+        checkIn: formData.checkIn || '',
+        checkOut: formData.checkOut || '',
+        numeroDiarias,
+        valorDiaria: formData.valorDiaria || '',
+        valorTotalDiarias: formData.valorTotalDiarias || (valorDiaria != null ? brl(valorDiaria * (numeroDiarias || 1)) : ''),
+        valorTotal: formData.valorTotal || '',
+        itinerario: formData.itinerario || '',
+        motivo: formData.motivo || '',
+        numeroPedido: formData.numeroPedido || '',
+        observacao: formData.observacao || '',
+        pago: Boolean(formData.pago)
+      });
+      form.reset();
+      saveLocalCache();
+      openPassagensView('hospedagem');
+      renderPassagens();
+      setSyncStatus('Cadastro manual de hotel salvo');
+    });
+    document.getElementById('passagensCarroManualForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const formData = Object.fromEntries(new FormData(form).entries());
+      passagensCarros.push({
+        id: createId(),
+        passagemKey: '',
+        obra: formData.obra || '',
+        motorista: formData.motorista || '',
+        cidade: formData.cidade || '',
+        retirada: formData.retirada || '',
+        devolucao: formData.devolucao || '',
+        numeroDiarias: formData.numeroDiarias || countDiarias(formData.retirada, formData.devolucao),
+        valorTotal: formData.valorTotal || '',
+        numeroReserva: formData.numeroReserva || '',
+        motivo: formData.motivo || '',
+        numeroPedido: formData.numeroPedido || '',
+        observacao: formData.observacao || '',
+        pago: Boolean(formData.pago)
+      });
+      form.reset();
+      saveLocalCache();
+      openPassagensView('carros');
+      renderPassagens();
+      setSyncStatus('Cadastro manual de carro salvo');
+    });
     document.getElementById('passagensCreditoForm').addEventListener('submit', async event => {
       event.preventDefault();
       const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
@@ -8498,6 +8785,35 @@ AMAURI BARROSO DE MOURA"></textarea>
       saveManagementCache();
       resetManagementFornecedorForm();
       renderManagement();
+    });
+    document.getElementById('managementApiConfigForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
+      Object.assign(managementApiConfig, {
+        companhia: formData.companhia || 'LATAM',
+        siteUrl: formData.siteUrl || '',
+        usuario: formData.usuario || '',
+        senhaMask: maskSecret(formData.senha || ''),
+        ambiente: formData.ambiente || 'Teste',
+        status: formData.status || 'Configurado',
+        observacao: formData.observacao || '',
+        updatedAt: new Date().toISOString()
+      });
+      saveManagementCache();
+      renderManagementApi();
+      setSyncStatus(`Conector ${managementApiConfig.companhia} salvo para teste`);
+    });
+    document.getElementById('managementApiQuoteForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const formData = Object.fromEntries(new FormData(form).entries());
+      managementApiQuotes.unshift(buildManagementApiQuote(formData));
+      if (managementApiQuotes.length > 25) managementApiQuotes.splice(25);
+      saveManagementCache();
+      form.reset();
+      form.elements.adultos.value = 1;
+      renderManagementApi();
+      setSyncStatus('Cotacao de teste registrada na aba API');
     });
     document.getElementById('hitachiPayrollImport').addEventListener('click', importHitachiPayrollFile);
     document.getElementById('hitachiManualSeed').addEventListener('click', seedHitachiManualServiceList);
