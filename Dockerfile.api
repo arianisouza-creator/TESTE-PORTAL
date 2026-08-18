@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY requirements-api.txt .
 RUN pip install --no-cache-dir -r requirements-api.txt
+RUN mkdir -p /data && chmod 777 /data
 
 COPY cotacoes ./cotacoes
 COPY cotacoes_api.py .

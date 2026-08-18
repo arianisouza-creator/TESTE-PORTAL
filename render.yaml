@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: teste-portal-cotacoes-api
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile.api
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: COTACOES_CORS_ORIGINS
+        value: https://testeariani.streamlit.app,http://localhost:8501,http://127.0.0.1:8501
+      - key: COTACOES_DATA_FILE
+        value: /data/cotacoes_data.json
+      - key: COTACOES_LATAM_MODE
+        value: browser
+      - key: COTACOES_AZUL_MODE
+        value: browser
+      - key: COTACOES_LATAM_HEADLESS
+        value: true
+      - key: COTACOES_AZUL_HEADLESS
+        value: true
+      - key: COTACOES_LATAM_SITE_URL
+        value: https://www.corporate.latamairlines.com/br/pt
+      - key: COTACOES_AZUL_SITE_URL
+        value: https://apps.voeazul.com.br/PortalEmpresas/?ReturnUrl=%2fPortalEmpresas%2fReserva%2fComprar%2f
+      - key: COTACOES_LATAM_USUARIO
+        sync: false
+      - key: COTACOES_LATAM_SENHA
+        sync: false
+      - key: COTACOES_AZUL_USUARIO
+        sync: false
+      - key: COTACOES_AZUL_SENHA
+        sync: false

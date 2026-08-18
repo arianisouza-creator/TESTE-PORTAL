@@ -51,12 +51,32 @@ Arquivos preparados:
 - `cotacoes/`: conectores LATAM/Azul.
 - `requirements-api.txt`: dependencias da API.
 - `Dockerfile.api`: imagem Docker com Playwright para hospedar o robo.
+- `render.yaml`: blueprint para criar a API no Render pelo GitHub.
 
 Com Docker, o comando de subida usa:
 
 ```bash
 uvicorn cotacoes_api:app --host 0.0.0.0 --port $PORT
 ```
+
+### Deploy pelo Render
+
+1. Entre em [Render](https://render.com/).
+2. Escolha **Blueprints > New Blueprint Instance**.
+3. Conecte o repositorio `arianisouza-creator/TESTE-PORTAL`.
+4. O Render vai ler `render.yaml` e criar o servico `teste-portal-cotacoes-api`.
+5. Preencha as variaveis marcadas como secretas:
+
+```bash
+COTACOES_LATAM_USUARIO=...
+COTACOES_LATAM_SENHA=...
+COTACOES_AZUL_USUARIO=...
+COTACOES_AZUL_SENHA=...
+```
+
+6. Depois do deploy, abra `https://NOME-DA-API.onrender.com/health`.
+7. Se aparecer `{"status":"ok","service":"cotacoes-api"}`, copie a URL base da API.
+8. No Streamlit Cloud, cole essa URL em `cotacoes_api_base_url`.
 
 ## 4. Variaveis da API de cotacoes
 
@@ -69,9 +89,17 @@ COTACOES_LATAM_HEADLESS=true
 COTACOES_AZUL_HEADLESS=true
 COTACOES_CORS_ORIGINS=https://SEU-APP.streamlit.app
 COTACOES_DATA_FILE=/data/cotacoes_data.json
+COTACOES_LATAM_SITE_URL=https://www.corporate.latamairlines.com/br/pt
+COTACOES_AZUL_SITE_URL=https://apps.voeazul.com.br/PortalEmpresas/?ReturnUrl=%2fPortalEmpresas%2fReserva%2fComprar%2f
+COTACOES_LATAM_USUARIO=seu-login-latam
+COTACOES_LATAM_SENHA=sua-senha-latam
+COTACOES_AZUL_USUARIO=seu-login-azul
+COTACOES_AZUL_SENHA=sua-senha-azul
 ```
 
 As credenciais das companhias devem ser salvas pela tela **Administrativo > API** ou configuradas como armazenamento persistente no provedor.
+
+Em producao, prefira as variaveis de ambiente acima. Assim a API ja sobe com LATAM/Azul configuradas e o robo consegue cotar de forma invisivel quando uma solicitacao for criada no portal.
 
 ## 5. O que nao subir para o GitHub
 
