@@ -2,7 +2,7 @@ services:
   - type: web
     name: teste-portal-cotacoes-api
     runtime: docker
-    plan: starter
+    plan: free
     dockerfilePath: ./Dockerfile.api
     dockerContext: .
     healthCheckPath: /health
