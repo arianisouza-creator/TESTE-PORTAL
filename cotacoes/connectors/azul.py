@@ -42,6 +42,7 @@ class AzulConnector(SandboxConnector):
                 headless=headless,
                 locale="pt-BR",
                 viewport={"width": 1280, "height": 900},
+                args=["--no-sandbox", "--disable-dev-shm-usage"],
             )
             page = browser.pages[0] if browser.pages else browser.new_page()
             try:

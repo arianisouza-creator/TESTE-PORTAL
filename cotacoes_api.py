@@ -1,4 +1,6 @@
 import os
+import logging
+import traceback
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
@@ -7,6 +9,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from cotacoes.models import ConnectorConfig, QuoteRequest
 from cotacoes.service import get_company_config, get_config, history, quote, save_config
 
+
+logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
+logger = logging.getLogger("cotacoes_api")
 
 app = FastAPI(title="MSE Cotacoes API", version="0.1.0")
 app.add_middleware(
@@ -28,6 +33,30 @@ def read_config() -> dict[str, Any]:
     return {"status": "ok", "config": get_config()}
 
 
+@app.get("/api/cotacoes/debug")
+def read_debug() -> dict[str, Any]:
+    config = get_config()
+    return {
+        "status": "ok",
+        "companies": {
+            company: {
+                "siteUrl": bool(payload.get("siteUrl")),
+                "usuario": bool(payload.get("usuario")),
+                "senhaMask": bool(payload.get("senhaMask")),
+                "ambiente": payload.get("ambiente", ""),
+                "status": payload.get("status", ""),
+            }
+            for company, payload in config.items()
+        },
+        "modes": {
+            "latam": os.getenv("COTACOES_LATAM_MODE", ""),
+            "azul": os.getenv("COTACOES_AZUL_MODE", ""),
+            "latam_headless": os.getenv("COTACOES_LATAM_HEADLESS", ""),
+            "azul_headless": os.getenv("COTACOES_AZUL_HEADLESS", ""),
+        },
+    }
+
+
 @app.post("/api/cotacoes/config")
 def write_config(config: ConnectorConfig) -> dict[str, Any]:
     return {"status": "ok", "config": save_config(config)}
@@ -44,6 +73,16 @@ def quote_test(request: QuoteRequest) -> dict[str, Any]:
     try:
         return {"status": "ok", "quote": quote(request)}
     except Exception as exc:
+        logger.error(
+            "Erro na cotacao %s %s-%s %s/%s: %s\n%s",
+            company,
+            request.origem,
+            request.destino,
+            request.dataIda,
+            request.dataVolta or "sem-volta",
+            exc,
+            traceback.format_exc(),
+        )
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 

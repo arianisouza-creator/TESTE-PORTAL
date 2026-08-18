@@ -41,6 +41,7 @@ class LatamConnector(SandboxConnector):
                 user_data_dir=str(LATAM_PROFILE_DIR),
                 headless=headless,
                 locale="pt-BR",
+                args=["--no-sandbox", "--disable-dev-shm-usage"],
             )
             page = browser.pages[0] if browser.pages else browser.new_page()
             try:
