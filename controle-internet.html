@@ -278,6 +278,23 @@
     .cred-item h4{margin:0 0 10px;color:#17356c;font-size:15px}
     .cred-row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line-2);font-size:12px;color:var(--body)}
     .cred-row:last-child{border-bottom:0}
+    .quote-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-height:58vh;overflow:auto;padding:2px 4px 2px 0}
+    .quote-choice-card{border:1px solid #dbe5f4;border-radius:10px;background:#fff;padding:12px;display:grid;gap:10px;cursor:pointer;transition:.15s ease;box-shadow:0 3px 10px rgba(15,23,42,.04)}
+    .quote-choice-card:hover{border-color:#b8cdfb;box-shadow:0 10px 24px rgba(37,99,235,.12)}
+    .quote-choice-card.selected{border-color:#1d56ce;background:#eef4ff;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+    .quote-choice-card.alternative{border-color:#b7ebc6;background:#f0fff5}
+    .quote-choice-card.alternative.selected{border-color:#16a34a;background:#e8f9ee;box-shadow:0 0 0 3px rgba(22,163,74,.16)}
+    .quote-choice-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .quote-route{font-weight:700;color:#0b2d66;font-size:13px}
+    .quote-company{display:inline-flex;align-items:center;justify-content:center;min-width:58px;height:24px;border-radius:999px;background:#eaf2ff;color:#1d4ed8;font:700 10px "IBM Plex Mono",monospace;text-transform:uppercase}
+    .quote-company.azul{background:#e8f7ff;color:#0369a1}
+    .quote-alt-badge{display:inline-flex;align-items:center;justify-content:center;min-height:22px;border-radius:999px;background:#dcfce7;color:#15803d;font:700 10px "IBM Plex Mono",monospace;text-transform:uppercase;padding:0 8px}
+    .quote-slots{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .quote-slot{border:1px solid #eef2f7;border-radius:8px;background:#fbfdff;padding:8px}
+    .quote-slot span{display:block;font:700 10px "IBM Plex Mono",monospace;color:#8a98ad;text-transform:uppercase;margin-bottom:3px}
+    .quote-slot b{display:block;color:#17356c;font-size:12px}
+    .quote-total{display:flex;justify-content:space-between;gap:10px;align-items:center;border-top:1px dashed #dbe5f4;padding-top:8px;font:700 11px "IBM Plex Mono",monospace;color:#8a98ad;text-transform:uppercase}
+    .quote-total b{color:#081d44;font:800 14px "IBM Plex Sans",system-ui,sans-serif}
     .pwd{font-family:"IBM Plex Mono",monospace}
     .inline-btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 10px;font-size:12px;color:#456191;font-weight:600}
     .contract-stack{display:grid;gap:14px;margin-top:14px}
@@ -304,6 +321,7 @@
     .modal.open{display:grid}
     .dialog{width:min(700px,100%);background:#fff;border-radius:16px;border:1px solid var(--line);box-shadow:0 18px 50px rgba(16,24,40,.18);padding:18px}
     .dialog.wide{width:min(880px,100%)}
+    .dialog.extra-wide{width:min(1040px,100%)}
     .formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     label{display:grid;gap:6px;font:600 10px "IBM Plex Mono",monospace;text-transform:uppercase;color:var(--mut)}
     input,select,textarea{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff;color:var(--ink);min-width:0}
@@ -315,7 +333,7 @@
     svg{width:18px;height:18px;stroke-width:1.8}
     @media (max-width:1280px){.kpis{grid-template-columns:repeat(3,1fr)}.dashgrid{grid-template-columns:1fr 1fr}.detail-grid,.cred-grid{grid-template-columns:1fr}.detail-grid-passagem{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media (max-width:980px){.shell{padding:0 20px}.side{display:none}.main{padding-left:0}.monthbar,.toolbar{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.detail-grid{grid-template-columns:1fr}.hinner{padding:14px}.clock,.tecto,.user{display:none}.uinner{padding:0 20px}.trow{padding:0 20px}}
-    @media (max-width:640px){.trow{height:auto;display:grid;grid-template-columns:1fr;gap:8px;padding:12px 20px}.tscroll{display:grid;mask-image:none;-webkit-mask-image:none}.ti{padding:8px 0;border-left:0;border-top:1px solid var(--line-2)}.greet{padding-right:0}.kpis{grid-template-columns:1fr}.dashgrid{grid-template-columns:1fr}.formgrid,.import-grid{grid-template-columns:1fr}.donut-wrap,.cred-grid{grid-template-columns:1fr}.uinner{overflow:auto}.detail-grid-passagem{grid-template-columns:1fr}}
+    @media (max-width:640px){.trow{height:auto;display:grid;grid-template-columns:1fr;gap:8px;padding:12px 20px}.tscroll{display:grid;mask-image:none;-webkit-mask-image:none}.ti{padding:8px 0;border-left:0;border-top:1px solid var(--line-2)}.greet{padding-right:0}.kpis{grid-template-columns:1fr}.dashgrid{grid-template-columns:1fr}.formgrid,.import-grid{grid-template-columns:1fr}.donut-wrap,.cred-grid,.quote-choice-grid{grid-template-columns:1fr}.uinner{overflow:auto}.detail-grid-passagem{grid-template-columns:1fr}}
     .pending-mail-list{display:grid;gap:12px;max-height:340px;overflow:auto;padding-right:4px}
     .pending-mail-item{border:1px solid var(--line);border-radius:12px;background:#fbfcff;padding:12px}
     .pending-mail-item b{display:block;color:#17356c;margin-bottom:6px}
@@ -782,6 +800,8 @@
 
         <div class="topmenu">
           <button class="toplink on" data-p-view="overview">Visao Geral</button>
+          <button class="toplink" data-p-view="solicitacao">Solicitacao de viagem</button>
+          <button class="toplink" data-p-view="cotacao-realizada">Cotacao realizada</button>
           <button class="toplink" data-p-view="kpi">KPI</button>
           <button class="toplink" data-p-view="air">Aereo</button>
           <button class="toplink" data-p-view="road">Rodoviario</button>
@@ -789,6 +809,133 @@
           <button class="toplink" data-p-view="carros">Carros</button>
           <button class="toplink" data-p-view="cadastro">Cadastro</button>
           <button class="toplink" data-p-view="creditos">Creditos</button>
+        </div>
+
+        <div class="view" id="pview-solicitacao">
+          <div class="hero">
+            <h1>Solicitacao de viagem</h1>
+            <p>Registre a necessidade do colaborador e deixe o portal cotar nas companhias configuradas.</p>
+          </div>
+          <section class="dashgrid" style="grid-template-columns:.95fr 1.05fr">
+            <article class="card pad">
+              <div class="chead"><span class="ti2">Nova solicitacao</span><span class="eyebrow">Cotacao automatica</span></div>
+              <form id="passagensSolicitacaoForm" class="formgrid">
+                <label>Colaborador<input name="colaborador" required placeholder="Nome do passageiro"></label>
+                <label>Obra / centro de custo<input name="obra" placeholder="Ex.: SEDE, PORTO, LMS"></label>
+                <label>Origem<input name="origem" required placeholder="Ex.: LDB"></label>
+                <label>Destino<input name="destino" required placeholder="Ex.: GRU"></label>
+                <label>Data de ida<input name="dataIda" type="date" required></label>
+                <label>Data de volta<input name="dataVolta" type="date"></label>
+                <label>Adultos<input name="adultos" type="number" min="1" value="1"></label>
+                <label>Cabine
+                  <select name="cabine">
+                    <option value="Economica">Economica</option>
+                    <option value="Premium Economy">Premium Economy</option>
+                    <option value="Executiva">Executiva</option>
+                  </select>
+                </label>
+                <div style="grid-column:1 / -1">
+                  <div class="eyebrow" style="margin-bottom:8px">Companhias para cotar</div>
+                  <div class="checkrow">
+                    <label class="checklabel"><input name="solicitacaoCompanhias" type="checkbox" value="LATAM" checked>LATAM</label>
+                    <label class="checklabel"><input name="solicitacaoCompanhias" type="checkbox" value="AZUL">Azul</label>
+                    <label class="checklabel"><input id="solicitacaoTodasCompanhias" type="checkbox">Todas</label>
+                  </div>
+                </div>
+                <label style="grid-column:1 / -1">Motivo<input name="motivo" placeholder="Ex.: visita tecnica, mobilizacao, reuniao"></label>
+                <label style="grid-column:1 / -1">Observacao<input name="observacao" placeholder="Preferencias, bagagem, horario ou aprovacao"></label>
+                <footer style="grid-column:1 / -1">
+                  <button class="primary" type="submit" id="passagensSolicitacaoSubmit"><span data-icon="refresh"></span>Solicitar cotacao</button>
+                </footer>
+              </form>
+            </article>
+            <article class="card pad">
+              <div class="chead"><span class="ti2">Como vai funcionar</span><span class="eyebrow">Robo invisivel</span></div>
+              <div class="list" id="pSolicitacaoGuide">
+                <div class="li"><div><b class="link">1. Solicitacao</b><div class="lisub">O colaborador informa trecho, data e motivo no portal.</div></div><span class="tag neutral">Entrada</span></div>
+                <div class="li"><div><b class="link">2. Cotacao</b><div class="lisub">O backend abre a companhia em segundo plano e busca as opcoes.</div></div><span class="tag neutral">API</span></div>
+                <div class="li"><div><b class="link">3. Escolha</b><div class="lisub">As opcoes ficam salvas aqui para aprovacao e compra.</div></div><span class="tag ok">Retorno</span></div>
+              </div>
+            </article>
+          </section>
+          <section class="card table-card" style="margin-top:14px">
+            <div class="pad">
+              <div class="chead"><span class="ti2">Solicitacoes recentes</span><span class="eyebrow" id="pSolicitacaoCount">0 registros</span></div>
+            </div>
+            <div style="overflow:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Colaborador</th>
+                    <th>Trecho</th>
+                    <th>Periodo</th>
+                    <th>Companhias</th>
+                    <th>Resultado</th>
+                    <th>Status</th>
+                    <th>Acoes</th>
+                  </tr>
+                </thead>
+                <tbody id="pSolicitacaoRows"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div class="view" id="pview-cotacao-realizada">
+          <div class="hero">
+            <h1>Cotacao realizada</h1>
+            <p>Acompanhe as solicitacoes que ja tiveram uma opcao de voo escolhida pelo colaborador.</p>
+          </div>
+          <section class="kpis" style="grid-template-columns:repeat(4,1fr)">
+            <div class="kpi">
+              <div class="ktop"><div class="kicon blue" data-icon="badgeCheck"></div><div class="klabel">Finalizadas</div></div>
+              <div class="kvalue" id="pCotacaoRealizadaCount">0</div>
+              <div class="kmeta">Com voo escolhido</div>
+            </div>
+            <div class="kpi">
+              <div class="ktop"><div class="kicon green" data-icon="dollar"></div><div class="klabel">Menor total</div></div>
+              <div class="kvalue" id="pCotacaoRealizadaMin">R$ 0,00</div>
+              <div class="kmeta">Entre as finalizadas</div>
+            </div>
+            <div class="kpi">
+              <div class="ktop"><div class="kicon slate" data-icon="plane"></div><div class="klabel">LATAM</div></div>
+              <div class="kvalue" id="pCotacaoLatamCount">0</div>
+              <div class="kmeta">Escolhas realizadas</div>
+            </div>
+            <div class="kpi">
+              <div class="ktop"><div class="kicon blue" data-icon="plane"></div><div class="klabel">Azul</div></div>
+              <div class="kvalue" id="pCotacaoAzulCount">0</div>
+              <div class="kmeta">Escolhas realizadas</div>
+            </div>
+          </section>
+          <section class="card table-card" style="margin-top:14px">
+            <div class="pad">
+              <div class="chead"><span class="ti2">Solicitacoes finalizadas</span><span class="eyebrow" id="pCotacaoRealizadaLabel">0 registros</span></div>
+            </div>
+            <div style="overflow:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Finalizada em</th>
+                    <th>Colaborador</th>
+                    <th>Trecho</th>
+                    <th>Periodo</th>
+                    <th>Companhia</th>
+                    <th>Classificacao</th>
+                    <th>Comparativo</th>
+                    <th>Opcao escolhida</th>
+                    <th>Valor total</th>
+                    <th>Motivo</th>
+                    <th>Aprovacao</th>
+                    <th>Pedido</th>
+                    <th>Acoes</th>
+                  </tr>
+                </thead>
+                <tbody id="pCotacaoRealizadaRows"></tbody>
+              </table>
+            </div>
+          </section>
         </div>
 
         <div class="view on" id="pview-overview">
@@ -1889,18 +2036,20 @@ AMAURI BARROSO DE MOURA"></textarea>
           <div class="cred-grid">
             <section class="card pad">
               <div class="chead"><span class="ti2">Conector da companhia</span><span class="eyebrow" id="gApiStatus">Nao configurado</span></div>
+              <div class="subtabs" style="margin:0 0 12px">
+                <button class="subtab on" type="button" data-api-company="LATAM">LATAM</button>
+                <button class="subtab" type="button" data-api-company="AZUL">Azul</button>
+              </div>
               <form id="managementApiConfigForm" class="formgrid">
                 <label>Companhia
                   <select name="companhia" required>
                     <option value="LATAM">LATAM</option>
                     <option value="Azul">Azul</option>
-                    <option value="GOL">GOL</option>
-                    <option value="Outra">Outra</option>
                   </select>
                 </label>
                 <label>Site de acesso<input name="siteUrl" type="url" required placeholder="https://www.companhia.com.br"></label>
-                <label>Usuario / login<input name="usuario" required placeholder="Seu login autorizado"></label>
-                <label>Senha<input name="senha" type="password" required placeholder="Sua senha"></label>
+                <label>Usuario / login<input name="usuario" placeholder="Seu login autorizado quando houver"></label>
+                <label>Senha<input name="senha" type="password" placeholder="Sua senha quando houver"></label>
                 <label>Ambiente
                   <select name="ambiente">
                     <option value="Teste">Teste</option>
@@ -1935,6 +2084,9 @@ AMAURI BARROSO DE MOURA"></textarea>
                     <option value="Executiva">Executiva</option>
                   </select>
                 </label>
+                <label class="checklabel"><input name="companhias" type="checkbox" value="LATAM" checked>LATAM</label>
+                <label class="checklabel"><input name="companhias" type="checkbox" value="AZUL">Azul</label>
+                <label class="checklabel"><input id="quoteAllCompanies" type="checkbox">Todas</label>
                 <label style="grid-column:1 / -1">Comando<input name="comando" placeholder="Ex.: menor preco com bagagem"></label>
                 <footer style="grid-column:1 / -1">
                   <button class="primary" type="submit"><span data-icon="refresh"></span>Testar cotacao</button>
@@ -2176,6 +2328,22 @@ AMAURI BARROSO DE MOURA"></textarea>
         <button class="ghost" type="button" id="copyHitachiPendencias"><span data-icon="copy"></span>Copiar texto</button>
         <button class="ghost" type="button" id="refreshHitachiPendencias"><span data-icon="refresh"></span>Atualizar lista</button>
         <button class="primary" type="button" id="sendHitachiPendencias"><span data-icon="mail"></span>Abrir e-mail</button>
+      </footer>
+    </div>
+  </div>
+
+  <div class="modal" id="passagensQuoteChoiceModal" role="dialog" aria-modal="true" aria-labelledby="passagensQuoteChoiceTitle">
+    <div class="dialog extra-wide">
+      <div class="chead">
+        <span class="ti2" id="passagensQuoteChoiceTitle">Escolher opcao de voo</span>
+        <button class="rowact" type="button" id="closePassagensQuoteChoiceModal" aria-label="Fechar" data-icon="close"></button>
+      </div>
+      <div class="helper" id="passagensQuoteChoiceSubtitle" style="margin-bottom:12px">Selecione uma opcao para finalizar a solicitacao.</div>
+      <div class="quote-choice-grid" id="passagensQuoteChoiceList"></div>
+      <div class="helper" id="passagensQuoteChoiceFeedback" style="margin-top:12px"></div>
+      <footer>
+        <button class="ghost" type="button" id="cancelPassagensQuoteChoiceModal">Cancelar</button>
+        <button class="primary" type="button" id="finalizePassagensQuoteChoice" disabled><span data-icon="badgeCheck"></span>Finalizar solicitacao</button>
       </footer>
     </div>
   </div>
@@ -2487,8 +2655,13 @@ AMAURI BARROSO DE MOURA"></textarea>
     const managementObras = [];
     const managementResponsaveis = [];
     const managementFornecedores = [];
-    const managementApiConfig = {};
+    const managementApiConfigs = {};
     const managementApiQuotes = [];
+    let selectedApiCompany = 'LATAM';
+    const API_COMPANIES = {
+      LATAM: { label: 'LATAM', siteUrl: 'https://b2b.corporate.latamairlines.com/br/pt' },
+      AZUL: { label: 'Azul', siteUrl: 'https://apps.voeazul.com.br/PortalEmpresas/?ReturnUrl=%2fPortalEmpresas%2fReserva%2fComprar%2f' }
+    };
     const hitachiExportacaoObras = [];
     const HITACHI_MANUAL_SERVICE_NAMES = [
       'ALBERT VICENTE ZAMBELLO',
@@ -2539,6 +2712,7 @@ AMAURI BARROSO DE MOURA"></textarea>
     const passagensComplements = {};
     const passagensHospedagens = [];
     const passagensCarros = [];
+    const passagensSolicitacoes = [];
     const pAirStart = document.getElementById('pAirStart');
     const pAirEnd = document.getElementById('pAirEnd');
     const pRoadStart = document.getElementById('pRoadStart');
@@ -2558,6 +2732,8 @@ AMAURI BARROSO DE MOURA"></textarea>
     let passagensCarTab = 'overview';
     let editingHospedagemId = null;
     let editingCarroId = null;
+    let choosingSolicitacaoId = null;
+    let selectedSolicitacaoChoiceId = '';
     const passagensSelectedKeys = new Set();
     const passagensOverviewCollapsed = { bars: false, modes: false, savings: false };
     const passagensSectionCollapsed = {
@@ -2642,6 +2818,8 @@ AMAURI BARROSO DE MOURA"></textarea>
       const remoteHospedagens = remotePayload.passagensHospedagens || remotePayload.passagens_hospedagens || [];
       const localCarros = localPayload.passagensCarros || localPayload.passagens_carros || [];
       const remoteCarros = remotePayload.passagensCarros || remotePayload.passagens_carros || [];
+      const localSolicitacoes = localPayload.passagensSolicitacoes || localPayload.passagens_solicitacoes || [];
+      const remoteSolicitacoes = remotePayload.passagensSolicitacoes || remotePayload.passagens_solicitacoes || [];
       const localHitachi = localPayload.hitachiCollaborators || [];
       const remoteHitachi = remotePayload.hitachiCollaborators || [];
       return {
@@ -2652,6 +2830,7 @@ AMAURI BARROSO DE MOURA"></textarea>
         passagensComplements: mergeByKey(localComplements, remoteComplements, item => String(item.key || '')),
         passagensHospedagens: mergeByKey(localHospedagens, remoteHospedagens, item => String(item.id || '')),
         passagensCarros: mergeByKey(localCarros, remoteCarros, item => String(item.id || '')),
+        passagensSolicitacoes: mergeByKey(localSolicitacoes, remoteSolicitacoes, item => String(item.id || '')),
         passagensApiToken: localPayload.passagensApiToken || remotePayload.passagensApiToken || passagensApiToken,
         passagensApiBaseUrl: localPayload.passagensApiBaseUrl || remotePayload.passagensApiBaseUrl || passagensApiBaseUrl,
         passagensLastSync: localPayload.passagensLastSync || remotePayload.passagensLastSync || passagensLastSync
@@ -2797,6 +2976,7 @@ AMAURI BARROSO DE MOURA"></textarea>
         passagensComplements: [],
         passagensHospedagens: [],
         passagensCarros: [],
+        passagensSolicitacoes: [],
         passagensApiToken: '',
         passagensApiBaseUrl: passagensApiBaseUrl,
         passagensLastSync: ''
@@ -2855,6 +3035,7 @@ AMAURI BARROSO DE MOURA"></textarea>
         })),
         passagensHospedagens: passagensHospedagens.map(item => ({ ...item })),
         passagensCarros: passagensCarros.map(item => ({ ...item })),
+        passagensSolicitacoes: passagensSolicitacoes.map(item => ({ ...item })),
         passagensApiToken: forLocalCache ? '' : passagensApiToken,
         passagensApiBaseUrl,
         passagensLastSync
@@ -3000,6 +3181,29 @@ AMAURI BARROSO DE MOURA"></textarea>
         observacao: item.observacao || '',
         pago: parseBool(item.pago ?? false)
       }))));
+      passagensSolicitacoes.splice(0, passagensSolicitacoes.length, ...((payload.passagensSolicitacoes || payload.passagens_solicitacoes || []).map(item => ({
+        id: item.id || createId(),
+        createdAt: item.createdAt ?? item.created_at ?? new Date().toISOString(),
+        colaborador: item.colaborador || '',
+        obra: item.obra || '',
+        origem: item.origem || '',
+        destino: item.destino || '',
+        dataIda: item.dataIda ?? item.data_ida ?? '',
+        dataVolta: item.dataVolta ?? item.data_volta ?? '',
+        adultos: Number(item.adultos || 1),
+        cabine: item.cabine || 'Economica',
+        motivo: item.motivo || '',
+        observacao: item.observacao || '',
+        companhias: Array.isArray(item.companhias) ? item.companhias : [],
+        cotacoes: Array.isArray(item.cotacoes) ? item.cotacoes : [],
+        escolha: item.escolha || null,
+        finalizedAt: item.finalizedAt ?? item.finalized_at ?? '',
+        adminStatus: item.adminStatus ?? item.admin_status ?? '',
+        numeroPedidoCompra: item.numeroPedidoCompra ?? item.numero_pedido_compra ?? '',
+        aprovacaoObs: item.aprovacaoObs ?? item.aprovacao_obs ?? '',
+        approvedAt: item.approvedAt ?? item.approved_at ?? '',
+        status: item.status || 'Registrada'
+      }))));
       clearObject(passagensComplements);
       (payload.passagensComplements || payload.passagens_complements || []).forEach(item => {
         if (!item.key) return;
@@ -3072,7 +3276,7 @@ AMAURI BARROSO DE MOURA"></textarea>
     }
 
     async function loadRemoteState() {
-      const [remoteContracts, remoteMonthEntries, remoteLines, remoteDiarista, remoteDiaristaEntries, remoteHitachi, remoteHitachiCompanyDocs, remotePassagensRows, remotePassagensComplements, remotePassagensCreditos] = await Promise.all([
+      const [remoteContracts, remoteMonthEntries, remoteLines, remoteDiarista, remoteDiaristaEntries, remoteHitachi, remoteHitachiCompanyDocs, remotePassagensRows, remotePassagensComplements, remotePassagensCreditos, remotePassagensSolicitacoes] = await Promise.all([
         supabaseRequest('internet_contracts', { query: 'select=*&order=id.asc' }),
         supabaseRequest('internet_month_entries', { query: 'select=*&order=month_key.asc,contract_id.asc' }),
         supabaseRequest('internet_lines', { query: 'select=*&order=month_key.asc,id.asc' }),
@@ -3082,7 +3286,11 @@ AMAURI BARROSO DE MOURA"></textarea>
         supabaseRequest('hitachi_company_docs', { query: 'select=*&order=month_key.desc,empresa.asc,documento.asc' }),
         PASSAGENS_API_ONLY ? Promise.resolve([]) : supabaseRequest('passagens_rows', { query: 'select=*&order=updated_at.asc' }),
         PASSAGENS_API_ONLY ? Promise.resolve([]) : supabaseRequest('passagens_complements', { query: 'select=*&order=updated_at.asc' }),
-        PASSAGENS_API_ONLY ? Promise.resolve([]) : supabaseRequest('passagens_creditos', { query: 'select=*&order=updated_at.asc' })
+        PASSAGENS_API_ONLY ? Promise.resolve([]) : supabaseRequest('passagens_creditos', { query: 'select=*&order=updated_at.asc' }),
+        supabaseRequest('passagens_solicitacoes', { query: 'select=*&order=updated_at.asc' }).catch(error => {
+          console.warn('Tabela passagens_solicitacoes indisponivel.', error);
+          return [];
+        })
       ]);
       return {
         contracts: remoteContracts,
@@ -3094,7 +3302,8 @@ AMAURI BARROSO DE MOURA"></textarea>
         hitachiCompanyDocs: remoteHitachiCompanyDocs,
         passagensRows: remotePassagensRows.map(item => ({ ...(item.item || {}) })),
         passagensComplements: remotePassagensComplements.map(item => ({ key: item.key, ...(item.data || {}) })),
-        passagensCreditos: remotePassagensCreditos.map(item => ({ id: item.id, ...(item.data || {}) }))
+        passagensCreditos: remotePassagensCreditos.map(item => ({ id: item.id, ...(item.data || {}) })),
+        passagensSolicitacoes: remotePassagensSolicitacoes.map(item => ({ id: item.id, ...(item.data || {}) }))
       };
     }
 
@@ -3107,11 +3316,12 @@ AMAURI BARROSO DE MOURA"></textarea>
           const payload = mergePassagensPayload(localPayload, remotePayload);
           hydrateState(payload);
           saveLocalCache();
-          if (!PASSAGENS_API_ONLY && (
+          if (
             (localPayload.passagensRows || localPayload.passagens_rows || []).length ||
             (localPayload.passagensComplements || localPayload.passagens_complements || []).length ||
-            (localPayload.passagensCreditos || localPayload.passagens_creditos || []).length
-          )) {
+            (localPayload.passagensCreditos || localPayload.passagens_creditos || []).length ||
+            (localPayload.passagensSolicitacoes || localPayload.passagens_solicitacoes || []).length
+          ) {
             syncPassagensStorageRemote().catch(error => console.error(error));
           }
           setSyncStatus(PASSAGENS_API_ONLY ? 'Portal carregado. Passagens em modo API.' : 'Ultima atualizacao via Supabase');
@@ -3307,6 +3517,34 @@ AMAURI BARROSO DE MOURA"></textarea>
       });
     }
 
+    async function upsertPassagensSolicitacaoRemote(item) {
+      if (!REMOTE_ENABLED || !item || !item.id) return;
+      await supabaseRequest('passagens_solicitacoes', {
+        method: 'POST',
+        prefer: 'resolution=merge-duplicates,return=representation',
+        body: [{
+          id: String(item.id),
+          data: item
+        }]
+      });
+    }
+
+    function persistPassagensSolicitacaoRemote(item) {
+      if (!REMOTE_ENABLED) return;
+      upsertPassagensSolicitacaoRemote(item).catch(error => {
+        console.error(error);
+        setSyncStatus('Nao foi possivel salvar a solicitacao no Supabase. Mantida no cache local.');
+      });
+    }
+
+    async function deletePassagensSolicitacaoRemote(id) {
+      if (!REMOTE_ENABLED || !id) return;
+      await supabaseRequest('passagens_solicitacoes', {
+        method: 'DELETE',
+        query: `id=eq.${encodeURIComponent(String(id))}`
+      });
+    }
+
     async function deletePassagemRemote(key) {
       if (!REMOTE_ENABLED || PASSAGENS_API_ONLY) return;
       await Promise.all([
@@ -3322,12 +3560,16 @@ AMAURI BARROSO DE MOURA"></textarea>
     }
 
     async function syncPassagensStorageRemote() {
-      if (!REMOTE_ENABLED || PASSAGENS_API_ONLY) return;
-      await Promise.all([
-        ...passagensRows.map(item => upsertPassagemRowRemote(item)),
-        ...Object.entries(passagensComplements).map(([key, value]) => upsertPassagemComplementRemote(key, value)),
-        ...passagensCreditos.map(item => upsertPassagemCreditoRemote(item))
-      ]);
+      if (!REMOTE_ENABLED) return;
+      const jobs = passagensSolicitacoes.map(item => upsertPassagensSolicitacaoRemote(item));
+      if (!PASSAGENS_API_ONLY) {
+        jobs.push(
+          ...passagensRows.map(item => upsertPassagemRowRemote(item)),
+          ...Object.entries(passagensComplements).map(([key, value]) => upsertPassagemComplementRemote(key, value)),
+          ...passagensCreditos.map(item => upsertPassagemCreditoRemote(item))
+        );
+      }
+      await Promise.all(jobs);
     }
 
     async function resetRemoteMonth(table, monthKey) {
@@ -5350,11 +5592,22 @@ AMAURI BARROSO DE MOURA"></textarea>
         managementObras.splice(0, managementObras.length, ...((payload.managementObras || []).map(item => ({ ...item }))));
         managementResponsaveis.splice(0, managementResponsaveis.length, ...((payload.managementResponsaveis || []).map(item => ({ ...item }))));
         managementFornecedores.splice(0, managementFornecedores.length, ...((payload.managementFornecedores || []).map(item => ({ ...item }))));
-        Object.assign(managementApiConfig, payload.managementApiConfig || {});
+        Object.assign(managementApiConfigs, payload.managementApiConfigs || {});
+        if (!Object.keys(managementApiConfigs).length && payload.managementApiConfig) {
+          const legacyCompany = (payload.managementApiConfig.companhia || 'LATAM').toUpperCase();
+          managementApiConfigs[legacyCompany] = payload.managementApiConfig;
+        }
         let migratedApiSecret = false;
-        if (managementApiConfig.senha) {
-          managementApiConfig.senhaMask = managementApiConfig.senhaMask || maskSecret(managementApiConfig.senha);
-          delete managementApiConfig.senha;
+        Object.values(managementApiConfigs).forEach(config => {
+          if (config.senha) {
+            config.senhaMask = config.senhaMask || maskSecret(config.senha);
+            delete config.senha;
+            migratedApiSecret = true;
+          }
+        });
+        if (payload.managementApiConfig?.senha) {
+          payload.managementApiConfig.senhaMask = payload.managementApiConfig.senhaMask || maskSecret(payload.managementApiConfig.senha);
+          delete payload.managementApiConfig.senha;
           migratedApiSecret = true;
         }
         managementApiQuotes.splice(0, managementApiQuotes.length, ...((payload.managementApiQuotes || []).map(item => ({ ...item }))));
@@ -5370,7 +5623,7 @@ AMAURI BARROSO DE MOURA"></textarea>
         managementObras,
         managementResponsaveis,
         managementFornecedores,
-        managementApiConfig,
+        managementApiConfigs,
         managementApiQuotes
       }));
     }
@@ -5515,24 +5768,29 @@ AMAURI BARROSO DE MOURA"></textarea>
     function syncManagementApiForm() {
       const form = document.getElementById('managementApiConfigForm');
       if (!form) return;
-      form.elements.companhia.value = managementApiConfig.companhia || 'LATAM';
-      form.elements.siteUrl.value = managementApiConfig.siteUrl || '';
-      form.elements.usuario.value = managementApiConfig.usuario || '';
+      const defaults = API_COMPANIES[selectedApiCompany] || API_COMPANIES.LATAM;
+      const current = managementApiConfigs[selectedApiCompany] || {};
+      form.elements.companhia.value = current.companhia || selectedApiCompany;
+      form.elements.siteUrl.value = current.siteUrl || defaults.siteUrl || '';
+      form.elements.usuario.value = current.usuario || '';
       form.elements.senha.value = '';
-      form.elements.senha.placeholder = managementApiConfig.senhaMask ? `Salva como ${managementApiConfig.senhaMask}` : 'Sua senha';
-      form.elements.ambiente.value = managementApiConfig.ambiente || 'Teste';
-      form.elements.status.value = managementApiConfig.status || 'Pendente';
-      form.elements.observacao.value = managementApiConfig.observacao || '';
+      form.elements.senha.placeholder = current.senhaMask ? `Salva como ${current.senhaMask}` : 'Sua senha';
+      form.elements.ambiente.value = current.ambiente || 'Teste';
+      form.elements.status.value = current.status || 'Pendente';
+      form.elements.observacao.value = current.observacao || '';
     }
 
     function buildManagementApiQuote(formData) {
+      const selectedCompanies = selectedQuoteCompanies();
+      const quoteCompany = selectedCompanies[0] || selectedApiCompany;
+      const quoteConfig = managementApiConfigs[quoteCompany] || {};
       const base = [
         formData.origem,
         formData.destino,
         formData.dataIda,
         formData.dataVolta,
         formData.adultos,
-        managementApiConfig.companhia
+        quoteCompany
       ].join('|');
       let hash = 0;
       for (let index = 0; index < base.length; index += 1) hash = ((hash * 31) + base.charCodeAt(index)) >>> 0;
@@ -5542,7 +5800,7 @@ AMAURI BARROSO DE MOURA"></textarea>
       return {
         id: createId(),
         createdAt: new Date().toISOString(),
-        companhia: managementApiConfig.companhia || 'Nao configurada',
+        companhia: quoteConfig.companhia || quoteCompany || 'Nao configurada',
         origem: String(formData.origem || '').toUpperCase(),
         destino: String(formData.destino || '').toUpperCase(),
         dataIda: formData.dataIda || '',
@@ -5551,10 +5809,15 @@ AMAURI BARROSO DE MOURA"></textarea>
         cabine: formData.cabine || 'Economica',
         comando: formData.comando || '',
         resultado: `${brl(valor)} | ${localizadorTeste}`,
-        status: managementApiConfig.siteUrl && managementApiConfig.usuario && managementApiConfig.senhaMask
+        status: quoteConfig.siteUrl && (quoteCompany !== 'AZUL' || (quoteConfig.usuario && quoteConfig.senhaMask))
           ? 'Teste simulado pronto para backend'
-          : 'Configure site, login e senha'
+          : (quoteCompany === 'AZUL' ? 'Configure site, login e senha da Azul' : 'Configure site da companhia')
       };
+    }
+
+    function selectedQuoteCompanies() {
+      const checked = [...document.querySelectorAll('input[name="companhias"]:checked')].map(input => input.value);
+      return checked.length ? checked : [selectedApiCompany];
     }
 
     async function cotacoesApiRequest(path, { method = 'GET', body = null } = {}) {
@@ -5576,7 +5839,7 @@ AMAURI BARROSO DE MOURA"></textarea>
       return {
         id: quote.id || createId(),
         createdAt: quote.createdAt || new Date().toISOString(),
-        companhia: quote.companhia || managementApiConfig.companhia || 'Nao configurada',
+        companhia: quote.companhia || selectedApiCompany || 'Nao configurada',
         origem: quote.origem || '',
         destino: quote.destino || '',
         dataIda: quote.dataIda || '',
@@ -5585,8 +5848,21 @@ AMAURI BARROSO DE MOURA"></textarea>
         cabine: quote.cabine || 'Economica',
         comando: quote.comando || '',
         resultado: quote.menorPreco != null ? `${brl(Number(quote.menorPreco))} | ${quote.localizadorTeste || 'API'}` : (quote.resultado || '-'),
+        detalhes: Array.isArray(quote.detalhes) ? quote.detalhes : [],
         status: quote.status || 'Retorno da API'
       };
+    }
+
+    function renderQuoteResult(item) {
+      if (Array.isArray(item.detalhes) && item.detalhes.length) {
+        return `<div class="cred-list" style="gap:6px">${item.detalhes.slice(0, 8).map(option => `
+          <div class="cred-row" style="gap:10px">
+            <span>${escapeHtml(option.tipo || 'voo')} ${escapeHtml(option.saida || '-')} - ${escapeHtml(option.chegada || '-')}</span>
+            <b>${option.preco != null ? brl(Number(option.preco)) : '-'}</b>
+          </div>
+        `).join('')}</div>`;
+      }
+      return `<span class="money">${escapeHtml(item.resultado || '-')}</span>`;
     }
 
     function deleteManagementApiQuote(id) {
@@ -5599,8 +5875,12 @@ AMAURI BARROSO DE MOURA"></textarea>
     window.deleteManagementApiQuote = deleteManagementApiQuote;
 
     function renderManagementApi() {
-      const status = managementApiConfig.status || 'Nao configurado';
-      const companhia = managementApiConfig.companhia || '';
+      document.querySelectorAll('[data-api-company]').forEach(button => {
+        button.classList.toggle('on', button.dataset.apiCompany === selectedApiCompany);
+      });
+      const current = managementApiConfigs[selectedApiCompany] || {};
+      const status = current.status || 'Nao configurado';
+      const companhia = current.companhia || selectedApiCompany || '';
       document.getElementById('gApiStatus').textContent = companhia ? `${companhia} | ${status}` : status;
       syncManagementApiForm();
       document.getElementById('gApiQuoteCount').textContent = `${managementApiQuotes.length} registro${managementApiQuotes.length === 1 ? '' : 's'}`;
@@ -5614,7 +5894,7 @@ AMAURI BARROSO DE MOURA"></textarea>
             <td><b class="link">${escapeHtml(item.origem || '-')} - ${escapeHtml(item.destino || '-')}</b></td>
             <td>${formatDate(item.dataIda) || '-'}${item.dataVolta ? ` ate ${formatDate(item.dataVolta)}` : ''}</td>
             <td>${item.adultos || 1} | ${escapeHtml(item.cabine || 'Economica')}</td>
-            <td><span class="money">${escapeHtml(item.resultado || '-')}</span></td>
+            <td>${renderQuoteResult(item)}</td>
             <td><span class="tag neutral">${escapeHtml(item.status || '-')}</span></td>
             <td class="actioncell"><button class="rowact" title="Excluir teste" aria-label="Excluir teste" onclick="deleteManagementApiQuote(${item.id})">${icon('trash')}</button></td>
           </tr>
@@ -7462,6 +7742,503 @@ AMAURI BARROSO DE MOURA"></textarea>
       return norm(values.join(' ')).includes(query);
     }
 
+    function selectedSolicitacaoCompanies() {
+      const boxes = [...document.querySelectorAll('input[name="solicitacaoCompanhias"]:checked')].map(input => input.value);
+      return boxes.length ? boxes : ['LATAM'];
+    }
+
+    function solicitacaoQuoteSummary(item) {
+      if (item.escolha) {
+        return `<div class="cred-list" style="gap:6px">
+          <div class="cred-row" style="gap:10px">
+            <span>${escapeHtml(item.escolha.companhia || '-')}</span>
+            <b>${brl(Number(item.escolha.total || 0))}</b>
+          </div>
+        </div>`;
+      }
+      const choices = buildSolicitacaoChoices(item);
+      if (choices.length) {
+        return `<div class="cred-list" style="gap:6px">${choices.slice(0, 3).map(choice => `
+          <div class="cred-row" style="gap:10px">
+            <span>${choice.alternativa ? '<span class="quote-alt-badge">Alternativa</span> ' : ''}${escapeHtml(choice.companhia || '-')} ${escapeHtml(choice.ida?.saida || '--:--')}</span>
+            <b>${brl(Number(choice.total || 0))}</b>
+          </div>
+        `).join('')}</div>`;
+      }
+      return '<span class="tag neutral">Aguardando retorno</span>';
+    }
+
+    function quoteTimeRange(option) {
+      const start = option?.saida || option?.partida || option?.horarioSaida || option?.horaSaida || '';
+      const end = option?.chegada || option?.horarioChegada || option?.horaChegada || '';
+      if (!start && !end) return '--:--';
+      return `${start || '--:--'} - ${end || '--:--'}`;
+    }
+
+    function quoteRouteText(option, fallbackOrigem, fallbackDestino) {
+      const origem = option?.origem || option?.from || fallbackOrigem || '';
+      const destino = option?.destino || option?.to || fallbackDestino || '';
+      return `${String(origem || '').toUpperCase()} - ${String(destino || '').toUpperCase()}`;
+    }
+
+    function quoteOptionPrice(option) {
+      const value = option?.preco ?? option?.valor ?? option?.price ?? option?.total ?? null;
+      const number = Number(value);
+      return Number.isFinite(number) ? number : 0;
+    }
+
+    function isLondrinaRoutePoint(value) {
+      const text = norm(value || '');
+      return text === 'ldb' || text.includes('londrina');
+    }
+
+    function isMaringaRoutePoint(value) {
+      const text = norm(value || '');
+      return text === 'mgf' || text.includes('maringa');
+    }
+
+    function isSaoPauloRoutePoint(value) {
+      const text = norm(value || '');
+      return ['sao', 'gru', 'cgh', 'vcp'].includes(text) || text.includes('sao paulo');
+    }
+
+    function normalizeAirportForQuote(value) {
+      if (isLondrinaRoutePoint(value)) return 'LDB';
+      return String(value || '').trim().toUpperCase();
+    }
+
+    function buildSolicitacaoRouteVariants(solicitacao) {
+      const origem = normalizeAirportForQuote(solicitacao.origem);
+      const destino = normalizeAirportForQuote(solicitacao.destino);
+      const variants = [{
+        origem,
+        destino,
+        alternativa: false,
+        rotaLabel: isLondrinaRoutePoint(solicitacao.origem) || isLondrinaRoutePoint(solicitacao.destino)
+          ? 'Rota solicitada Londrina'
+          : 'Rota solicitada'
+      }];
+      const alternatives = [
+        { code: 'MGF', label: 'Alternativa via Maringa', sameCity: isMaringaRoutePoint },
+        { code: 'GRU', label: 'Alternativa via Sao Paulo', sameCity: isSaoPauloRoutePoint }
+      ];
+      alternatives.forEach(airport => {
+        if (isLondrinaRoutePoint(origem) && airport.code !== destino && !airport.sameCity(destino)) {
+          variants.push({
+            origem: airport.code,
+            destino,
+            alternativa: true,
+            rotaLabel: airport.label
+          });
+        }
+        if (isLondrinaRoutePoint(destino) && airport.code !== origem && !airport.sameCity(origem)) {
+          variants.push({
+            origem,
+            destino: airport.code,
+            alternativa: true,
+            rotaLabel: airport.label
+          });
+        }
+      });
+      const seen = new Set();
+      return variants.filter(item => {
+        const key = `${item.origem}-${item.destino}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
+    function classifySolicitacaoChoice(item, choice) {
+      const choices = buildSolicitacaoChoices(item).filter(entry => Number(entry.total || 0) > 0);
+      if (!choice || !choices.length) return 'Sem comparativo';
+      const ordered = choices.slice().sort((a, b) => Number(a.total || 0) - Number(b.total || 0));
+      const choiceTotal = Number(choice.total || 0);
+      const min = Number(ordered[0].total || 0);
+      const max = Number(ordered[ordered.length - 1].total || 0);
+      if (choiceTotal <= min) return 'Melhor preco';
+      if (choiceTotal >= max) return 'Mais caro';
+      return 'Preco medio';
+    }
+
+    function bestSolicitacaoChoice(item) {
+      const choices = buildSolicitacaoChoices(item).filter(entry => Number(entry.total || 0) > 0);
+      return choices.slice().sort((a, b) => Number(a.total || 0) - Number(b.total || 0))[0] || null;
+    }
+
+    function choicePriceDelta(item, choice) {
+      const best = bestSolicitacaoChoice(item);
+      const choiceTotal = Number(choice?.total || 0);
+      const bestTotal = Number(best?.total || 0);
+      if (!best || !choiceTotal || !bestTotal) return { value: 0, pct: 0, label: 'Sem comparativo' };
+      const value = choiceTotal - bestTotal;
+      const pct = bestTotal ? (value / bestTotal) * 100 : 0;
+      return {
+        value,
+        pct,
+        label: value <= 0 ? 'Escolheu o menor valor' : `Acima do melhor em ${brl(value)} (${pct.toFixed(1)}%)`
+      };
+    }
+
+    function adminStatusTone(status) {
+      const value = String(status || '');
+      if (value === 'Aprovada') return 'ok';
+      if (value === 'Ajuste solicitado') return 'warn';
+      return 'neutral';
+    }
+
+    function buildSolicitacaoChoices(item) {
+      const choices = [];
+      (item.cotacoes || []).forEach(quote => {
+        const company = String(quote.companhia || '').toUpperCase() || 'CIA';
+        const details = Array.isArray(quote.detalhes) ? quote.detalhes : [];
+        const idaOptions = details.filter(option => norm(option.tipo || option.sentido || '').includes('ida'));
+        const voltaOptions = details.filter(option => norm(option.tipo || option.sentido || '').includes('volta'));
+        const others = details.filter(option => !idaOptions.includes(option) && !voltaOptions.includes(option));
+        if (item.dataVolta && idaOptions.length && voltaOptions.length) {
+          idaOptions.slice(0, 5).forEach((ida, idaIndex) => {
+            voltaOptions.slice(0, 5).forEach((volta, voltaIndex) => {
+              choices.push({
+                id: `${item.id}-${company}-${idaIndex}-${voltaIndex}`,
+                companhia: company,
+                ida,
+                volta,
+                total: quoteOptionPrice(ida) + quoteOptionPrice(volta),
+                origem: quote.origem || item.origem,
+                destino: quote.destino || item.destino,
+                alternativa: Boolean(quote.alternativa),
+                rotaLabel: quote.rotaLabel || (quote.alternativa ? 'Rota alternativa' : 'Rota solicitada')
+              });
+            });
+          });
+          return;
+        }
+        const baseOptions = idaOptions.length ? idaOptions : others;
+        baseOptions.slice(0, 10).forEach((ida, index) => {
+          choices.push({
+            id: `${item.id}-${company}-${index}`,
+            companhia: company,
+            ida,
+            volta: null,
+            total: quoteOptionPrice(ida),
+            origem: quote.origem || item.origem,
+            destino: quote.destino || item.destino,
+            alternativa: Boolean(quote.alternativa),
+            rotaLabel: quote.rotaLabel || (quote.alternativa ? 'Rota alternativa' : 'Rota solicitada')
+          });
+        });
+      });
+      return choices.sort((a, b) => Number(a.total || 0) - Number(b.total || 0));
+    }
+
+    function renderSolicitacaoChoiceCard(choice) {
+      const companyClass = norm(choice.companhia).includes('azul') ? 'azul' : '';
+      return `
+        <button class="quote-choice-card ${choice.alternativa ? 'alternative' : ''} ${selectedSolicitacaoChoiceId === choice.id ? 'selected' : ''}" type="button" data-choice-id="${escapeHtml(choice.id)}">
+          <div class="quote-choice-top">
+            <div class="quote-route">${escapeHtml(quoteRouteText(choice.ida, choice.origem, choice.destino))}</div>
+            <span class="quote-company ${companyClass}">${escapeHtml(choice.companhia || '-')}</span>
+          </div>
+          ${choice.alternativa ? `<span class="quote-alt-badge">${escapeHtml(choice.rotaLabel || 'Rota alternativa')}</span>` : ''}
+          <div class="quote-slots">
+            <div class="quote-slot"><span>Ida</span><b>${escapeHtml(quoteTimeRange(choice.ida))}</b></div>
+            <div class="quote-slot"><span>Volta</span><b>${choice.volta ? escapeHtml(quoteTimeRange(choice.volta)) : 'Somente ida'}</b></div>
+          </div>
+          <div class="quote-total"><span>Valor total</span><b>${brl(Number(choice.total || 0))}</b></div>
+        </button>
+      `;
+    }
+
+    function openSolicitacaoChoiceModal(id) {
+      const item = passagensSolicitacoes.find(entry => String(entry.id) === String(id));
+      if (!item) return;
+      choosingSolicitacaoId = item.id;
+      selectedSolicitacaoChoiceId = item.escolha?.id || '';
+      const choices = buildSolicitacaoChoices(item);
+      document.getElementById('passagensQuoteChoiceTitle').textContent = `${item.colaborador || 'Solicitacao'} | ${String(item.origem || '').toUpperCase()} - ${String(item.destino || '').toUpperCase()}`;
+      document.getElementById('passagensQuoteChoiceSubtitle').textContent = `${formatDate(item.dataIda) || '-'}${item.dataVolta ? ` ate ${formatDate(item.dataVolta)}` : ''}. Escolha uma opcao para finalizar e enviar para a tela de cotacoes realizadas.`;
+      document.getElementById('passagensQuoteChoiceFeedback').textContent = choices.length ? 'Clique em um card para selecionar.' : 'Nenhuma opcao de voo retornada para esta solicitacao.';
+      document.getElementById('passagensQuoteChoiceList').innerHTML = choices.length ? choices.map(renderSolicitacaoChoiceCard).join('') : `<div class="empty-state" style="grid-column:1 / -1"><b>Nenhuma opcao disponivel.</b>Confira se a companhia retornou voos ou tente cotar novamente.</div>`;
+      document.getElementById('finalizePassagensQuoteChoice').disabled = !selectedSolicitacaoChoiceId;
+      openModalById('passagensQuoteChoiceModal');
+    }
+    window.openSolicitacaoChoiceModal = openSolicitacaoChoiceModal;
+
+    function closeSolicitacaoChoiceModal() {
+      choosingSolicitacaoId = null;
+      selectedSolicitacaoChoiceId = '';
+      closeModalById('passagensQuoteChoiceModal');
+    }
+
+    function finalizeSolicitacaoChoice() {
+      const item = passagensSolicitacoes.find(entry => String(entry.id) === String(choosingSolicitacaoId));
+      if (!item || !selectedSolicitacaoChoiceId) return;
+      const choice = buildSolicitacaoChoices(item).find(entry => entry.id === selectedSolicitacaoChoiceId);
+      if (!choice) return;
+      choice.classificacaoPreco = classifySolicitacaoChoice(item, choice);
+      item.escolha = choice;
+      item.finalizedAt = new Date().toISOString();
+      item.status = 'Finalizada';
+      item.adminStatus = item.adminStatus || 'Aguardando aprovacao';
+      saveLocalCache();
+      persistPassagensSolicitacaoRemote(item);
+      closeSolicitacaoChoiceModal();
+      openPassagensView('cotacao-realizada');
+      renderPassagens();
+      setSyncStatus(`Solicitacao de ${item.colaborador || 'colaborador'} finalizada com ${choice.companhia}`);
+    }
+    window.finalizeSolicitacaoChoice = finalizeSolicitacaoChoice;
+
+    function deletePassagensSolicitacao(id) {
+      const index = passagensSolicitacoes.findIndex(item => String(item.id) === String(id));
+      if (index < 0) return;
+      passagensSolicitacoes.splice(index, 1);
+      saveLocalCache();
+      deletePassagensSolicitacaoRemote(id).catch(error => {
+        console.error(error);
+        setSyncStatus('Nao foi possivel excluir a solicitacao no Supabase.');
+      });
+      renderPassagens();
+    }
+    window.deletePassagensSolicitacao = deletePassagensSolicitacao;
+
+    function saveCotacaoAdminFields(id) {
+      const item = passagensSolicitacoes.find(entry => String(entry.id) === String(id));
+      if (!item) return null;
+      const pedido = document.getElementById(`cotacaoPedido_${id}`);
+      const obs = document.getElementById(`cotacaoObs_${id}`);
+      item.numeroPedidoCompra = pedido ? pedido.value.trim() : (item.numeroPedidoCompra || '');
+      item.aprovacaoObs = obs ? obs.value.trim() : (item.aprovacaoObs || '');
+      saveLocalCache();
+      persistPassagensSolicitacaoRemote(item);
+      renderPassagens();
+      return item;
+    }
+
+    function approveCotacaoRealizada(id) {
+      const item = saveCotacaoAdminFields(id);
+      if (!item) return;
+      item.adminStatus = 'Aprovada';
+      item.approvedAt = new Date().toISOString();
+      saveLocalCache();
+      persistPassagensSolicitacaoRemote(item);
+      renderPassagens();
+      setSyncStatus(`Cotacao de ${item.colaborador || 'colaborador'} aprovada${item.numeroPedidoCompra ? ` | pedido ${item.numeroPedidoCompra}` : ''}.`);
+    }
+    window.approveCotacaoRealizada = approveCotacaoRealizada;
+
+    function requestCotacaoAdjustment(id) {
+      const item = saveCotacaoAdminFields(id);
+      if (!item) return;
+      const reason = window.prompt('Informe o motivo do ajuste:', item.aprovacaoObs || '');
+      if (reason === null) return;
+      item.aprovacaoObs = reason.trim();
+      item.adminStatus = 'Ajuste solicitado';
+      saveLocalCache();
+      persistPassagensSolicitacaoRemote(item);
+      renderPassagens();
+      setSyncStatus(`Ajuste solicitado para ${item.colaborador || 'colaborador'}.`);
+    }
+    window.requestCotacaoAdjustment = requestCotacaoAdjustment;
+
+    function saveCotacaoAdmin(id) {
+      const item = saveCotacaoAdminFields(id);
+      if (item) setSyncStatus(`Dados administrativos salvos para ${item.colaborador || 'cotacao'}.`);
+    }
+    window.saveCotacaoAdmin = saveCotacaoAdmin;
+
+    function printCotacaoResumo(id) {
+      const item = saveCotacaoAdminFields(id);
+      if (!item || !item.escolha) return;
+      const choice = item.escolha;
+      const delta = choicePriceDelta(item, choice);
+      const classification = choice.classificacaoPreco || classifySolicitacaoChoice(item, choice);
+      const html = `
+        <!doctype html><html><head><meta charset="utf-8"><title>Resumo de cotacao</title>
+        <style>body{font-family:Arial,sans-serif;color:#0f2448;padding:28px}h1{font-size:22px;margin:0 0 6px}small{color:#64748b}.box{border:1px solid #dbe5f4;border-radius:12px;padding:14px;margin-top:14px}.row{display:flex;justify-content:space-between;border-bottom:1px solid #edf2f7;padding:8px 0}.row:last-child{border-bottom:0}b{color:#071b3d}.tag{display:inline-block;border-radius:999px;background:#eef4ff;padding:6px 10px;font-weight:700}</style>
+        </head><body>
+          <h1>Resumo de cotacao de viagem</h1>
+          <small>Gerado em ${new Date().toLocaleString('pt-BR')}</small>
+          <div class="box">
+            <div class="row"><span>Colaborador</span><b>${escapeHtml(item.colaborador || '-')}</b></div>
+            <div class="row"><span>Obra / centro de custo</span><b>${escapeHtml(item.obra || '-')}</b></div>
+            <div class="row"><span>Trecho solicitado</span><b>${escapeHtml(item.origem || '-')} - ${escapeHtml(item.destino || '-')}</b></div>
+            <div class="row"><span>Periodo</span><b>${formatDate(item.dataIda) || '-'}${item.dataVolta ? ` ate ${formatDate(item.dataVolta)}` : ''}</b></div>
+            <div class="row"><span>Motivo</span><b>${escapeHtml(item.motivo || item.observacao || '-')}</b></div>
+          </div>
+          <div class="box">
+            <div class="row"><span>Companhia escolhida</span><b>${escapeHtml(choice.companhia || '-')}</b></div>
+            <div class="row"><span>Ida</span><b>${escapeHtml(quoteTimeRange(choice.ida))}</b></div>
+            <div class="row"><span>Volta</span><b>${choice.volta ? escapeHtml(quoteTimeRange(choice.volta)) : 'Somente ida'}</b></div>
+            <div class="row"><span>Valor total</span><b>${brl(Number(choice.total || 0))}</b></div>
+            <div class="row"><span>Classificacao</span><b>${escapeHtml(classification)}</b></div>
+            <div class="row"><span>Comparativo</span><b>${escapeHtml(delta.label)}</b></div>
+          </div>
+          <div class="box">
+            <div class="row"><span>Status administrativo</span><b>${escapeHtml(item.adminStatus || 'Aguardando aprovacao')}</b></div>
+            <div class="row"><span>Numero do pedido</span><b>${escapeHtml(item.numeroPedidoCompra || '-')}</b></div>
+            <div class="row"><span>Observacao administrativa</span><b>${escapeHtml(item.aprovacaoObs || '-')}</b></div>
+          </div>
+        </body></html>`;
+      const view = window.open('', '_blank');
+      if (!view) return;
+      view.document.write(html);
+      view.document.close();
+      view.focus();
+      view.print();
+    }
+    window.printCotacaoResumo = printCotacaoResumo;
+
+    function renderPassagensSolicitacoes() {
+      const rows = passagensSolicitacoes
+        .filter(item => queryMatch([item.colaborador, item.obra, item.origem, item.destino, item.motivo, item.status, ...(item.companhias || [])]))
+        .slice()
+        .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+      const count = document.getElementById('pSolicitacaoCount');
+      const body = document.getElementById('pSolicitacaoRows');
+      if (!count || !body) return;
+      count.textContent = `${rows.length} registro${rows.length === 1 ? '' : 's'}`;
+      body.innerHTML = rows.length ? rows.map(item => `
+        <tr>
+          <td>${formatManagementUpdate(item.createdAt)}</td>
+          <td><span class="company">${escapeHtml(item.colaborador || '-')}</span><div class="lisub">${escapeHtml(item.obra || 'Sem obra')}</div></td>
+          <td><b class="link">${escapeHtml(String(item.origem || '').toUpperCase())} - ${escapeHtml(String(item.destino || '').toUpperCase())}</b></td>
+          <td>${formatDate(item.dataIda) || '-'}${item.dataVolta ? ` ate ${formatDate(item.dataVolta)}` : ''}</td>
+          <td>${(item.companhias || []).map(company => `<span class="tag neutral">${escapeHtml(company)}</span>`).join(' ') || '-'}</td>
+          <td>${solicitacaoQuoteSummary(item)}</td>
+          <td><span class="tag ${String(item.status || '').includes('Erro') ? 'warn' : String(item.status || '').includes('Cotacao concluida') ? 'ok' : 'neutral'}">${escapeHtml(item.status || '-')}</span></td>
+          <td class="actioncell">
+            <div style="display:flex;justify-content:flex-end;gap:8px">
+              ${buildSolicitacaoChoices(item).length && !item.escolha ? `<button class="rowact" title="Escolher voo" aria-label="Escolher voo" onclick="openSolicitacaoChoiceModal(${item.id})">${icon('badgeCheck')}</button>` : ''}
+              <button class="rowact" title="Excluir solicitacao" aria-label="Excluir solicitacao" onclick="deletePassagensSolicitacao(${item.id})">${icon('trash')}</button>
+            </div>
+          </td>
+        </tr>
+      `).join('') : `<tr><td colspan="8"><div class="empty-state"><b>Nenhuma solicitacao registrada.</b>Use o formulario para disparar uma cotacao automatica pelas companhias configuradas.</div></td></tr>`;
+    }
+
+    function renderCotacoesRealizadas() {
+      const rows = passagensSolicitacoes
+        .filter(item => item.escolha)
+        .filter(item => queryMatch([item.colaborador, item.obra, item.origem, item.destino, item.motivo, item.escolha?.companhia]))
+        .slice()
+        .sort((a, b) => String(b.finalizedAt || b.createdAt || '').localeCompare(String(a.finalizedAt || a.createdAt || '')));
+      const totals = rows.map(item => Number(item.escolha?.total || 0)).filter(value => Number.isFinite(value) && value > 0);
+      const minTotal = totals.length ? Math.min(...totals) : 0;
+      const latamCount = rows.filter(item => norm(item.escolha?.companhia || '').includes('latam')).length;
+      const azulCount = rows.filter(item => norm(item.escolha?.companhia || '').includes('azul')).length;
+      document.getElementById('pCotacaoRealizadaCount').textContent = rows.length;
+      document.getElementById('pCotacaoRealizadaMin').textContent = brl(minTotal);
+      document.getElementById('pCotacaoLatamCount').textContent = latamCount;
+      document.getElementById('pCotacaoAzulCount').textContent = azulCount;
+      document.getElementById('pCotacaoRealizadaLabel').textContent = `${rows.length} registro${rows.length === 1 ? '' : 's'}`;
+      document.getElementById('pCotacaoRealizadaRows').innerHTML = rows.length ? rows.map(item => {
+        const choice = item.escolha || {};
+        const classification = choice.classificacaoPreco || classifySolicitacaoChoice(item, choice);
+        const classificationTone = classification === 'Melhor preco' ? 'ok' : classification === 'Mais caro' ? 'warn' : 'neutral';
+        const delta = choicePriceDelta(item, choice);
+        const adminStatus = item.adminStatus || 'Aguardando aprovacao';
+        return `
+          <tr>
+            <td>${formatManagementUpdate(item.finalizedAt || item.createdAt)}</td>
+            <td><span class="company">${escapeHtml(item.colaborador || '-')}</span><div class="lisub">${escapeHtml(item.obra || 'Sem obra')}</div></td>
+            <td><b class="link">${escapeHtml(String(item.origem || '').toUpperCase())} - ${escapeHtml(String(item.destino || '').toUpperCase())}</b></td>
+            <td>${formatDate(item.dataIda) || '-'}${item.dataVolta ? ` ate ${formatDate(item.dataVolta)}` : ''}</td>
+            <td><span class="tag ok">${escapeHtml(choice.companhia || '-')}</span></td>
+            <td><span class="tag ${classificationTone}">${escapeHtml(classification)}</span>${choice.alternativa ? `<div class="lisub">${escapeHtml(choice.rotaLabel || 'Rota alternativa')}</div>` : ''}</td>
+            <td><span class="tag ${delta.value <= 0 ? 'ok' : 'warn'}">${escapeHtml(delta.label)}</span></td>
+            <td>
+              <div class="cred-list" style="gap:4px">
+                <div class="cred-row"><span>Ida</span><b>${escapeHtml(quoteTimeRange(choice.ida))}</b></div>
+                <div class="cred-row"><span>Volta</span><b>${choice.volta ? escapeHtml(quoteTimeRange(choice.volta)) : 'Somente ida'}</b></div>
+              </div>
+            </td>
+            <td><span class="money">${brl(Number(choice.total || 0))}</span></td>
+            <td>${escapeHtml(item.motivo || item.observacao || '-')}</td>
+            <td>
+              <span class="tag ${adminStatusTone(adminStatus)}">${escapeHtml(adminStatus)}</span>
+              ${item.approvedAt ? `<div class="lisub">Aprovada em ${formatManagementUpdate(item.approvedAt)}</div>` : ''}
+            </td>
+            <td>
+              <input id="cotacaoPedido_${item.id}" class="th-filter" value="${escapeHtml(item.numeroPedidoCompra || '')}" placeholder="Numero do pedido">
+              <input id="cotacaoObs_${item.id}" class="th-filter" style="margin-top:6px" value="${escapeHtml(item.aprovacaoObs || '')}" placeholder="Observacao">
+            </td>
+            <td class="actioncell">
+              <div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap">
+                <button class="inline-btn" type="button" onclick="saveCotacaoAdmin(${item.id})">Salvar</button>
+                <button class="inline-btn" type="button" onclick="approveCotacaoRealizada(${item.id})">Aprovar</button>
+                <button class="inline-btn" type="button" onclick="requestCotacaoAdjustment(${item.id})">Ajuste</button>
+                <button class="inline-btn" type="button" onclick="printCotacaoResumo(${item.id})">Resumo</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('') : `<tr><td colspan="13"><div class="empty-state"><b>Nenhuma cotacao finalizada.</b>Quando o colaborador escolher uma opcao no popup, ela aparece aqui para voce.</div></td></tr>`;
+    }
+
+    async function runPassagensSolicitacaoQuote(solicitacao) {
+      const companies = solicitacao.companhias && solicitacao.companhias.length ? solicitacao.companhias : ['LATAM'];
+      const routeVariants = buildSolicitacaoRouteVariants(solicitacao);
+      const quotes = [];
+      for (const company of companies) {
+        for (const route of routeVariants) {
+          try {
+            const payload = await cotacoesApiRequest('/api/cotacoes/teste', {
+              method: 'POST',
+              body: {
+                companhia: company,
+                origem: route.origem,
+                destino: route.destino,
+                dataIda: solicitacao.dataIda,
+                dataVolta: solicitacao.dataVolta,
+                adultos: solicitacao.adultos || 1,
+                cabine: solicitacao.cabine || 'Economica',
+                comando: route.alternativa
+                  ? `${solicitacao.motivo || solicitacao.observacao || 'Solicitacao de viagem'} | ${route.rotaLabel}`
+                  : (solicitacao.motivo || solicitacao.observacao || 'Solicitacao de viagem')
+              }
+            });
+            const quote = normalizeBackendQuote(payload.quote);
+            if (quote) {
+              quote.companhia = company;
+              quote.origem = route.origem;
+              quote.destino = route.destino;
+              quote.alternativa = route.alternativa;
+              quote.rotaLabel = route.rotaLabel;
+              quotes.push(quote);
+            }
+          } catch (error) {
+            quotes.push({
+              id: createId(),
+              createdAt: new Date().toISOString(),
+              companhia: company,
+              origem: route.origem,
+              destino: route.destino,
+              dataIda: solicitacao.dataIda,
+              dataVolta: solicitacao.dataVolta,
+              adultos: solicitacao.adultos || 1,
+              cabine: solicitacao.cabine || 'Economica',
+              resultado: '-',
+              detalhes: [],
+              alternativa: route.alternativa,
+              rotaLabel: route.rotaLabel,
+              status: `Erro API ${company}: ${error && error.message ? error.message : 'Falha na cotacao'}`
+            });
+          }
+        }
+      }
+      solicitacao.cotacoes = quotes;
+      solicitacao.status = quotes.some(quote => Array.isArray(quote.detalhes) && quote.detalhes.length)
+        ? 'Aguardando escolha'
+        : (quotes.some(quote => String(quote.status || '').startsWith('Erro')) ? 'Erro na cotacao' : 'Sem opcoes retornadas');
+      saveLocalCache();
+      persistPassagensSolicitacaoRemote(solicitacao);
+      renderPassagens();
+      if (buildSolicitacaoChoices(solicitacao).length && !solicitacao.escolha) {
+        openSolicitacaoChoiceModal(solicitacao.id);
+      }
+    }
+
     function renderPassagens() {
       const todayRows = filteredPassagens(todayPassagensData(), 'all');
       const monthRows = currentPassagensData();
@@ -7584,6 +8361,8 @@ AMAURI BARROSO DE MOURA"></textarea>
       document.querySelectorAll('[data-p-road-tab]').forEach(button => button.classList.toggle('on', button.dataset.pRoadTab === passagensRoadTab));
       document.querySelectorAll('[data-p-hosp-tab]').forEach(button => button.classList.toggle('on', button.dataset.pHospTab === passagensHospTab));
       document.querySelectorAll('[data-p-car-tab]').forEach(button => button.classList.toggle('on', button.dataset.pCarTab === passagensCarTab));
+      renderPassagensSolicitacoes();
+      renderCotacoesRealizadas();
 
       const cadastroRows = monthRows.filter(row => row.tabela === 'manual' || row.key.startsWith('manual:'));
       document.getElementById('pCadastroCount').textContent = `${cadastroRows.length} registros`;
@@ -8345,6 +9124,19 @@ AMAURI BARROSO DE MOURA"></textarea>
     document.getElementById('cancelPassagensHospedagemModal').addEventListener('click', () => closeModalById('passagensHospedagemModal'));
     document.getElementById('closePassagensCarroModal').addEventListener('click', () => closeModalById('passagensCarroModal'));
     document.getElementById('cancelPassagensCarroModal').addEventListener('click', () => closeModalById('passagensCarroModal'));
+    document.getElementById('closePassagensQuoteChoiceModal').addEventListener('click', closeSolicitacaoChoiceModal);
+    document.getElementById('cancelPassagensQuoteChoiceModal').addEventListener('click', closeSolicitacaoChoiceModal);
+    document.getElementById('finalizePassagensQuoteChoice').addEventListener('click', finalizeSolicitacaoChoice);
+    document.getElementById('passagensQuoteChoiceList').addEventListener('click', event => {
+      const card = event.target.closest('[data-choice-id]');
+      if (!card) return;
+      selectedSolicitacaoChoiceId = card.dataset.choiceId || '';
+      const item = passagensSolicitacoes.find(entry => String(entry.id) === String(choosingSolicitacaoId));
+      const choices = item ? buildSolicitacaoChoices(item) : [];
+      document.getElementById('passagensQuoteChoiceList').innerHTML = choices.map(renderSolicitacaoChoiceCard).join('');
+      document.getElementById('finalizePassagensQuoteChoice').disabled = !selectedSolicitacaoChoiceId;
+      document.getElementById('passagensQuoteChoiceFeedback').textContent = 'Opcao selecionada. Agora finalize a solicitacao.';
+    });
     document.getElementById('cancelCreditoEdit').addEventListener('click', resetCreditoForm);
     document.getElementById('togglePBars').addEventListener('click', () => toggleOverviewPanel('bars'));
     document.getElementById('togglePModes').addEventListener('click', () => toggleOverviewPanel('modes'));
@@ -8416,6 +9208,64 @@ AMAURI BARROSO DE MOURA"></textarea>
           submitButton.innerHTML = originalLabel;
         }
       }
+    });
+    document.getElementById('solicitacaoTodasCompanhias').addEventListener('change', event => {
+      document.querySelectorAll('input[name="solicitacaoCompanhias"]').forEach(input => {
+        input.checked = event.target.checked;
+      });
+    });
+    document.querySelectorAll('input[name="solicitacaoCompanhias"]').forEach(input => {
+      input.addEventListener('change', () => {
+        const boxes = [...document.querySelectorAll('input[name="solicitacaoCompanhias"]')];
+        document.getElementById('solicitacaoTodasCompanhias').checked = boxes.every(item => item.checked);
+      });
+    });
+    document.getElementById('passagensSolicitacaoForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const formData = Object.fromEntries(new FormData(form).entries());
+      const companhias = selectedSolicitacaoCompanies();
+      const solicitacao = {
+        id: createId(),
+        createdAt: new Date().toISOString(),
+        colaborador: formData.colaborador || '',
+        obra: formData.obra || '',
+        origem: String(formData.origem || '').toUpperCase(),
+        destino: String(formData.destino || '').toUpperCase(),
+        dataIda: formData.dataIda || '',
+        dataVolta: formData.dataVolta || '',
+        adultos: Math.max(1, Number(formData.adultos || 1)),
+        cabine: formData.cabine || 'Economica',
+        motivo: formData.motivo || '',
+        observacao: formData.observacao || '',
+        companhias,
+        cotacoes: [],
+        status: 'Cotando'
+      };
+      passagensSolicitacoes.unshift(solicitacao);
+      if (passagensSolicitacoes.length > 50) passagensSolicitacoes.splice(50);
+      saveLocalCache();
+      persistPassagensSolicitacaoRemote(solicitacao);
+      renderPassagens();
+      form.reset();
+      form.elements.adultos.value = '1';
+      document.querySelector('input[name="solicitacaoCompanhias"][value="LATAM"]').checked = true;
+      document.querySelector('input[name="solicitacaoCompanhias"][value="AZUL"]').checked = false;
+      document.getElementById('solicitacaoTodasCompanhias').checked = false;
+      runPassagensSolicitacaoQuote(solicitacao).catch(error => {
+        solicitacao.status = 'Erro na cotacao';
+        solicitacao.cotacoes = [{
+          id: createId(),
+          createdAt: new Date().toISOString(),
+          companhia: companhias.join(', '),
+          resultado: '-',
+          detalhes: [],
+          status: error && error.message ? error.message : 'Falha ao cotar'
+        }];
+        saveLocalCache();
+        persistPassagensSolicitacaoRemote(solicitacao);
+        renderPassagens();
+      });
     });
     document.getElementById('passagensManualForm').addEventListener('submit', async event => {
       event.preventDefault();
@@ -8824,11 +9674,29 @@ AMAURI BARROSO DE MOURA"></textarea>
       resetManagementFornecedorForm();
       renderManagement();
     });
+    document.querySelectorAll('[data-api-company]').forEach(button => {
+      button.addEventListener('click', () => {
+        selectedApiCompany = button.dataset.apiCompany || 'LATAM';
+        renderManagementApi();
+      });
+    });
+    document.getElementById('quoteAllCompanies').addEventListener('change', event => {
+      document.querySelectorAll('input[name="companhias"]').forEach(input => {
+        input.checked = event.currentTarget.checked;
+      });
+    });
+    document.querySelectorAll('input[name="companhias"]').forEach(input => {
+      input.addEventListener('change', () => {
+        const allBoxes = [...document.querySelectorAll('input[name="companhias"]')];
+        document.getElementById('quoteAllCompanies').checked = allBoxes.every(item => item.checked);
+      });
+    });
     document.getElementById('managementApiConfigForm').addEventListener('submit', async event => {
       event.preventDefault();
       const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
+      const company = (formData.companhia || selectedApiCompany || 'LATAM').toUpperCase();
       const nextConfig = {
-        companhia: formData.companhia || 'LATAM',
+        companhia: company,
         siteUrl: formData.siteUrl || '',
         usuario: formData.usuario || '',
         senhaMask: maskSecret(formData.senha || ''),
@@ -8845,12 +9713,12 @@ AMAURI BARROSO DE MOURA"></textarea>
             senha: formData.senha || ''
           }
         });
-        Object.assign(managementApiConfig, payload.config || nextConfig);
-        setSyncStatus(`Conector ${managementApiConfig.companhia} salvo na API`);
+        managementApiConfigs[company] = payload.config || nextConfig;
+        setSyncStatus(`Conector ${company} salvo na API`);
       } catch (error) {
         console.warn(error);
-        Object.assign(managementApiConfig, nextConfig);
-        setSyncStatus(`Conector ${managementApiConfig.companhia} salvo em sandbox local`);
+        managementApiConfigs[company] = nextConfig;
+        setSyncStatus(`Conector ${company} salvo em sandbox local`);
       }
       saveManagementCache();
       renderManagementApi();
@@ -8859,24 +9727,53 @@ AMAURI BARROSO DE MOURA"></textarea>
       event.preventDefault();
       const form = event.currentTarget;
       const formData = Object.fromEntries(new FormData(form).entries());
-      let quote = null;
-      try {
-        const payload = await cotacoesApiRequest('/api/cotacoes/teste', {
-          method: 'POST',
-          body: formData
-        });
-        quote = normalizeBackendQuote(payload.quote);
-        setSyncStatus('Cotacao registrada pela API');
-      } catch (error) {
-        console.warn(error);
-        quote = buildManagementApiQuote(formData);
-        setSyncStatus('Cotacao de teste registrada em sandbox local');
+      const companies = selectedQuoteCompanies();
+      const newQuotes = [];
+      for (const company of companies) {
+        let quote = null;
+        try {
+          const payload = await cotacoesApiRequest('/api/cotacoes/teste', {
+            method: 'POST',
+            body: { ...formData, companhia: company }
+          });
+          quote = normalizeBackendQuote(payload.quote);
+          setSyncStatus(`Cotacao ${company} registrada pela API`);
+        } catch (error) {
+          console.warn(error);
+          if (COTACOES_API_BASE_URL) {
+            quote = {
+              id: createId(),
+              createdAt: new Date().toISOString(),
+              companhia: company,
+              origem: String(formData.origem || '').toUpperCase(),
+              destino: String(formData.destino || '').toUpperCase(),
+              dataIda: formData.dataIda || '',
+              dataVolta: formData.dataVolta || '',
+              adultos: Number(formData.adultos || 1),
+              cabine: formData.cabine || 'Economica',
+              comando: formData.comando || '',
+              resultado: '-',
+              status: `Erro API ${company}: ${error.message || 'falha no backend'}`
+            };
+            setSyncStatus(quote.status);
+          } else {
+            quote = buildManagementApiQuote({ ...formData, companhia: company });
+            quote.companhia = company;
+            setSyncStatus(`Cotacao ${company} registrada em sandbox local`);
+          }
+        }
+        if (quote) newQuotes.push(quote);
       }
-      if (quote) managementApiQuotes.unshift(quote);
+      newQuotes.reverse().forEach(quote => managementApiQuotes.unshift(quote));
       if (managementApiQuotes.length > 25) managementApiQuotes.splice(25);
       saveManagementCache();
       form.reset();
       form.elements.adultos.value = 1;
+      document.querySelector('input[name="companhias"][value="LATAM"]').checked = true;
+      document.querySelectorAll('input[name="companhias"]').forEach(input => {
+        if (input.value !== 'LATAM') input.checked = false;
+      });
+      document.getElementById('quoteAllCompanies').checked = false;
       renderManagementApi();
     });
     document.getElementById('hitachiPayrollImport').addEventListener('click', importHitachiPayrollFile);

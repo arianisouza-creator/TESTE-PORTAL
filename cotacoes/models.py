@@ -6,8 +6,8 @@ from pydantic import BaseModel, Field
 
 class ConnectorConfig(BaseModel):
     companhia: str = Field(default="LATAM")
-    siteUrl: str
-    usuario: str
+    siteUrl: str = Field(default="")
+    usuario: str = Field(default="")
     senha: Optional[str] = None
     senhaMask: str = Field(default="")
     ambiente: str = Field(default="Teste")
@@ -17,6 +17,7 @@ class ConnectorConfig(BaseModel):
 
 
 class QuoteRequest(BaseModel):
+    companhia: str = Field(default="")
     origem: str
     destino: str
     dataIda: str

@@ -17,38 +17,46 @@ st.set_page_config(
 HTML_FILE = Path(__file__).with_name("controle-internet.html")
 
 
+def get_secret(name: str, default: str = "") -> str:
+    try:
+        value = st.secrets.get(name, default)
+    except Exception:
+        value = default
+    return str(value or "").strip()
+
+
 def load_portal_config() -> dict:
     return {
         "supabase": {
-            "url": st.secrets.get("supabase_url", os.getenv("SUPABASE_URL", "")).strip(),
-            "anonKey": st.secrets.get("supabase_anon_key", os.getenv("SUPABASE_ANON_KEY", "")).strip(),
+            "url": get_secret("supabase_url", os.getenv("SUPABASE_URL", "")),
+            "anonKey": get_secret("supabase_anon_key", os.getenv("SUPABASE_ANON_KEY", "")),
         },
         "exportacao": {
-            "baseUrl": st.secrets.get(
+            "baseUrl": get_secret(
                 "exportacao_api_base_url",
                 os.getenv(
                     "EXPORTACAO_API_BASE_URL",
                     "https://portalmse.com.br/microservices/exportacao_api",
                 ),
-            ).strip(),
-            "token": st.secrets.get("exportacao_api_token", os.getenv("EXPORTACAO_API_TOKEN", "")).strip(),
+            ),
+            "token": get_secret("exportacao_api_token", os.getenv("EXPORTACAO_API_TOKEN", "")),
         },
         "passagens": {
-            "baseUrl": st.secrets.get(
+            "baseUrl": get_secret(
                 "passagens_api_base_url",
                 os.getenv(
                     "PASSAGENS_API_BASE_URL",
                     "https://portalmse.com.br/microservices/hub_mse/api_passagens",
                 ),
-            ).strip(),
-            "token": st.secrets.get("passagens_api_token", os.getenv("PASSAGENS_API_TOKEN", "")).strip(),
+            ),
+            "token": get_secret("passagens_api_token", os.getenv("PASSAGENS_API_TOKEN", "")),
             "useApiOnly": True,
         },
         "cotacoes": {
-            "baseUrl": st.secrets.get(
+            "baseUrl": get_secret(
                 "cotacoes_api_base_url",
                 os.getenv("COTACOES_API_BASE_URL", ""),
-            ).strip().rstrip("/"),
+            ).rstrip("/"),
         },
     }
 

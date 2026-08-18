@@ -189,6 +189,12 @@ create table if not exists public.passagens_creditos (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.passagens_solicitacoes (
+  id text primary key,
+  data jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
 alter table public.internet_contracts enable row level security;
 alter table public.internet_month_entries enable row level security;
 alter table public.internet_lines enable row level security;
@@ -202,6 +208,7 @@ alter table public.management_nf_responsaveis enable row level security;
 alter table public.passagens_rows enable row level security;
 alter table public.passagens_complements enable row level security;
 alter table public.passagens_creditos enable row level security;
+alter table public.passagens_solicitacoes enable row level security;
 
 drop policy if exists "anon_full_internet_contracts" on public.internet_contracts;
 create policy "anon_full_internet_contracts"
@@ -302,6 +309,14 @@ with check (true);
 drop policy if exists "anon_full_passagens_creditos" on public.passagens_creditos;
 create policy "anon_full_passagens_creditos"
 on public.passagens_creditos
+for all
+to anon
+using (true)
+with check (true);
+
+drop policy if exists "anon_full_passagens_solicitacoes" on public.passagens_solicitacoes;
+create policy "anon_full_passagens_solicitacoes"
+on public.passagens_solicitacoes
 for all
 to anon
 using (true)

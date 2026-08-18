@@ -1,0 +1,19 @@
+FROM mcr.microsoft.com/playwright/python:v1.46.0-jammy
+
+WORKDIR /app
+
+COPY requirements-api.txt .
+RUN pip install --no-cache-dir -r requirements-api.txt
+
+COPY cotacoes ./cotacoes
+COPY cotacoes_api.py .
+
+ENV COTACOES_DATA_FILE=/data/cotacoes_data.json
+ENV COTACOES_LATAM_MODE=browser
+ENV COTACOES_AZUL_MODE=browser
+ENV COTACOES_LATAM_HEADLESS=true
+ENV COTACOES_AZUL_HEADLESS=true
+
+EXPOSE 8001
+
+CMD ["sh", "-c", "uvicorn cotacoes_api:app --host 0.0.0.0 --port ${PORT:-8001}"]

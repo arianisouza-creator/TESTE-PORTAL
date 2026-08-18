@@ -1,8 +1,5 @@
+streamlit
 pandas
 pypdf
-streamlit
 fpdf
 openpyxl
-fastapi
-uvicorn
-playwright

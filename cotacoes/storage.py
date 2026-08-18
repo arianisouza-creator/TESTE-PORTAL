@@ -4,22 +4,23 @@ from pathlib import Path
 from typing import Any
 
 
-DATA_FILE = Path(os.getenv("COTACOES_DATA_FILE", "cotacoes_data.json"))
+DATA_FILE = Path(os.getenv("COTACOES_DATA_FILE", Path(__file__).resolve().parents[1] / "cotacoes_data.json"))
 
 
 def empty_store() -> dict[str, Any]:
-    return {"config": {}, "quotes": []}
+    return {"config": {}, "configs": {}, "quotes": []}
 
 
 def load_store() -> dict[str, Any]:
     if not DATA_FILE.exists():
         return empty_store()
     try:
-        payload = json.loads(DATA_FILE.read_text(encoding="utf-8"))
+        payload = json.loads(DATA_FILE.read_text(encoding="utf-8-sig"))
     except json.JSONDecodeError:
         return empty_store()
     return {
         "config": payload.get("config") or {},
+        "configs": payload.get("configs") or {},
         "quotes": payload.get("quotes") or [],
     }
 
