@@ -14,10 +14,12 @@ logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
 logger = logging.getLogger("cotacoes_api")
 
 app = FastAPI(title="MSE Cotacoes API", version="0.1.0")
+CORS_ORIGINS = [origin.strip() for origin in os.getenv("COTACOES_CORS_ORIGINS", "*").split(",") if origin.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("COTACOES_CORS_ORIGINS", "*").split(","),
-    allow_credentials=True,
+    allow_origins=CORS_ORIGINS or ["*"],
+    allow_origin_regex=os.getenv("COTACOES_CORS_REGEX") or None,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

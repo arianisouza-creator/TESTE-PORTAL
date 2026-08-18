@@ -855,6 +855,7 @@
                 <div class="li"><div><b class="link">1. Solicitacao</b><div class="lisub">O colaborador informa trecho, data e motivo no portal.</div></div><span class="tag neutral">Entrada</span></div>
                 <div class="li"><div><b class="link">2. Cotacao</b><div class="lisub">O backend abre a companhia em segundo plano e busca as opcoes.</div></div><span class="tag neutral">API</span></div>
                 <div class="li"><div><b class="link">3. Escolha</b><div class="lisub">As opcoes ficam salvas aqui para aprovacao e compra.</div></div><span class="tag ok">Retorno</span></div>
+                <div class="li"><div><b class="link">API conectada</b><div class="lisub" id="pCotacoesApiEndpoint">Verificando configuracao...</div></div><span class="tag neutral">Status</span></div>
               </div>
             </article>
           </section>
@@ -5822,16 +5823,29 @@ AMAURI BARROSO DE MOURA"></textarea>
 
     async function cotacoesApiRequest(path, { method = 'GET', body = null } = {}) {
       if (!COTACOES_API_BASE_URL) throw new Error('API externa nao configurada. Usando sandbox local.');
-      const response = await fetch(`${COTACOES_API_BASE_URL}${path}`, {
-        method,
-        headers: body ? { 'Content-Type': 'application/json' } : {},
-        body: body ? JSON.stringify(body) : undefined
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(payload.detail || payload.message || 'Falha ao consultar API de cotacoes.');
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 240000);
+      try {
+        const response = await fetch(`${COTACOES_API_BASE_URL}${path}`, {
+          method,
+          mode: 'cors',
+          headers: body ? { 'Content-Type': 'application/json' } : {},
+          body: body ? JSON.stringify(body) : undefined,
+          signal: controller.signal
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(payload.detail || payload.message || `Falha ao consultar API de cotacoes (${response.status}).`);
+        }
+        return payload;
+      } catch (error) {
+        if (error && error.name === 'AbortError') {
+          throw new Error('Tempo limite da API de cotacoes. O robo demorou mais de 4 minutos para retornar.');
+        }
+        throw error;
+      } finally {
+        window.clearTimeout(timeout);
       }
-      return payload;
     }
 
     function normalizeBackendQuote(quote) {
@@ -8281,6 +8295,10 @@ AMAURI BARROSO DE MOURA"></textarea>
       });
 
       pMonthPicker.value = currentPassagensMonth();
+      const cotacoesEndpoint = document.getElementById('pCotacoesApiEndpoint');
+      if (cotacoesEndpoint) {
+        cotacoesEndpoint.textContent = COTACOES_API_BASE_URL || 'API externa nao configurada no Streamlit.';
+      }
       document.getElementById('pPageTitle').textContent = `Controle de Passagens | compras de hoje`;
       document.getElementById('pPageSubtitle').textContent = todayRows.length
         ? `A tela inicial mostra somente as passagens compradas hoje (${formatDate(todayKey())}).`

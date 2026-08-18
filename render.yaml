@@ -9,6 +9,8 @@ services:
     envVars:
       - key: COTACOES_CORS_ORIGINS
         value: https://testeariani.streamlit.app,http://localhost:8501,http://127.0.0.1:8501
+      - key: COTACOES_CORS_REGEX
+        value: https://.*\.streamlit\.app
       - key: COTACOES_DATA_FILE
         value: /data/cotacoes_data.json
       - key: COTACOES_LATAM_PROFILE_DIR
