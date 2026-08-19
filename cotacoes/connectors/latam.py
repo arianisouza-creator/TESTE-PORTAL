@@ -55,31 +55,48 @@ class LatamConnector(SandboxConnector):
                 ida_options = self._wait_and_extract_flight_options(page, direction="ida")
                 volta_options = []
                 if request.dataVolta:
-                    self._choose_first_light_fare(page)
-                    volta_options = self._wait_and_extract_flight_options(page, direction="volta")
+                    try:
+                        self._choose_first_light_fare(page)
+                        volta_options = self._wait_and_extract_flight_options(page, direction="volta")
+                    except Exception as exc:
+                        if ida_options:
+                            return self._build_result(
+                                request=request,
+                                detalhes=ida_options,
+                                status=f"Cotacao parcial LATAM: ida lida, volta nao concluida ({exc})",
+                            )
+                        raise
                 all_options = ida_options + volta_options
                 prices = [item["preco"] for item in all_options if item.get("preco") is not None]
                 if not prices:
                     raise RuntimeError("Nao encontrei precos visiveis na tela de resultados da LATAM.")
-                menor_preco = min(prices)
-                return QuoteResult(
-                    id=int(time.time() * 1000),
-                    createdAt=utc_now(),
-                    modo="browser",
-                    companhia="LATAM",
-                    origem=request.origem.upper(),
-                    destino=request.destino.upper(),
-                    dataIda=request.dataIda,
-                    dataVolta=request.dataVolta,
-                    adultos=request.adultos,
-                    cabine=request.cabine,
-                    comando=request.comando,
-                    menorPreco=menor_preco,
-                    detalhes=all_options[:20],
+                return self._build_result(
+                    request=request,
+                    detalhes=all_options,
                     status="Cotacao lida no site LATAM",
                 )
             finally:
                 browser.close()
+
+    def _build_result(self, request: QuoteRequest, detalhes: list[dict], status: str) -> QuoteResult:
+        prices = [item["preco"] for item in detalhes if item.get("preco") is not None]
+        menor_preco = min(prices) if prices else 0
+        return QuoteResult(
+            id=int(time.time() * 1000),
+            createdAt=utc_now(),
+            modo="browser",
+            companhia="LATAM",
+            origem=request.origem.upper(),
+            destino=request.destino.upper(),
+            dataIda=request.dataIda,
+            dataVolta=request.dataVolta,
+            adultos=request.adultos,
+            cabine=request.cabine,
+            comando=request.comando,
+            menorPreco=menor_preco,
+            detalhes=detalhes[:20],
+            status=status,
+        )
 
     def _try_click(self, page, name_pattern, timeout: int = 5000) -> bool:
         try:

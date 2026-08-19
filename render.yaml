@@ -8,9 +8,9 @@ services:
     healthCheckPath: /health
     envVars:
       - key: COTACOES_CORS_ORIGINS
-        value: https://testeariani.streamlit.app,http://localhost:8501,http://127.0.0.1:8501
+        value: https://testeariani.streamlit.app,http://localhost:8501,http://127.0.0.1:8501,http://localhost:8506,http://127.0.0.1:8506
       - key: COTACOES_CORS_REGEX
-        value: https://.*\.streamlit\.app
+        value: https://.*\.streamlit\.app|http://(localhost|127\.0\.0\.1):[0-9]+
       - key: COTACOES_DATA_FILE
         value: /data/cotacoes_data.json
       - key: COTACOES_LATAM_PROFILE_DIR

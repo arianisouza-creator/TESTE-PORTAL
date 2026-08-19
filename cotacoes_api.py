@@ -15,10 +15,11 @@ logger = logging.getLogger("cotacoes_api")
 
 app = FastAPI(title="MSE Cotacoes API", version="0.1.0")
 CORS_ORIGINS = [origin.strip() for origin in os.getenv("COTACOES_CORS_ORIGINS", "*").split(",") if origin.strip()]
+CORS_REGEX = os.getenv("COTACOES_CORS_REGEX", r"https://.*\.streamlit\.app|http://(localhost|127\.0\.0\.1):[0-9]+")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS or ["*"],
-    allow_origin_regex=os.getenv("COTACOES_CORS_REGEX") or None,
+    allow_origin_regex=CORS_REGEX or None,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],

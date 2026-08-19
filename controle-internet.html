@@ -278,13 +278,20 @@
     .cred-item h4{margin:0 0 10px;color:#17356c;font-size:15px}
     .cred-row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line-2);font-size:12px;color:var(--body)}
     .cred-row:last-child{border-bottom:0}
-    .quote-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-height:58vh;overflow:auto;padding:2px 4px 2px 0}
+    .quote-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .quote-choice-column{border:1px solid #dbe5f4;border-radius:12px;background:#fff;padding:12px;display:grid;grid-template-rows:auto minmax(0,1fr);gap:10px;min-height:420px}
+    .quote-choice-column-head{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#0b2d66;font-weight:800;font-size:18px}
+    .quote-choice-count{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:#f1f5f9;color:#17356c;font:700 11px "IBM Plex Mono",monospace;text-transform:uppercase;padding:7px 10px}
+    .quote-choice-list{display:grid;gap:10px;max-height:52vh;overflow:auto;padding:2px 4px 2px 0}
     .quote-choice-card{border:1px solid #dbe5f4;border-radius:10px;background:#fff;padding:12px;display:grid;gap:10px;cursor:pointer;transition:.15s ease;box-shadow:0 3px 10px rgba(15,23,42,.04)}
     .quote-choice-card:hover{border-color:#b8cdfb;box-shadow:0 10px 24px rgba(37,99,235,.12)}
     .quote-choice-card.selected{border-color:#1d56ce;background:#eef4ff;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
     .quote-choice-card.alternative{border-color:#b7ebc6;background:#f0fff5}
     .quote-choice-card.alternative.selected{border-color:#16a34a;background:#e8f9ee;box-shadow:0 0 0 3px rgba(22,163,74,.16)}
     .quote-choice-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .quote-choice-left{display:flex;align-items:center;gap:10px;min-width:0}
+    .quote-radio{width:18px;height:18px;border:1px solid #9aabc5;border-radius:50%;background:#fff;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
+    .quote-choice-card.selected .quote-radio{border-color:#2563eb;background:#2563eb;box-shadow:inset 0 0 0 4px #fff}
     .quote-route{font-weight:700;color:#0b2d66;font-size:13px}
     .quote-company{display:inline-flex;align-items:center;justify-content:center;min-width:58px;height:24px;border-radius:999px;background:#eaf2ff;color:#1d4ed8;font:700 10px "IBM Plex Mono",monospace;text-transform:uppercase}
     .quote-company.azul{background:#e8f7ff;color:#0369a1}
@@ -295,6 +302,11 @@
     .quote-slot b{display:block;color:#17356c;font-size:12px}
     .quote-total{display:flex;justify-content:space-between;gap:10px;align-items:center;border-top:1px dashed #dbe5f4;padding-top:8px;font:700 11px "IBM Plex Mono",monospace;color:#8a98ad;text-transform:uppercase}
     .quote-total b{color:#081d44;font:800 14px "IBM Plex Sans",system-ui,sans-serif}
+    .quote-choice-summary{display:grid;grid-template-columns:1fr 1fr .8fr;gap:10px;margin-top:14px}
+    .quote-summary-box{border:1px solid var(--line);border-radius:10px;background:#fbfdff;padding:10px 12px;display:grid;gap:4px;min-height:58px}
+    .quote-summary-box span{font-size:12px;color:#53657f}
+    .quote-summary-box b{color:#0b2d66;font-size:13px}
+    .quote-summary-box.total b{font-size:20px;color:#081d44}
     .pwd{font-family:"IBM Plex Mono",monospace}
     .inline-btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 10px;font-size:12px;color:#456191;font-weight:600}
     .contract-stack{display:grid;gap:14px;margin-top:14px}
@@ -333,7 +345,7 @@
     svg{width:18px;height:18px;stroke-width:1.8}
     @media (max-width:1280px){.kpis{grid-template-columns:repeat(3,1fr)}.dashgrid{grid-template-columns:1fr 1fr}.detail-grid,.cred-grid{grid-template-columns:1fr}.detail-grid-passagem{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media (max-width:980px){.shell{padding:0 20px}.side{display:none}.main{padding-left:0}.monthbar,.toolbar{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.detail-grid{grid-template-columns:1fr}.hinner{padding:14px}.clock,.tecto,.user{display:none}.uinner{padding:0 20px}.trow{padding:0 20px}}
-    @media (max-width:640px){.trow{height:auto;display:grid;grid-template-columns:1fr;gap:8px;padding:12px 20px}.tscroll{display:grid;mask-image:none;-webkit-mask-image:none}.ti{padding:8px 0;border-left:0;border-top:1px solid var(--line-2)}.greet{padding-right:0}.kpis{grid-template-columns:1fr}.dashgrid{grid-template-columns:1fr}.formgrid,.import-grid{grid-template-columns:1fr}.donut-wrap,.cred-grid,.quote-choice-grid{grid-template-columns:1fr}.uinner{overflow:auto}.detail-grid-passagem{grid-template-columns:1fr}}
+    @media (max-width:640px){.trow{height:auto;display:grid;grid-template-columns:1fr;gap:8px;padding:12px 20px}.tscroll{display:grid;mask-image:none;-webkit-mask-image:none}.ti{padding:8px 0;border-left:0;border-top:1px solid var(--line-2)}.greet{padding-right:0}.kpis{grid-template-columns:1fr}.dashgrid{grid-template-columns:1fr}.formgrid,.import-grid{grid-template-columns:1fr}.donut-wrap,.cred-grid,.quote-choice-grid,.quote-choice-summary{grid-template-columns:1fr}.uinner{overflow:auto}.detail-grid-passagem{grid-template-columns:1fr}}
     .pending-mail-list{display:grid;gap:12px;max-height:340px;overflow:auto;padding-right:4px}
     .pending-mail-item{border:1px solid var(--line);border-radius:12px;background:#fbfcff;padding:12px}
     .pending-mail-item b{display:block;color:#17356c;margin-bottom:6px}
@@ -2340,7 +2352,17 @@ AMAURI BARROSO DE MOURA"></textarea>
         <button class="rowact" type="button" id="closePassagensQuoteChoiceModal" aria-label="Fechar" data-icon="close"></button>
       </div>
       <div class="helper" id="passagensQuoteChoiceSubtitle" style="margin-bottom:12px">Selecione uma opcao para finalizar a solicitacao.</div>
-      <div class="quote-choice-grid" id="passagensQuoteChoiceList"></div>
+      <div class="quote-choice-grid" id="passagensQuoteChoiceList">
+        <section class="quote-choice-column">
+          <div class="quote-choice-column-head"><span>1. Escolha a ida</span><span class="quote-choice-count" id="passagensQuoteIdaCount">0 opcoes</span></div>
+          <div class="quote-choice-list" id="passagensQuoteIdaList"></div>
+        </section>
+        <section class="quote-choice-column" id="passagensQuoteVoltaColumn">
+          <div class="quote-choice-column-head"><span>2. Escolha a volta</span><span class="quote-choice-count" id="passagensQuoteVoltaCount">0 opcoes</span></div>
+          <div class="quote-choice-list" id="passagensQuoteVoltaList"></div>
+        </section>
+      </div>
+      <div class="quote-choice-summary" id="passagensQuoteChoiceSummary"></div>
       <div class="helper" id="passagensQuoteChoiceFeedback" style="margin-top:12px"></div>
       <footer>
         <button class="ghost" type="button" id="cancelPassagensQuoteChoiceModal">Cancelar</button>
@@ -2735,6 +2757,8 @@ AMAURI BARROSO DE MOURA"></textarea>
     let editingCarroId = null;
     let choosingSolicitacaoId = null;
     let selectedSolicitacaoChoiceId = '';
+    let selectedSolicitacaoIdaId = '';
+    let selectedSolicitacaoVoltaId = '';
     const passagensSelectedKeys = new Set();
     const passagensOverviewCollapsed = { bars: false, modes: false, savings: false };
     const passagensSectionCollapsed = {
@@ -5824,7 +5848,7 @@ AMAURI BARROSO DE MOURA"></textarea>
     async function cotacoesApiRequest(path, { method = 'GET', body = null } = {}) {
       if (!COTACOES_API_BASE_URL) throw new Error('API externa nao configurada. Usando sandbox local.');
       const controller = new AbortController();
-      const timeout = window.setTimeout(() => controller.abort(), 240000);
+      const timeout = window.setTimeout(() => controller.abort(), 900000);
       try {
         const response = await fetch(`${COTACOES_API_BASE_URL}${path}`, {
           method,
@@ -5840,7 +5864,7 @@ AMAURI BARROSO DE MOURA"></textarea>
         return payload;
       } catch (error) {
         if (error && error.name === 'AbortError') {
-          throw new Error('Tempo limite da API de cotacoes. O robo demorou mais de 4 minutos para retornar.');
+          throw new Error('Tempo limite da API de cotacoes. O robo demorou mais de 15 minutos para retornar.');
         }
         throw error;
       } finally {
@@ -7779,8 +7803,34 @@ AMAURI BARROSO DE MOURA"></textarea>
           </div>
         `).join('')}</div>`;
       }
+      const errors = solicitacaoErrorDetails(item);
+      if (errors.length) {
+        return `<div class="cred-list" style="gap:6px">${errors.slice(0, 4).map(error => `
+          <div class="cred-row" style="gap:10px">
+            <span>${escapeHtml(error.contexto)}</span>
+            <b style="color:#c2410c">${escapeHtml(error.mensagem)}</b>
+          </div>
+        `).join('')}</div>`;
+      }
       return '<span class="tag neutral">Aguardando retorno</span>';
     }
+
+    function solicitacaoErrorDetails(item) {
+      return (item.cotacoes || [])
+        .filter(quote => String(quote.status || '').includes('Erro'))
+        .map(quote => ({
+          contexto: `${quote.companhia || 'CIA'} ${quote.origem || '-'}-${quote.destino || '-'}`,
+          mensagem: String(quote.status || '').replace(/^Erro API\s*/i, '').trim()
+        }));
+    }
+
+    function fullSolicitacaoErrorText(id) {
+      const item = passagensSolicitacoes.find(entry => String(entry.id) === String(id));
+      const errors = solicitacaoErrorDetails(item || {});
+      if (!errors.length) return 'Nenhum erro detalhado foi salvo nesta solicitacao.';
+      return errors.map(error => `${error.contexto}: ${error.mensagem}`).join('\n\n');
+    }
+    window.fullSolicitacaoErrorText = fullSolicitacaoErrorText;
 
     function quoteTimeRange(option) {
       const start = option?.saida || option?.partida || option?.horarioSaida || option?.horaSaida || '';
@@ -7902,78 +7952,185 @@ AMAURI BARROSO DE MOURA"></textarea>
     }
 
     function buildSolicitacaoChoices(item) {
+      const split = buildSolicitacaoFlightOptions(item);
       const choices = [];
-      (item.cotacoes || []).forEach(quote => {
-        const company = String(quote.companhia || '').toUpperCase() || 'CIA';
-        const details = Array.isArray(quote.detalhes) ? quote.detalhes : [];
-        const idaOptions = details.filter(option => norm(option.tipo || option.sentido || '').includes('ida'));
-        const voltaOptions = details.filter(option => norm(option.tipo || option.sentido || '').includes('volta'));
-        const others = details.filter(option => !idaOptions.includes(option) && !voltaOptions.includes(option));
-        if (item.dataVolta && idaOptions.length && voltaOptions.length) {
-          idaOptions.slice(0, 5).forEach((ida, idaIndex) => {
-            voltaOptions.slice(0, 5).forEach((volta, voltaIndex) => {
-              choices.push({
-                id: `${item.id}-${company}-${idaIndex}-${voltaIndex}`,
-                companhia: company,
-                ida,
-                volta,
-                total: quoteOptionPrice(ida) + quoteOptionPrice(volta),
-                origem: quote.origem || item.origem,
-                destino: quote.destino || item.destino,
-                alternativa: Boolean(quote.alternativa),
-                rotaLabel: quote.rotaLabel || (quote.alternativa ? 'Rota alternativa' : 'Rota solicitada')
-              });
-            });
-          });
-          return;
-        }
-        const baseOptions = idaOptions.length ? idaOptions : others;
-        baseOptions.slice(0, 10).forEach((ida, index) => {
-          choices.push({
-            id: `${item.id}-${company}-${index}`,
-            companhia: company,
-            ida,
-            volta: null,
-            total: quoteOptionPrice(ida),
-            origem: quote.origem || item.origem,
-            destino: quote.destino || item.destino,
-            alternativa: Boolean(quote.alternativa),
-            rotaLabel: quote.rotaLabel || (quote.alternativa ? 'Rota alternativa' : 'Rota solicitada')
+      if (item.dataVolta && split.ida.length && split.volta.length) {
+        split.ida.forEach(ida => {
+          split.volta.forEach(volta => {
+            choices.push(buildSolicitacaoChoiceFromParts(item, ida, volta));
           });
         });
+        return choices.sort((a, b) => Number(a.total || 0) - Number(b.total || 0));
+      }
+      split.ida.forEach(ida => {
+        choices.push(buildSolicitacaoChoiceFromParts(item, ida, null));
       });
       return choices.sort((a, b) => Number(a.total || 0) - Number(b.total || 0));
     }
 
-    function renderSolicitacaoChoiceCard(choice) {
-      const companyClass = norm(choice.companhia).includes('azul') ? 'azul' : '';
+    function buildSolicitacaoFlightOptions(item) {
+      const ida = [];
+      const volta = [];
+      (item.cotacoes || []).forEach(quote => {
+        const company = String(quote.companhia || '').toUpperCase() || 'CIA';
+        const quoteOrigem = quote.origem || item.origem;
+        const quoteDestino = quote.destino || item.destino;
+        const details = Array.isArray(quote.detalhes) ? quote.detalhes : [];
+        details.forEach((option, optionIndex) => {
+          const direction = inferQuoteDirection(option, quoteOrigem, quoteDestino);
+          const normalized = {
+            id: `${item.id}-${company}-${quoteOrigem}-${quoteDestino}-${direction}-${optionIndex}`,
+            companhia: company,
+            option,
+            preco: quoteOptionPrice(option),
+            origem: quoteOrigem,
+            destino: quoteDestino,
+            alternativa: Boolean(quote.alternativa),
+            rotaLabel: quote.rotaLabel || (quote.alternativa ? 'Rota alternativa' : 'Rota solicitada')
+          };
+          if (direction === 'volta') volta.push(normalized);
+          else ida.push(normalized);
+        });
+      });
+      return {
+        ida: ida.sort((a, b) => Number(a.preco || 0) - Number(b.preco || 0)),
+        volta: volta.sort((a, b) => Number(a.preco || 0) - Number(b.preco || 0))
+      };
+    }
+
+    function inferQuoteDirection(option, quoteOrigem, quoteDestino) {
+      const text = norm(option.tipo || option.sentido || '');
+      if (text.includes('volta')) return 'volta';
+      const optionOrigem = norm(option.origem || option.from || '');
+      const optionDestino = norm(option.destino || option.to || '');
+      if (optionOrigem && optionDestino) {
+        if (sameAirportFamily(optionOrigem, quoteDestino) && sameAirportFamily(optionDestino, quoteOrigem)) {
+          return 'volta';
+        }
+      }
+      if (text.includes('ida')) return 'ida';
+      return 'ida';
+    }
+
+    function airportFamily(value) {
+      const text = norm(value || '');
+      if (!text) return '';
+      if (['ldb'].includes(text) || text.includes('londrina')) return 'londrina';
+      if (['mgf'].includes(text) || text.includes('maringa')) return 'maringa';
+      if (['gru', 'cgh', 'vcp', 'sao', 'sao paulo'].includes(text) || text.includes('sao paulo') || text.includes('guarulhos') || text.includes('congonhas') || text.includes('viracopos')) return 'sao-paulo';
+      if (['cnf', 'plu', 'bhz'].includes(text) || text.includes('belo horizonte') || text.includes('confins') || text.includes('pampulha')) return 'belo-horizonte';
+      return text;
+    }
+
+    function sameAirportFamily(a, b) {
+      const first = airportFamily(a);
+      const second = airportFamily(b);
+      return Boolean(first && second && first === second);
+    }
+
+    function buildSolicitacaoChoiceFromParts(item, ida, volta) {
+      const companies = [...new Set([ida?.companhia, volta?.companhia].filter(Boolean))];
+      const labels = [...new Set([ida?.rotaLabel, volta?.rotaLabel].filter(Boolean))];
+      return {
+        id: `${item.id}-${ida?.id || 'ida'}-${volta?.id || 'sem-volta'}`,
+        ida: ida?.option || null,
+        volta: volta?.option || null,
+        companhia: companies.join(' + ') || 'CIA',
+        total: Number(ida?.preco || 0) + Number(volta?.preco || 0),
+        origem: ida?.origem || item.origem,
+        destino: ida?.destino || item.destino,
+        alternativa: Boolean(ida?.alternativa || volta?.alternativa),
+        rotaLabel: labels.join(' / ') || 'Rota solicitada',
+        idaSelecionada: ida || null,
+        voltaSelecionada: volta || null
+      };
+    }
+
+    function currentSolicitacaoChoice(item) {
+      if (!item) return null;
+      const split = buildSolicitacaoFlightOptions(item);
+      const ida = split.ida.find(option => option.id === selectedSolicitacaoIdaId);
+      const volta = split.volta.find(option => option.id === selectedSolicitacaoVoltaId);
+      if (!ida) return null;
+      if (item.dataVolta && split.volta.length && !volta) return null;
+      return buildSolicitacaoChoiceFromParts(item, ida, volta || null);
+    }
+
+    function renderSolicitacaoSingleOptionCard(entry, direction) {
+      const companyClass = norm(entry.companhia).includes('azul') ? 'azul' : '';
+      const selectedId = direction === 'volta' ? selectedSolicitacaoVoltaId : selectedSolicitacaoIdaId;
       return `
-        <button class="quote-choice-card ${choice.alternativa ? 'alternative' : ''} ${selectedSolicitacaoChoiceId === choice.id ? 'selected' : ''}" type="button" data-choice-id="${escapeHtml(choice.id)}">
+        <button class="quote-choice-card ${entry.alternativa ? 'alternative' : ''} ${selectedId === entry.id ? 'selected' : ''}" type="button" data-choice-kind="${direction}" data-choice-id="${escapeHtml(entry.id)}">
           <div class="quote-choice-top">
-            <div class="quote-route">${escapeHtml(quoteRouteText(choice.ida, choice.origem, choice.destino))}</div>
-            <span class="quote-company ${companyClass}">${escapeHtml(choice.companhia || '-')}</span>
+            <div class="quote-choice-left"><span class="quote-radio"></span><div class="quote-route">${escapeHtml(quoteRouteText(entry.option, entry.origem, entry.destino))}</div></div>
+            <span class="quote-company ${companyClass}">${escapeHtml(entry.companhia || '-')}</span>
           </div>
-          ${choice.alternativa ? `<span class="quote-alt-badge">${escapeHtml(choice.rotaLabel || 'Rota alternativa')}</span>` : ''}
+          ${entry.alternativa ? `<span class="quote-alt-badge">${escapeHtml(entry.rotaLabel || 'Rota alternativa')}</span>` : ''}
           <div class="quote-slots">
-            <div class="quote-slot"><span>Ida</span><b>${escapeHtml(quoteTimeRange(choice.ida))}</b></div>
-            <div class="quote-slot"><span>Volta</span><b>${choice.volta ? escapeHtml(quoteTimeRange(choice.volta)) : 'Somente ida'}</b></div>
+            <div class="quote-slot"><span>${direction === 'volta' ? 'Volta' : 'Ida'}</span><b>${escapeHtml(quoteTimeRange(entry.option))}</b></div>
+            <div class="quote-slot"><span>Valor</span><b>${brl(Number(entry.preco || 0))}</b></div>
           </div>
-          <div class="quote-total"><span>Valor total</span><b>${brl(Number(choice.total || 0))}</b></div>
         </button>
       `;
+    }
+
+    function renderSolicitacaoChoiceSummary(item) {
+      const choice = currentSolicitacaoChoice(item);
+      const ida = choice?.idaSelecionada;
+      const volta = choice?.voltaSelecionada;
+      return `
+        <div class="quote-summary-box">
+          <span>Ida selecionada</span>
+          <b>${ida ? `${escapeHtml(ida.companhia)} ${escapeHtml(quoteTimeRange(ida.option))} | ${brl(Number(ida.preco || 0))}` : 'Selecione uma ida'}</b>
+        </div>
+        <div class="quote-summary-box">
+          <span>Volta selecionada</span>
+          <b>${item.dataVolta ? (volta ? `${escapeHtml(volta.companhia)} ${escapeHtml(quoteTimeRange(volta.option))} | ${brl(Number(volta.preco || 0))}` : 'Selecione uma volta') : 'Somente ida'}</b>
+        </div>
+        <div class="quote-summary-box total">
+          <span>Total</span>
+          <b>${choice ? brl(Number(choice.total || 0)) : brl(0)}</b>
+        </div>
+      `;
+    }
+
+    function renderSolicitacaoSplitChoiceLists(item, split = null) {
+      const options = split || buildSolicitacaoFlightOptions(item);
+      const needsReturn = Boolean(item.dataVolta && options.volta.length);
+      const choice = currentSolicitacaoChoice(item);
+      document.getElementById('passagensQuoteIdaCount').textContent = `${options.ida.length} opcao${options.ida.length === 1 ? '' : 'es'}`;
+      document.getElementById('passagensQuoteVoltaCount').textContent = `${options.volta.length} opcao${options.volta.length === 1 ? '' : 'es'}`;
+      document.getElementById('passagensQuoteVoltaColumn').style.display = item.dataVolta ? 'grid' : 'none';
+      document.getElementById('passagensQuoteIdaList').innerHTML = options.ida.length
+        ? options.ida.map(entry => renderSolicitacaoSingleOptionCard(entry, 'ida')).join('')
+        : `<div class="empty-state"><b>Nenhuma ida disponivel.</b>Confira se a companhia retornou voos de ida.</div>`;
+      document.getElementById('passagensQuoteVoltaList').innerHTML = item.dataVolta
+        ? (options.volta.length ? options.volta.map(entry => renderSolicitacaoSingleOptionCard(entry, 'volta')).join('') : `<div class="empty-state"><b>Nenhuma volta disponivel.</b>Finalize apenas se a companhia retornou somente ida ou tente cotar novamente.</div>`)
+        : '';
+      document.getElementById('passagensQuoteChoiceSummary').innerHTML = renderSolicitacaoChoiceSummary(item);
+      document.getElementById('finalizePassagensQuoteChoice').disabled = !choice;
+      if (!options.ida.length) {
+        document.getElementById('passagensQuoteChoiceFeedback').textContent = 'Nenhuma opcao de voo retornada para esta solicitacao.';
+      } else if (!selectedSolicitacaoIdaId) {
+        document.getElementById('passagensQuoteChoiceFeedback').textContent = 'Escolha uma opcao de ida.';
+      } else if (needsReturn && !selectedSolicitacaoVoltaId) {
+        document.getElementById('passagensQuoteChoiceFeedback').textContent = 'Agora escolha uma opcao de volta.';
+      } else {
+        document.getElementById('passagensQuoteChoiceFeedback').textContent = 'Opcao selecionada. Agora finalize a solicitacao.';
+      }
     }
 
     function openSolicitacaoChoiceModal(id) {
       const item = passagensSolicitacoes.find(entry => String(entry.id) === String(id));
       if (!item) return;
       choosingSolicitacaoId = item.id;
-      selectedSolicitacaoChoiceId = item.escolha?.id || '';
-      const choices = buildSolicitacaoChoices(item);
+      selectedSolicitacaoChoiceId = '';
+      selectedSolicitacaoIdaId = item.escolha?.idaSelecionada?.id || '';
+      selectedSolicitacaoVoltaId = item.escolha?.voltaSelecionada?.id || '';
+      const split = buildSolicitacaoFlightOptions(item);
       document.getElementById('passagensQuoteChoiceTitle').textContent = `${item.colaborador || 'Solicitacao'} | ${String(item.origem || '').toUpperCase()} - ${String(item.destino || '').toUpperCase()}`;
-      document.getElementById('passagensQuoteChoiceSubtitle').textContent = `${formatDate(item.dataIda) || '-'}${item.dataVolta ? ` ate ${formatDate(item.dataVolta)}` : ''}. Escolha uma opcao para finalizar e enviar para a tela de cotacoes realizadas.`;
-      document.getElementById('passagensQuoteChoiceFeedback').textContent = choices.length ? 'Clique em um card para selecionar.' : 'Nenhuma opcao de voo retornada para esta solicitacao.';
-      document.getElementById('passagensQuoteChoiceList').innerHTML = choices.length ? choices.map(renderSolicitacaoChoiceCard).join('') : `<div class="empty-state" style="grid-column:1 / -1"><b>Nenhuma opcao disponivel.</b>Confira se a companhia retornou voos ou tente cotar novamente.</div>`;
-      document.getElementById('finalizePassagensQuoteChoice').disabled = !selectedSolicitacaoChoiceId;
+      document.getElementById('passagensQuoteChoiceSubtitle').textContent = `${formatDate(item.dataIda) || '-'}${item.dataVolta ? ` ate ${formatDate(item.dataVolta)}` : ''}. Escolha a ida${item.dataVolta ? ' e a volta' : ''} para finalizar e enviar para a tela de cotacoes realizadas.`;
+      renderSolicitacaoSplitChoiceLists(item, split);
       openModalById('passagensQuoteChoiceModal');
     }
     window.openSolicitacaoChoiceModal = openSolicitacaoChoiceModal;
@@ -7981,13 +8138,15 @@ AMAURI BARROSO DE MOURA"></textarea>
     function closeSolicitacaoChoiceModal() {
       choosingSolicitacaoId = null;
       selectedSolicitacaoChoiceId = '';
+      selectedSolicitacaoIdaId = '';
+      selectedSolicitacaoVoltaId = '';
       closeModalById('passagensQuoteChoiceModal');
     }
 
     function finalizeSolicitacaoChoice() {
       const item = passagensSolicitacoes.find(entry => String(entry.id) === String(choosingSolicitacaoId));
-      if (!item || !selectedSolicitacaoChoiceId) return;
-      const choice = buildSolicitacaoChoices(item).find(entry => entry.id === selectedSolicitacaoChoiceId);
+      if (!item) return;
+      const choice = currentSolicitacaoChoice(item);
       if (!choice) return;
       choice.classificacaoPreco = classifySolicitacaoChoice(item, choice);
       item.escolha = choice;
@@ -8015,6 +8174,65 @@ AMAURI BARROSO DE MOURA"></textarea>
       renderPassagens();
     }
     window.deletePassagensSolicitacao = deletePassagensSolicitacao;
+
+    async function recoverSolicitacaoCotacoes(id) {
+      const item = passagensSolicitacoes.find(entry => String(entry.id) === String(id));
+      if (!item) return;
+      setSyncStatus('Restaurando cotacoes salvas no historico da API...');
+      try {
+        const payload = await cotacoesApiRequest('/api/cotacoes/historico');
+        const quotes = Array.isArray(payload.quotes) ? payload.quotes : [];
+        const wantedDate = normalizeDateValue(item.dataIda);
+        const wantedReturn = normalizeDateValue(item.dataVolta || '');
+        const wantedDestination = norm(item.destino || '');
+        const wantedOrigin = norm(item.origem || '');
+        const recovered = quotes
+          .filter(quote => normalizeDateValue(quote.dataIda || '') === wantedDate)
+          .filter(quote => normalizeDateValue(quote.dataVolta || '') === wantedReturn)
+          .filter(quote => {
+            const quoteDestination = norm(quote.destino || '');
+            const quoteOrigin = norm(quote.origem || '');
+            const sameDestination = quoteDestination.includes(wantedDestination) || wantedDestination.includes(quoteDestination);
+            const sameOrigin = quoteOrigin.includes(wantedOrigin) || wantedOrigin.includes(quoteOrigin) || ['ldb', 'mgf', 'gru', 'sao paulo', 'guarulhos'].some(token => quoteOrigin.includes(token));
+            return sameDestination && sameOrigin && Array.isArray(quote.detalhes) && quote.detalhes.length;
+          })
+          .slice(0, 12)
+          .map(quote => {
+            const quoteOrigin = quote.origem || item.origem;
+            const alternative = norm(quoteOrigin) !== norm(item.origem || '');
+            return {
+              ...normalizeBackendQuote(quote),
+              companhia: quote.companhia || 'AZUL',
+              origem: quoteOrigin,
+              destino: quote.destino || item.destino,
+              alternativa: alternative,
+              rotaLabel: alternative ? `Rota alternativa via ${quoteOrigin}` : 'Rota solicitada'
+            };
+          });
+        if (!recovered.length) {
+          item.status = 'Sem cotacoes salvas para restaurar';
+          saveLocalCache();
+          persistPassagensSolicitacaoRemote(item);
+          renderPassagens();
+          setSyncStatus('Nao encontrei cotacoes salvas para esse trecho/data.');
+          return;
+        }
+        item.cotacoes = recovered;
+        item.status = 'Aguardando escolha';
+        saveLocalCache();
+        persistPassagensSolicitacaoRemote(item);
+        renderPassagens();
+        openSolicitacaoChoiceModal(item.id);
+        setSyncStatus(`${recovered.length} cotacao(oes) restaurada(s) do historico da API.`);
+      } catch (error) {
+        console.error(error);
+        item.status = 'Erro ao restaurar cotacao';
+        saveLocalCache();
+        renderPassagens();
+        setSyncStatus(error && error.message ? error.message : 'Nao foi possivel restaurar a cotacao.');
+      }
+    }
+    window.recoverSolicitacaoCotacoes = recoverSolicitacaoCotacoes;
 
     function saveCotacaoAdminFields(id) {
       const item = passagensSolicitacoes.find(entry => String(entry.id) === String(id));
@@ -8124,6 +8342,8 @@ AMAURI BARROSO DE MOURA"></textarea>
           <td class="actioncell">
             <div style="display:flex;justify-content:flex-end;gap:8px">
               ${buildSolicitacaoChoices(item).length && !item.escolha ? `<button class="rowact" title="Escolher voo" aria-label="Escolher voo" onclick="openSolicitacaoChoiceModal(${item.id})">${icon('badgeCheck')}</button>` : ''}
+              ${solicitacaoErrorDetails(item).length ? `<button class="inline-btn" type="button" onclick="alert(fullSolicitacaoErrorText(${item.id}))">Ver erro</button>` : ''}
+              ${!item.escolha ? `<button class="inline-btn" type="button" onclick="recoverSolicitacaoCotacoes(${item.id})">Restaurar</button>` : ''}
               <button class="rowact" title="Excluir solicitacao" aria-label="Excluir solicitacao" onclick="deletePassagensSolicitacao(${item.id})">${icon('trash')}</button>
             </div>
           </td>
@@ -8196,6 +8416,10 @@ AMAURI BARROSO DE MOURA"></textarea>
       const quotes = [];
       for (const company of companies) {
         for (const route of routeVariants) {
+          solicitacao.status = `Cotando ${company} ${route.origem} - ${route.destino}`;
+          saveLocalCache();
+          persistPassagensSolicitacaoRemote(solicitacao);
+          renderPassagens();
           try {
             const payload = await cotacoesApiRequest('/api/cotacoes/teste', {
               method: 'POST',
@@ -8220,6 +8444,11 @@ AMAURI BARROSO DE MOURA"></textarea>
               quote.alternativa = route.alternativa;
               quote.rotaLabel = route.rotaLabel;
               quotes.push(quote);
+              solicitacao.cotacoes = quotes;
+              solicitacao.status = 'Cotacao parcial recebida';
+              saveLocalCache();
+              persistPassagensSolicitacaoRemote(solicitacao);
+              renderPassagens();
             }
           } catch (error) {
             quotes.push({
@@ -8238,6 +8467,11 @@ AMAURI BARROSO DE MOURA"></textarea>
               rotaLabel: route.rotaLabel,
               status: `Erro API ${company}: ${error && error.message ? error.message : 'Falha na cotacao'}`
             });
+            solicitacao.cotacoes = quotes;
+            solicitacao.status = buildSolicitacaoChoices(solicitacao).length ? 'Cotacao parcial recebida' : 'Erro parcial na cotacao';
+            saveLocalCache();
+            persistPassagensSolicitacaoRemote(solicitacao);
+            renderPassagens();
           }
         }
       }
@@ -9148,12 +9382,11 @@ AMAURI BARROSO DE MOURA"></textarea>
     document.getElementById('passagensQuoteChoiceList').addEventListener('click', event => {
       const card = event.target.closest('[data-choice-id]');
       if (!card) return;
-      selectedSolicitacaoChoiceId = card.dataset.choiceId || '';
+      const kind = card.dataset.choiceKind || 'ida';
+      if (kind === 'volta') selectedSolicitacaoVoltaId = card.dataset.choiceId || '';
+      else selectedSolicitacaoIdaId = card.dataset.choiceId || '';
       const item = passagensSolicitacoes.find(entry => String(entry.id) === String(choosingSolicitacaoId));
-      const choices = item ? buildSolicitacaoChoices(item) : [];
-      document.getElementById('passagensQuoteChoiceList').innerHTML = choices.map(renderSolicitacaoChoiceCard).join('');
-      document.getElementById('finalizePassagensQuoteChoice').disabled = !selectedSolicitacaoChoiceId;
-      document.getElementById('passagensQuoteChoiceFeedback').textContent = 'Opcao selecionada. Agora finalize a solicitacao.';
+      if (item) renderSolicitacaoSplitChoiceLists(item);
     });
     document.getElementById('cancelCreditoEdit').addEventListener('click', resetCreditoForm);
     document.getElementById('togglePBars').addEventListener('click', () => toggleOverviewPanel('bars'));
