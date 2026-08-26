@@ -1,0 +1,28 @@
+<div id="panel-kpi" class="tab-panel" style="display:none">
+  <div class="hint" style="margin-bottom:12px">Só entram aqui as compras em que o valor pago ficou <b>menor</b> que o valor aprovado - isso é economia de verdade.</div>
+  <div class="controls" style="margin-bottom:12px">
+    <label style="font-size:12.5px;font-weight:600;color:var(--body);display:flex;align-items:center;gap:8px">
+      Período <input type="month" id="kpiMes" style="font-family:inherit;font-size:13px;border:1px solid var(--line);border-radius:9px;padding:6px 10px">
+    </label>
+    <button class="ghost" id="kpiMesTodos" type="button">Todos os períodos</button>
+  </div>
+  <div class="kpis fin" id="kpiFin" style="margin-bottom:16px"></div>
+  <div class="two">
+    <div class="card chart-card">
+      <div class="chead"><span class="ti2">Evolução diária da economia</span></div>
+      <div class="hint" style="margin-bottom:10px"><span style="color:#98a1b0;font-weight:700">●</span> Valor aprovado &nbsp;&nbsp; <span style="color:var(--blue);font-weight:700">●</span> Valor pago</div>
+      <div id="kpiEvolucao"></div>
+    </div>
+    <div class="card chart-card">
+      <div class="chead"><span class="ti2">Leitura executiva</span></div>
+      <div id="kpiLeitura" class="hint" style="font-size:13.5px;line-height:1.65;color:var(--body)"></div>
+    </div>
+  </div>
+  <div class="card chart-card" style="margin-top:16px">
+    <div class="chead"><span class="ti2">Economias registradas no mês</span><span class="lbl" id="kpiEconCount"></span></div>
+    <div style="overflow-x:auto"><table class="dtable" id="tabelaKpiEconomias"><thead><tr>
+      <th>Data compra</th><th>Colaborador</th><th>Obra</th><th>Modalidade</th><th>Aprovado</th><th>Pago</th><th>Economia</th><th>Ações</th>
+    </tr></thead><tbody></tbody></table></div>
+  </div>
+</div>
+

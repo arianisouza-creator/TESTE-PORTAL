@@ -1,0 +1,422 @@
+const MODALIDADE_LABELS = {Aereo:'plane', Rodoviario:'bus'};
+async function fetchPassagensJoined(incluirExcluidas){
+  const [rows, complements] = await Promise.all([
+    apiFetch('/rest/v1/passagens_rows'),
+    apiFetch('/rest/v1/passagens_complements'),
+  ]);
+  const compMap = {};
+  complements.forEach(c => { compMap[c.key] = c.data; });
+  const joined = rows.map(r => {
+    const complement = compMap[r.key] || compMap['manual:'+r.key] || {};
+    // edicoes feitas pelo lapis ficam em complement.overrides e sempre
+    // ganham do dado bruto - assim uma sincronizacao nova da API nunca
+    // apaga o que foi editado a mao aqui dentro.
+    return {
+      ...r.item,
+      ...(complement.overrides || {}),
+      _key: r.key,
+      _tabela: r.tabela,
+      complement,
+    };
+  });
+  return incluirExcluidas ? joined : joined.filter(r => !r.complement.excluida);
+}
+
+async function salvarEdicaoPassagem(key, campos){
+  const [complements] = await Promise.all([apiFetch(`/rest/v1/passagens_complements?key=eq.${encodeURIComponent(key)}`)]);
+  const atual = (complements[0] && complements[0].data) || {};
+  const data = {...atual, overrides: {...(atual.overrides||{}), ...campos}};
+  await apiFetch('/rest/v1/passagens_complements', {method:'POST', body:JSON.stringify({key, data})});
+}
+
+async function excluirPassagem(key, motivo){
+  const complements = await apiFetch(`/rest/v1/passagens_complements?key=eq.${encodeURIComponent(key)}`);
+  const atual = (complements[0] && complements[0].data) || {};
+  const data = {...atual, excluida:true, motivoExclusao:motivo||'', dataExclusao:new Date().toISOString()};
+  await apiFetch('/rest/v1/passagens_complements', {method:'POST', body:JSON.stringify({key, data})});
+}
+
+async function toggleFinalizadaPassagem(modalidade, key, pagoConfirmado){
+  if(pagoConfirmado){ await finalizarPassagens([key]); } else { await reabrirPassagens([key]); }
+  carregarAba(modalidade);
+}
+
+// Cache do status de pedidos (numero_pedido -> ultima consulta feita pelo botao
+// "Sincronizar API de Pedidos") - carregado 1x e reaproveitado nas tabelas de
+// Aereo/Rodoviario, pra mostrar o status ja do lado do numero sem precisar
+// clicar linha a linha. force=true recarrega mesmo se ja tiver sido carregado.
+function dataCompraOf(r){ return r.data_compra || r.data_prevista || r.data_ida || ''; }
+// Valor aprovado manual (editado no portal) tem prioridade; sem isso, usa o
+// que a propria API do sistema atual de passagens ja trouxe.
+function valorAprovadoOf(r){ return (r.complement && r.complement.valorAprovado) || r.valor_aprovado || ''; }
+
+const PASSAGEM_STATE = {
+  Aereo: {prefix:'aer', sub:'pendente', selecionadas:new Set(), expandidas:new Set(), editando:null},
+  Rodoviario: {prefix:'rod', sub:'pendente', selecionadas:new Set(), expandidas:new Set(), editando:null},
+};
+
+function passagemPanelHtml(modalidade){
+  const p = PASSAGEM_STATE[modalidade].prefix;
+  const nomeMod = modalidade==='Aereo' ? 'Aéreas' : 'Rodoviárias';
+  return `
+  <div class="sec">Painel <span class="ct">visão geral - ${nomeMod}</span></div>
+  <div class="mods" id="${p}DashCards" style="margin-bottom:16px"></div>
+  <div class="two" style="margin-bottom:16px">
+    <div class="card pad">
+      <div class="chead"><span class="ti2">Sistema atual de passagens</span><span class="lbl" id="${p}StatusSyncApi">-</span></div>
+      <div class="hint" style="margin-bottom:10px">Traz pra cá as viagens já registradas no sistema de hoje (compradas) - não mexe no que foi cadastrado manualmente aqui dentro. Sincroniza sozinho a cada 30 minutos; use o botão só se precisar atualizar na hora.</div>
+      <div id="${p}SyncApiAviso"></div>
+      <div class="formactions" style="margin-top:0"><button class="primary" id="${p}BtnSyncApi" type="button">Sincronizar agora</button></div>
+    </div>
+    <div class="card pad">
+      <div class="chead"><span class="ti2">API de Pedidos</span><span class="lbl" id="${p}StatusSyncPedidos">-</span></div>
+      <div class="hint" style="margin-bottom:10px">Consulta o status (Em Aberto, Finalizado etc) de todos os pedidos já cadastrados. Sincroniza sozinho a cada 30 minutos; use o botão só se precisar atualizar na hora.</div>
+      <div id="${p}SyncPedidosAviso"></div>
+      <div class="formactions" style="margin-top:0"><button class="primary" id="${p}BtnSyncPedidos" type="button">Sincronizar API de Pedidos</button></div>
+    </div>
+  </div>
+  <div class="card chart-card" style="margin-bottom:16px">
+    <div class="chead"><span class="ti2">Top 5 colaboradores por gasto</span></div>
+    <div id="${p}DashHbarsColab"></div>
+  </div>
+  <div class="controls">
+    <div class="seg" id="${p}Sub">
+      <button data-sub="pendente" class="on">Pendentes</button>
+      <button data-sub="finalizado">Finalizados</button>
+    </div>
+    <div class="toolgroup">
+      <button class="ghost" id="${p}FinalizarBtn">Finalizar selecionadas</button>
+      <button class="ghost" id="${p}ReabrirBtn">Voltar selecionadas p/ pendentes</button>
+      <button class="primary" id="${p}GerarPdf">${icon('download')} Gerar PDF</button>
+    </div>
+  </div>
+  <div class="filterbar">
+    <div class="fhead">${icon('filter')} Filtros</div>
+    <div class="frow">
+      <label class="ffield"><span>Colaborador</span><input type="text" id="${p}FColab" placeholder="Buscar..."></label>
+      <label class="ffield"><span>Obra</span><input type="text" id="${p}FObra" placeholder="Buscar..."></label>
+      <label class="ffield small"><span>Tipo</span><input type="text" id="${p}FTipo" placeholder="Buscar..."></label>
+      <label class="ffield small"><span>Função</span><input type="text" id="${p}FFuncao" placeholder="Buscar..."></label>
+      <label class="ffield small"><span>Localizador</span><input type="text" id="${p}FLocalizador" placeholder="Buscar..."></label>
+      <label class="ffield small"><span>Companhia</span><input type="text" id="${p}FCompanhia" placeholder="Buscar..."></label>
+      <label class="ffield small"><span>Pedido</span><input type="text" id="${p}FPedido" placeholder="Buscar..."></label>
+      <label class="ffield small"><span>Compra de</span><input type="date" id="${p}FDataIni"></label>
+      <label class="ffield small"><span>Compra até</span><input type="date" id="${p}FDataFim"></label>
+      <button class="fclear" type="button" id="${p}Limpar">Limpar filtros</button>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px;overflow-x:auto">
+    <table class="dtable" id="${p}Tabela"><thead><tr>
+      <th><input type="checkbox" id="${p}SelAll"></th>
+      <th>Colaborador</th><th>Função</th><th>Tipo</th><th>Obra</th><th>Data compra</th>
+      <th>Companhia</th><th>Localizador</th><th>Valor pago</th><th>Valor aprovado</th><th>Pedido</th><th>Ações</th>
+    </tr></thead><tbody></tbody></table>
+  </div>`;
+}
+
+function passagemDetailHtml(r, modalidade){
+  const c = r.complement || {};
+  const editando = PASSAGEM_STATE[modalidade].editando === r._key;
+  const campo = (label, name, value, type) => editando
+    ? `<label>${label}<input type="${type||'text'}" name="${name}" value="${(value||'').toString().replace(/"/g,'&quot;')}"></label>`
+    : `<div class="ditem"><span class="lbl">${label}</span><span>${value||'-'}</span></div>`;
+  const camposHtml = [
+    campo('Tipo de viagem', 'tipo_viagem', r.tipo_viagem || 'Ida'),
+    campo('Companhia', 'companhia', r.companhia),
+    campo('Origem', 'origem', r.origem),
+    campo('Destino', 'destino', r.destino),
+    campo('Centro de custo', 'centro_custo', r.centro_custo || c.centroCusto),
+    campo('Data de ida', 'data_ida', r.data_ida, 'date'),
+    campo('Data de volta', 'data_ida_volta', r.data_ida_volta, 'date'),
+    campo('Horário de ida', 'horario_ida', r.horario_ida, 'time'),
+    campo('Horário de volta', 'horario_volta', r.horario_volta, 'time'),
+    campo('Pedido', 'pedido', r.pedido),
+    campo('Localizador', 'localizador', r.localizador),
+    campo('Valor pago', 'valor_pago', r.valor_pago),
+    campo('Valor aprovado', 'valorAprovado', valorAprovadoOf(r)),
+    campo('Observação', 'observacao', r.observacao),
+  ].join('');
+  const statusPedidoHtml = (!editando && r.pedido) ? `
+    <div class="ditem" style="grid-column:1/-1">
+      <span class="lbl">Status do pedido (API)</span>
+      <span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <button class="ghost" type="button" style="padding:4px 10px;font-size:12px" onclick="consultarStatusPedido('${r._key}','${(r.pedido||'').toString().replace(/'/g,"\\'")}')">Consultar status</button>
+        <span id="statusPedidoResultado-${r._key}" class="hint"></span>
+      </span>
+    </div>` : '';
+  const acoes = editando
+    ? `<div class="formactions" style="margin-top:10px">
+        <button class="ghost" type="button" onclick="cancelarEdicaoPassagem('${modalidade}')">Cancelar</button>
+        <button class="primary" type="button" onclick="salvarFormEdicaoPassagem('${modalidade}','${r._key}')">Salvar</button>
+      </div>`
+    : `<div class="formactions" style="margin-top:10px">
+        <button class="ghost" type="button" onclick="confirmarExcluirPassagem('${modalidade}','${r._key}')">${icon('trash')} Excluir</button>
+        <button class="primary" type="button" onclick="iniciarEdicaoPassagem('${modalidade}','${r._key}')">${icon('edit')} Editar</button>
+      </div>`;
+  return `<div class="detail-box"><div class="detail-grid-passagem" id="detailForm-${r._key}">${camposHtml}${statusPedidoHtml}</div>${acoes}</div>`;
+}
+
+async function consultarStatusPedido(key, numeroPedido){
+  const el = document.getElementById('statusPedidoResultado-'+key);
+  if(!el) return;
+  el.textContent = 'Consultando...';
+  try{
+    const resp = await apiFetch('/api/pedidos/status?numero_pedido='+encodeURIComponent(numeroPedido));
+    if(!resp.encontrado){
+      el.innerHTML = `<span style="color:var(--red)">${resp.erro||'Não encontrado.'}</span>`;
+      return;
+    }
+    el.innerHTML = `<span class="badge-status ${statusPedidoClasse(resp.status_pedido)}">${resp.status_pedido||'-'}</span>` +
+      (resp.fornecedor ? ` <span class="hint">${resp.fornecedor}</span>` : '');
+  }catch(err){
+    el.innerHTML = `<span style="color:var(--red)">Erro: ${err.message}</span>`;
+  }
+}
+
+function renderMiniDashboard(modalidade, rowsModalidade){
+  const p = PASSAGEM_STATE[modalidade].prefix;
+  const totalPago = rowsModalidade.reduce((s,r)=>s+parseMoneyBR(r.valor_pago),0);
+  const totalEconomia = rowsModalidade.reduce((s,r)=>{
+    const aprovado = parseMoneyBR(valorAprovadoOf(r)), pago = parseMoneyBR(r.valor_pago);
+    return s + ((aprovado>0 && pago>0 && pago<aprovado) ? (aprovado-pago) : 0);
+  }, 0);
+  const cardsEl = document.getElementById(p+'DashCards');
+  if(cardsEl) cardsEl.innerHTML = `
+    <div class="card mod"><div class="mtop"><span class="lbl">Total de registros</span><span class="micon blue">${icon('inbox')}</span></div><h3>${rowsModalidade.length}</h3></div>
+    <div class="card mod"><div class="mtop"><span class="lbl">Valor pago total</span><span class="micon green">${icon('creditCard')}</span></div><h3>${fmtMoney(totalPago)}</h3></div>
+    <div class="card mod"><div class="mtop"><span class="lbl">Economia total</span><span class="micon amber">${icon('chart')}</span></div><h3>${fmtMoney(totalEconomia)}</h3></div>`;
+  const porColabValor = {};
+  rowsModalidade.forEach(r => { const nome = r.nome_colab || 'Sem nome'; porColabValor[nome] = (porColabValor[nome]||0) + parseMoneyBR(r.valor_pago); });
+  const topColab = Object.entries(porColabValor).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const hbarsEl = document.getElementById(p+'DashHbarsColab');
+  if(hbarsEl){
+    if(topColab.length){
+      hbars(p+'DashHbarsColab', topColab.map(([nome,v]) => ({nm:nome, pct:v, txt:fmtMoney(v), color:'var(--blue)'})),
+        {max: Math.max(1, ...topColab.map(([,v])=>v))});
+    } else {
+      hbarsEl.innerHTML = '<div class="empty">Sem valores pagos ainda.</div>';
+    }
+  }
+}
+
+async function carregarAba(modalidade){
+  await carregarPedidosStatusCache();
+  const st = PASSAGEM_STATE[modalidade];
+  const p = st.prefix;
+  const panel = document.getElementById('panel-'+(modalidade==='Aereo'?'aereo':'rodoviario'));
+  if(!panel.dataset.montado){
+    panel.innerHTML = passagemPanelHtml(modalidade);
+    panel.dataset.montado = '1';
+    document.getElementById(p+'Sub').addEventListener('click', e=>{
+      const btn = e.target.closest('button[data-sub]'); if(!btn) return;
+      st.sub = btn.dataset.sub;
+      document.querySelectorAll('#'+p+'Sub button').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+      carregarAba(modalidade);
+    });
+    ['FColab','FObra','FTipo','FFuncao','FLocalizador','FCompanhia','FPedido'].forEach(id=>{
+      document.getElementById(p+id).addEventListener('input', ()=>carregarAba(modalidade));
+    });
+    ['FDataIni','FDataFim'].forEach(id=>{
+      document.getElementById(p+id).addEventListener('change', ()=>carregarAba(modalidade));
+    });
+    document.getElementById(p+'Limpar').addEventListener('click', ()=>{
+      ['FColab','FObra','FTipo','FFuncao','FLocalizador','FCompanhia','FPedido','FDataIni','FDataFim'].forEach(id=>{
+        document.getElementById(p+id).value='';
+      });
+      carregarAba(modalidade);
+    });
+    document.getElementById(p+'FinalizarBtn').addEventListener('click', async ()=>{
+      if(!st.selecionadas.size){ alert('Selecione ao menos uma passagem.'); return; }
+      await finalizarPassagens([...st.selecionadas]);
+      st.selecionadas.clear();
+      carregarAba(modalidade);
+    });
+    // Volta manualmente pra Pendentes - util pra corrigir passagens que
+    // ficaram finalizadas de um fechamento antigo (de antes da fatura saber
+    // reabrir sozinha ao excluir do historico), ou qualquer finalizacao
+    // feita sem querer.
+    document.getElementById(p+'ReabrirBtn').addEventListener('click', async ()=>{
+      if(!st.selecionadas.size){ alert('Selecione ao menos uma passagem.'); return; }
+      await reabrirPassagens([...st.selecionadas]);
+      st.selecionadas.clear();
+      carregarAba(modalidade);
+    });
+    document.getElementById(p+'GerarPdf').addEventListener('click', ()=>gerarPdfPassagens(modalidade));
+    document.getElementById(p+'SelAll').addEventListener('change', (e)=>{
+      document.querySelectorAll('#'+p+'Tabela tbody input[type=checkbox][data-key]').forEach(cb=>{
+        cb.checked = e.target.checked;
+        if(e.target.checked) st.selecionadas.add(cb.dataset.key); else st.selecionadas.delete(cb.dataset.key);
+      });
+    });
+    document.getElementById(p+'BtnSyncApi').addEventListener('click', async ()=>{
+      const btn = document.getElementById(p+'BtnSyncApi');
+      const aviso = document.getElementById(p+'SyncApiAviso');
+      btn.disabled = true; btn.textContent = 'Sincronizando...';
+      aviso.innerHTML = '';
+      try{
+        const r = await apiFetch('/api/passagens-externas/sincronizar', {method:'POST', body:JSON.stringify({})});
+        aviso.innerHTML = `<div class="okmsg">Pronto! ${r.novos} novo(s), ${r.atualizados} atualizado(s)${r.ignorados?`, ${r.ignorados} ignorado(s) (lançamentos manuais)`:''}.</div>`;
+        carregarAba(modalidade);
+      }catch(err){
+        aviso.innerHTML = `<div class="errmsg">Não consegui sincronizar: ${err.message}</div>`;
+      }finally{
+        btn.disabled = false; btn.textContent = 'Sincronizar agora';
+      }
+    });
+    document.getElementById(p+'BtnSyncPedidos').addEventListener('click', async ()=>{
+      const btn = document.getElementById(p+'BtnSyncPedidos');
+      const aviso = document.getElementById(p+'SyncPedidosAviso');
+      btn.disabled = true; btn.textContent = 'Sincronizando...';
+      aviso.innerHTML = '';
+      try{
+        const r = await apiFetch('/api/pedidos/sincronizar', {method:'POST', body:JSON.stringify({})});
+        aviso.innerHTML = `<div class="okmsg">Pronto! Status atualizado para ${r.encontrados} de ${r.total} pedido(s)${r.nao_encontrados.length?`, ${r.nao_encontrados.length} não encontrado(s) na API`:''}.</div>`;
+        await carregarPedidosStatusCache(true);
+        carregarAba(modalidade);
+      }catch(err){
+        aviso.innerHTML = `<div class="errmsg">Não consegui sincronizar: ${err.message}</div>`;
+      }finally{
+        btn.disabled = false; btn.textContent = 'Sincronizar API de Pedidos';
+      }
+    });
+    checarMiniStatusSync(p);
+  }
+
+  let rowsTodos = await fetchPassagensJoined();
+  rowsTodos = rowsTodos.filter(r => modalidade==='Aereo' ? (parseMoneyBR(r.valor_aereo)>0 || r.complement.modalidade==='Aereo')
+                                                  : (parseMoneyBR(r.valor_rodoviario)>0 || r.complement.modalidade==='Rodoviario'));
+  renderMiniDashboard(modalidade, rowsTodos);
+  let rows = rowsTodos.filter(r => st.sub==='finalizado' ? !!r.complement.pagoConfirmado : !r.complement.pagoConfirmado);
+
+  const fVal = id => (document.getElementById(p+id)?.value || '').trim().toLowerCase();
+  const norm = s => (s||'').toString().toLowerCase();
+  const fColab = fVal('FColab'), fObra = fVal('FObra'), fTipo = fVal('FTipo'), fFuncao = fVal('FFuncao'),
+        fLoc = fVal('FLocalizador'), fComp = fVal('FCompanhia'), fPedido = fVal('FPedido'),
+        fIni = document.getElementById(p+'FDataIni')?.value, fFim = document.getElementById(p+'FDataFim')?.value;
+  rows = rows.filter(r => {
+    if(fColab && !norm(r.nome_colab).includes(fColab)) return false;
+    if(fObra && !norm(r.nome_obra).includes(fObra)) return false;
+    if(fTipo && !norm(r.tipo).includes(fTipo)) return false;
+    if(fFuncao && !norm(r.nome_funcao).includes(fFuncao)) return false;
+    if(fLoc && !norm(r.localizador).includes(fLoc)) return false;
+    if(fComp && !norm(r.companhia).includes(fComp)) return false;
+    if(fPedido && !norm(r.pedido).includes(fPedido)) return false;
+    const dc = dataCompraOf(r);
+    if(fIni && (!dc || dc < fIni)) return false;
+    if(fFim && (!dc || dc > fFim)) return false;
+    return true;
+  });
+
+  const tbody = document.querySelector('#'+p+'Tabela tbody');
+  tbody.innerHTML = rows.map(r => {
+    const aberto = st.expandidas.has(r._key);
+    return `
+    <tr class="row-main-click" onclick="toggleExpandPassagem('${modalidade}','${r._key}')">
+      <td onclick="event.stopPropagation()"><input type="checkbox" data-key="${r._key}" ${st.selecionadas.has(r._key)?'checked':''}
+        onchange="this.checked?PASSAGEM_STATE['${modalidade}'].selecionadas.add('${r._key}'):PASSAGEM_STATE['${modalidade}'].selecionadas.delete('${r._key}')"></td>
+      <td>${r.nome_colab||'-'}</td><td>${r.nome_funcao||'-'}</td><td>${r.tipo||'-'}</td><td>${r.nome_obra||'-'}</td>
+      <td>${fmtDate(dataCompraOf(r))}</td><td>${r.companhia||'-'}</td><td>${r.localizador||'-'}</td>
+      <td>${r.valor_pago?fmtMoney(r.valor_pago):'-'}</td>
+      <td>${valorAprovadoOf(r)?fmtMoney(valorAprovadoOf(r)):'-'}</td>
+      <td>${pedidoCellHtml(r.pedido)}</td>
+      <td onclick="event.stopPropagation()">
+        <button class="rowact" title="${r.complement.pagoConfirmado?'Voltar para pendentes':'Marcar como finalizada'}" onclick="toggleFinalizadaPassagem('${modalidade}','${r._key}',${!r.complement.pagoConfirmado})">${icon(r.complement.pagoConfirmado?'arrowUp':'checkCircle')}</button>
+        <button class="rowact" title="Editar" onclick="iniciarEdicaoPassagem('${modalidade}','${r._key}')">${icon('edit')}</button>
+        <button class="rowact" title="Excluir" onclick="confirmarExcluirPassagem('${modalidade}','${r._key}')">${icon('trash')}</button>
+      </td>
+    </tr>
+    ${aberto ? `<tr class="detail-row"><td colspan="12">${passagemDetailHtml(r, modalidade)}</td></tr>` : ''}`;
+  }).join('') || `<tr><td colspan="12" class="empty">Nenhum registro ${st.sub==='finalizado'?'finalizado':'pendente'} encontrado.</td></tr>`;
+
+  window['__rows_'+p] = rows; // cache pro Gerar PDF usar o mesmo filtro atual
+}
+
+function toggleExpandPassagem(modalidade, key){
+  const st = PASSAGEM_STATE[modalidade];
+  if(st.expandidas.has(key)) st.expandidas.delete(key); else st.expandidas.add(key);
+  carregarAba(modalidade);
+}
+function iniciarEdicaoPassagem(modalidade, key){
+  const st = PASSAGEM_STATE[modalidade];
+  st.editando = key;
+  st.expandidas.add(key);
+  carregarAba(modalidade);
+}
+function cancelarEdicaoPassagem(modalidade){
+  PASSAGEM_STATE[modalidade].editando = null;
+  carregarAba(modalidade);
+}
+async function salvarFormEdicaoPassagem(modalidade, key){
+  const form = document.getElementById('detailForm-'+key);
+  const campos = {};
+  form.querySelectorAll('input, textarea').forEach(inp => { campos[inp.name] = inp.value; });
+  const valorAprovado = campos.valorAprovado; delete campos.valorAprovado;
+  await salvarEdicaoPassagem(key, campos);
+  if(valorAprovado !== undefined){
+    const complements = await apiFetch(`/rest/v1/passagens_complements?key=eq.${encodeURIComponent(key)}`);
+    const atual = (complements[0] && complements[0].data) || {};
+    await apiFetch('/rest/v1/passagens_complements', {method:'POST', body:JSON.stringify({key, data:{...atual, valorAprovado}})});
+  }
+  PASSAGEM_STATE[modalidade].editando = null;
+  carregarAba(modalidade);
+}
+async function confirmarExcluirPassagem(modalidade, key){
+  if(!confirm('Excluir esta passagem? Ela some da lista, mas fica registrada (não volta numa próxima sincronização).')) return;
+  await excluirPassagem(key, '');
+  carregarAba(modalidade);
+}
+
+function gerarPdfPassagens(modalidade){
+  const p = PASSAGEM_STATE[modalidade].prefix;
+  const rows = window['__rows_'+p] || [];
+  const nomeMod = modalidade==='Aereo' ? 'Aereas' : 'Rodoviarias';
+  const agora = new Date();
+  const totalGasto = rows.reduce((s,r)=>s+parseMoneyBR(r.valor_pago),0);
+  const totalAprovado = rows.reduce((s,r)=>s+parseMoneyBR(valorAprovadoOf(r)),0);
+  const economia = Math.max(0, totalAprovado-totalGasto);
+  const porObra = {};
+  rows.forEach(r=>{ const obra=r.nome_obra||'Sem obra'; porObra[obra]=(porObra[obra]||0)+parseMoneyBR(r.valor_pago); });
+  const obraLinhas = Object.entries(porObra).sort((a,b)=>b[1]-a[1]).map(([obra,total])=>`
+    <tr><td>${obra}</td><td>${fmtMoney(total)}</td><td>${totalGasto>0?((total/totalGasto)*100).toFixed(2):'0,00'}%</td></tr>`).join('');
+  const detalheLinhas = rows.map(r=>`
+    <tr><td>${r.nome_colab||'-'}</td><td>${r.nome_obra||'-'}</td><td>${r.nome_funcao||'-'}</td><td>${r.tipo||'-'}</td>
+    <td>${fmtDate(dataCompraOf(r))}</td><td>${fmtDate(r.data_ida)}</td><td>${fmtDate(r.data_ida_volta)}</td>
+    <td>${r.origem||'-'}</td><td>${r.destino||'-'}</td><td>${r.companhia||'-'}</td><td>${r.localizador||'-'}</td>
+    <td>${r.pedido||'-'}</td><td>${valorAprovadoOf(r)?fmtMoney(valorAprovadoOf(r)):'-'}</td>
+    <td>${r.valor_pago?fmtMoney(r.valor_pago):'-'}</td><td>${r.observacao||'-'}</td></tr>`).join('');
+  const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatorio de Passagens ${nomeMod}</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:24px;color:#192231}
+    h1{font-size:20px;margin-bottom:4px}
+    .sub{color:#666;font-size:12px;margin-bottom:18px}
+    .cards{display:flex;gap:14px;margin-bottom:20px}
+    .card{border:1px solid #ddd;border-radius:8px;padding:10px 14px;flex:1}
+    .card .lbl{font-size:10px;text-transform:uppercase;color:#888}
+    .card .v{font-size:16px;font-weight:700}
+    table{width:100%;border-collapse:collapse;margin-bottom:22px;font-size:11px}
+    th,td{border:1px solid #ddd;padding:5px 7px;text-align:left}
+    th{background:#f4f6fa}
+    h2{font-size:14px;margin:18px 0 8px}
+    @media print{body{margin:14px}.card{break-inside:avoid}tr{break-inside:avoid}}
+  </style></head><body>
+  <h1>Relatorio de Passagens ${nomeMod} - ${String(agora.getMonth()+1).padStart(2,'0')}/${agora.getFullYear()}</h1>
+  <div class="sub">Gerado em ${agora.toLocaleString('pt-BR')}</div>
+  <div class="cards">
+    <div class="card"><div class="lbl">Registros</div><div class="v">${rows.length}</div></div>
+    <div class="card"><div class="lbl">Total gasto</div><div class="v">${fmtMoney(totalGasto)}</div></div>
+    <div class="card"><div class="lbl">Economia</div><div class="v">${fmtMoney(economia)}</div></div>
+  </div>
+  <h2>Resumo por obra</h2>
+  <table><thead><tr><th>Obra</th><th>Total gasto</th><th>% do total</th></tr></thead><tbody>${obraLinhas||'<tr><td colspan="3">Sem dados.</td></tr>'}</tbody></table>
+  <h2>Detalhamento completo</h2>
+  <table><thead><tr><th>Colaborador</th><th>Obra</th><th>Função</th><th>Tipo</th><th>Compra</th><th>Ida</th><th>Volta</th>
+    <th>Origem</th><th>Destino</th><th>Companhia</th><th>Localizador</th><th>Pedido</th><th>Valor aprovado</th><th>Valor pago</th><th>Observação</th>
+  </tr></thead><tbody>${detalheLinhas||'<tr><td colspan="15">Sem dados.</td></tr>'}</tbody></table>
+  </body></html>`;
+  const w = window.open('', '_blank', 'width=1400,height=900');
+  if(!w){ alert('Não foi possível abrir a janela do relatório - seu navegador pode ter bloqueado o pop-up.'); return; }
+  w.document.open(); w.document.write(html); w.document.close(); w.focus();
+  setTimeout(()=>w.print(), 400);
+}
+

@@ -1,0 +1,8 @@
+// abre a aba certa ao carregar (link direto ou refresh com #hash)
+const ADMIN_TABS = ['solicitacoes','aereo','rodoviario','hospedagem','carros','cadastro','creditos','kpi','fechamento-cartao','config-cotacao'];
+const initialTab = (window.location.hash||'').slice(1);
+if(!IS_ADMIN){
+  showTab(PUBLIC_TABS.includes(initialTab) ? initialTab : 'inicio');
+} else {
+  showTab(ADMIN_TABS.includes(initialTab) || PUBLIC_TABS.includes(initialTab) ? initialTab : 'solicitacoes');
+}

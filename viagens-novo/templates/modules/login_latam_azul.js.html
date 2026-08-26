@@ -1,0 +1,42 @@
+const COTACOES_API_BASE = 'http://127.0.0.1:8001';
+async function loadConfigCotacao(){
+  const aviso = document.getElementById('configCotacaoAviso');
+  aviso.innerHTML = '';
+  try{
+    const resp = await fetch(`${COTACOES_API_BASE}/api/cotacoes/config`);
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const data = await resp.json();
+    const cfg = data.config || {};
+    const latam = cfg.LATAM || {}, azul = cfg.AZUL || {};
+    document.getElementById('statusLatam').textContent = latam.usuario ? `Configurado (${latam.usuario})` : 'Sem login salvo';
+    document.getElementById('statusAzul').textContent = azul.usuario ? `Configurado (${azul.usuario})` : 'Sem login salvo';
+  }catch(err){
+    aviso.innerHTML = `<div class="errmsg">Não consegui falar com o robô de cotação em ${COTACOES_API_BASE}. Confirma que o terminal 1 (uvicorn cotacoes_api) está rodando na sua máquina.</div>`;
+  }
+}
+document.querySelectorAll('#panel-config-cotacao form[data-cia]').forEach(form=>{
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const cia = form.dataset.cia;
+    const fd = Object.fromEntries(new FormData(form).entries());
+    const btn = form.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    const aviso = document.getElementById('configCotacaoAviso');
+    try{
+      const resp = await fetch(`${COTACOES_API_BASE}/api/cotacoes/config`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({companhia:cia, usuario:fd.usuario||'', senha:fd.senha||undefined, siteUrl:fd.siteUrl||''}),
+      });
+      if(!resp.ok) throw new Error(await resp.text());
+      aviso.innerHTML = `<div class="okmsg">Login da ${cia} salvo na sua máquina.</div>`;
+      form.querySelector('input[name="senha"]').value = '';
+      loadConfigCotacao();
+    }catch(err){
+      aviso.innerHTML = `<div class="errmsg">Não consegui salvar o login da ${cia}: ${err.message}</div>`;
+    }finally{
+      btn.disabled = false;
+    }
+  });
+});
+
+// --- Formulario publico de solicitacao (aba "Solicitar Passagem") ---

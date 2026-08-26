@@ -1,0 +1,71 @@
+{% extends "base_admin.html" %}
+{% block title %}MSE | Painel Viagens{% endblock %}
+{% block section_title %}<span id="sectionTitle">Solicitações</span>{% endblock %}
+{% block content %}
+<div class="wrap" style="padding:0">
+
+<!-- Solicitação (pública + fila admin) -->
+{% include "modules/solicitacao_panels.html" %}
+
+<!-- Aéreo / Rodoviário - painel é montado via JS (carregarAba), engine compartilhada -->
+{% include "modules/aereo_rodoviario_panels.html" %}
+
+<!-- Hospedagem / Carros - painel é montado via JS (carregarAbaHC), engine compartilhada -->
+{% include "modules/hospedagem_carros_panels.html" %}
+
+<!-- Cadastro manual -->
+{% include "modules/cadastro_manual_panel.html" %}
+
+<!-- Créditos -->
+{% include "modules/creditos_panel.html" %}
+
+<!-- KPI -->
+{% include "modules/kpi_panel.html" %}
+
+<!-- Fechamento de cartão -->
+{% include "modules/fechamento_cartao_panel.html" %}
+
+<!-- Login LATAM/Azul (config do robô de cotação) -->
+{% include "modules/login_latam_azul_panel.html" %}
+</div>
+
+<!-- Modais: Solicitação -->
+{% include "modules/solicitacao_modais.html" %}
+
+<!-- Modal: Hospedagem/Carros -->
+{% include "modules/hospedagem_carros_modal.html" %}
+
+{% endblock %}
+{% block scripts %}
+<script>
+
+// ==== Núcleo compartilhado (utils, navegação, cache de status de pedido, finalizar/reabrir passagem) ====
+{% include "modules/_core.js.html" %}
+
+// ==== Solicitação ====
+{% include "modules/solicitacao.js.html" %}
+
+// ==== Aéreo / Rodoviário ====
+{% include "modules/aereo_rodoviario.js.html" %}
+
+// ==== Hospedagem / Carros ====
+{% include "modules/hospedagem_carros.js.html" %}
+
+// ==== Cadastro manual ====
+{% include "modules/cadastro_manual.js.html" %}
+
+// ==== Créditos ====
+{% include "modules/creditos.js.html" %}
+
+// ==== KPI ====
+{% include "modules/kpi.js.html" %}
+
+// ==== Fechamento de cartão ====
+{% include "modules/fechamento_cartao.js.html" %}
+
+// ==== Login LATAM/Azul ====
+{% include "modules/login_latam_azul.js.html" %}
+
+{% include "modules/_init.js.html" %}
+</script>
+{% endblock %}

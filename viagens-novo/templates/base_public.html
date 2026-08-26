@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}MSE | Portal Passagens{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% include "_style.html" %}
+</head>
+<body>
+<header class="hdr">
+  <div class="hrow">
+    <div class="brand">
+      <span class="logo"></span>
+      <div class="titles">
+        <div class="t">Portal <b>Passagens</b></div>
+        <div class="s">MSE &middot; Solicitação de viagem</div>
+      </div>
+    </div>
+    <div class="hsep"></div>
+    <div class="tecto"><b>MSE <i>&middot;</i></b><small>CAPEX SEGURO</small></div>
+    <div class="grow"></div>
+    <span class="status"><span class="live"></span>SOLICITAÇÃO ONLINE</span>
+    <span class="clock" id="clock"></span>
+  </div>
+</header>
+
+{% block content %}{% endblock %}
+
+<script>
+{% include "_icons.html" %}
+function tick(){const c=document.getElementById('clock');if(c)c.textContent=new Date().toLocaleTimeString('pt-BR');}
+setInterval(tick,1000);tick();
+document.addEventListener('DOMContentLoaded',()=>{
+  const logo=document.querySelector('.logo');if(logo)logo.innerHTML=icon('logo');
+});
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

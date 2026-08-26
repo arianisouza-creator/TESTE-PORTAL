@@ -1,0 +1,222 @@
+{% extends "base_public.html" %}
+{% block title %}MSE | Solicitar Passagem{% endblock %}
+{% block content %}
+<div class="publicwrap">
+  <div class="sec" style="margin-top:0">Solicitação de viagem <span class="ct">Portal Passagens</span></div>
+  <div id="formMsg"></div>
+
+  <form id="solicitarForm" class="card pad" enctype="multipart/form-data">
+
+    <fieldset class="fieldset">
+      <legend>Tipo de passagem</legend>
+      <div class="formgrid">
+        <label class="full">Tipo de Passagem?
+          <select name="tipo_passagem" required id="tipoPassagem">
+            <option value="">Selecione uma opção</option>
+            <option value="Passagem Avulsa">Passagem Avulsa</option>
+            <option value="Mobilização">Mobilização</option>
+            <option value="Folga de Campo">Folga de Campo</option>
+            <option value="Transferência de Obra">Transferência de Obra</option>
+            <option value="Desmobilização">Desmobilização</option>
+          </select>
+        </label>
+        <label class="full">Tipo de viagem *
+          <select name="tipo_viagem_modal" required>
+            <option value="">Selecione uma opção</option>
+            <option value="Onibus">Ônibus</option>
+            <option value="Aviao">Avião</option>
+          </select>
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset class="fieldset">
+      <legend>Dados da viagem</legend>
+      <div class="formgrid">
+        <label>Funcionário na ficha
+          <button type="button" class="toggle on" data-toggle-for="funcionario_na_ficha"><span class="knob"></span></button>
+          <input type="hidden" name="funcionario_na_ficha" value="on">
+        </label>
+        <label>Passagem internacional
+          <button type="button" class="toggle" data-toggle-for="passagem_internacional"><span class="knob"></span></button>
+          <input type="hidden" name="passagem_internacional" value="">
+        </label>
+        <label>Nome *<input type="text" name="nome_colaborador" required placeholder="Nome do colaborador"></label>
+        <label>Função *<input type="text" name="funcao" required placeholder="Ex.: Montador de andaime pleno"></label>
+        <label>Obra *<input type="text" name="obra" required placeholder="Ex.: NN - UB/SP - Eletromecânica"></label>
+        <label>CPF *<input type="text" name="cpf" required placeholder="000.000.000-00"></label>
+        <label>RG<input type="text" name="rg"></label>
+        <label>Data de nascimento *<input type="date" name="data_nascimento" required></label>
+
+        <label class="full">Motivo da viagem *
+          <div class="radiorow">
+            <label><input type="radio" name="motivo_viagem" value="Dispensa" required> Dispensa</label>
+            <label><input type="radio" name="motivo_viagem" value="Troca de Obra"> Troca de Obra</label>
+            <label><input type="radio" name="motivo_viagem" value="Visita"> Visita</label>
+            <label><input type="radio" name="motivo_viagem" value="Folga de Campo"> Folga de Campo</label>
+            <label><input type="radio" name="motivo_viagem" value="Outro"> Outro</label>
+          </div>
+        </label>
+
+        <label class="full">Essa viagem é *
+          <div class="radiorow">
+            <label><input type="radio" name="ida_volta" value="Ida e volta" required id="idaVoltaSim"> Ida e volta</label>
+            <label><input type="radio" name="ida_volta" value="Ida" id="idaVoltaNao"> Ida</label>
+          </div>
+        </label>
+
+        <label>Informe a data de ida *<input type="date" name="data_ida" required></label>
+        <label id="campoDataVolta" style="display:none">Informe a data de volta<input type="date" name="data_volta"></label>
+
+        <label class="full">Acomodação *
+          <div class="radiorow">
+            <label><input type="radio" name="acomodacao" value="Cabine e Cama" required> Cabine e Cama</label>
+            <label><input type="radio" name="acomodacao" value="Executivo"> Executivo</label>
+            <label><input type="radio" name="acomodacao" value="Semi-leito"> Semi-leito</label>
+            <label><input type="radio" name="acomodacao" value="Leito"> Leito</label>
+          </div>
+        </label>
+
+        <label>Cidade de ida *<input type="text" name="cidade_ida" required></label>
+        <label>Estado de destino *<input type="text" name="estado_destino" required placeholder="Ex.: MG"></label>
+        <label>Cidade de destino *<input type="text" name="cidade_destino" required></label>
+        <label>Anexar documento do viajante (CPF ou RG)<input type="file" name="documento_viajante" accept="image/*,.pdf"></label>
+        <label class="full">Observações<textarea name="observacoes"></textarea></label>
+
+        <label class="full">Precisa de bagagem despachada *
+          <div class="hint">Apenas em caso de Mobilização, Desmobilização, Transferência de obra, ou se aprovado pela diretoria.</div>
+          <div class="radiorow">
+            <label><input type="radio" name="bagagem_despachada" value="Sim" required> Sim</label>
+            <label><input type="radio" name="bagagem_despachada" value="Não"> Não</label>
+          </div>
+        </label>
+
+        <label class="full">Viagem inclui trajeto de ônibus? *
+          <div class="radiorow">
+            <label><input type="radio" name="inclui_trajeto_onibus" value="Sim" required> Sim</label>
+            <label><input type="radio" name="inclui_trajeto_onibus" value="Não"> Não</label>
+          </div>
+        </label>
+
+        <label class="full">Necessário hospedagem? *
+          <div class="radiorow">
+            <label><input type="radio" name="necessario_hospedagem" value="Sim" required id="hospSim"> Sim</label>
+            <label><input type="radio" name="necessario_hospedagem" value="Não" id="hospNao"> Não</label>
+          </div>
+        </label>
+
+        <label class="full">Necessário veículo? *
+          <div class="radiorow">
+            <label><input type="radio" name="necessario_veiculo" value="Sim" required id="veicSim"> Sim</label>
+            <label><input type="radio" name="necessario_veiculo" value="Não" id="veicNao"> Não</label>
+          </div>
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset class="fieldset" id="fieldsetHospedagem" style="display:none">
+      <legend>Hospedagem</legend>
+      <div class="formgrid">
+        <label>Tipo Acomodação?
+          <select name="hosp_tipo_acomodacao">
+            <option value="">Selecione uma opção</option>
+            <option>Hotel</option><option>Pousada</option><option>Apart-hotel</option>
+          </select>
+        </label>
+        <label>Estado Acomodação?<input type="text" name="hosp_estado_acomodacao"></label>
+        <label>Cidade Acomodação?<input type="text" name="hosp_cidade_acomodacao"></label>
+        <label>Data Entrada?<input type="date" name="hosp_data_entrada"></label>
+        <label>Horário Entrada?<input type="time" name="hosp_horario_entrada"></label>
+        <label>Data Saída?<input type="date" name="hosp_data_saida"></label>
+        <label>Horário Saída?<input type="time" name="hosp_horario_saida"></label>
+        <label class="full">Alguma particularidade?<input type="text" name="hosp_particularidade"></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="fieldset" id="fieldsetVeiculo" style="display:none">
+      <legend>Veículo</legend>
+      <div class="formgrid">
+        <label class="full" style="flex-direction:row;align-items:center;gap:8px">
+          <input type="checkbox" name="veic_termo_aceite" style="width:auto">
+          Certifico que li e concordo que colaboradores menores de 21 anos e com carteira provisória não estão autorizados a conduzir o veículo locado pela MSE.
+        </label>
+        <label>Adicionar CNH?<input type="file" name="cnh_condutor" accept="image/*,.pdf"></label>
+        <label>Data Retirada?<input type="date" name="veic_data_retirada"></label>
+        <label>Local Retirada?<input type="text" name="veic_local_retirada"></label>
+        <label>Horário Retirada?<input type="time" name="veic_horario_retirada"></label>
+        <label>Data/Previsão Devolução?<input type="date" name="veic_data_devolucao"></label>
+        <label>Horário Devolução?<input type="time" name="veic_horario_devolucao"></label>
+        <label class="full">Observações adicionais quanto ao veículo solicitado?<textarea name="veic_observacoes"></textarea></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="fieldset" style="border-color:#c7d7fb;background:#eef3fe">
+      <legend>Cotação automática</legend>
+      <div class="formgrid">
+        <label class="full" style="flex-direction:row;align-items:center;gap:10px">
+          <button type="button" class="toggle" data-toggle-for="cotar_passagem" id="cotarToggle"><span class="knob"></span></button>
+          <input type="hidden" name="cotar_passagem" value="" id="cotarHidden">
+          <span><b>Cotar minha passagem</b><br><span class="hint" style="margin-top:2px">Assim que você enviar, nosso robô já busca as melhores opções na LATAM e na Azul automaticamente.</span></span>
+        </label>
+      </div>
+    </fieldset>
+
+    <div class="formactions">
+      <button type="button" class="ghost" onclick="document.getElementById('solicitarForm').reset()">Cancelar</button>
+      <button type="submit" class="primary" id="btnSalvar">Salvar</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.querySelectorAll('.toggle[data-toggle-for]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    btn.classList.toggle('on');
+    const input=document.querySelector(`input[name="${btn.dataset.toggleFor}"]`);
+    if(input)input.value = btn.classList.contains('on') ? 'on' : '';
+  });
+});
+
+function toggleSection(radioYesId, radioNoId, sectionId){
+  const yes=document.getElementById(radioYesId), section=document.getElementById(sectionId);
+  document.querySelectorAll(`input[name="${document.getElementById(radioYesId).name}"]`).forEach(r=>{
+    r.addEventListener('change',()=>{ section.style.display = yes.checked ? 'block' : 'none'; });
+  });
+}
+toggleSection('hospSim','hospNao','fieldsetHospedagem');
+toggleSection('veicSim','veicNao','fieldsetVeiculo');
+
+document.querySelectorAll('input[name="ida_volta"]').forEach(r=>{
+  r.addEventListener('change',()=>{
+    document.getElementById('campoDataVolta').style.display = document.getElementById('idaVoltaSim').checked ? 'block' : 'none';
+  });
+});
+
+document.getElementById('solicitarForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const btn=document.getElementById('btnSalvar');
+  btn.disabled=true; btn.textContent='Enviando...';
+  const msgBox=document.getElementById('formMsg');
+  msgBox.innerHTML='';
+  try{
+    const resp = await fetch('/api/solicitacoes', {method:'POST', body:new FormData(event.target)});
+    if(!resp.ok) throw new Error(await resp.text());
+    const data = await resp.json();
+    msgBox.innerHTML = `<div class="okmsg">Solicitação enviada! Protocolo <b>${data.id}</b>.` +
+      (data.cotando ? ' Já disparamos a cotação na LATAM e na Azul — a equipe MSE vai revisar as opções em breve.' : '') +
+      `</div>`;
+    event.target.reset();
+    document.querySelectorAll('.toggle').forEach(t=>t.classList.remove('on'));
+    document.getElementById('fieldsetHospedagem').style.display='none';
+    document.getElementById('fieldsetVeiculo').style.display='none';
+    document.getElementById('campoDataVolta').style.display='none';
+    window.scrollTo({top:0, behavior:'smooth'});
+  }catch(err){
+    msgBox.innerHTML = `<div class="errmsg">Não consegui enviar sua solicitação: ${err.message}</div>`;
+  }finally{
+    btn.disabled=false; btn.textContent='Salvar';
+  }
+});
+</script>
+{% endblock %}

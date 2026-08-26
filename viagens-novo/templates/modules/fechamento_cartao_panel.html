@@ -1,0 +1,52 @@
+<div id="panel-fechamento-cartao" class="tab-panel" style="display:none">
+  <div class="hint" style="margin-bottom:12px">Envie o PDF da fatura do cartão corporativo - a gente separa os lançamentos por pessoa e casa com o que já foi comprado no portal (passagens aéreas/rodoviárias pelo localizador, hospedagens por colaborador e data da estadia).</div>
+
+  <div class="sec">Rascunhos em andamento <span class="ct">salvos, ainda não conferidos</span></div>
+  <div class="card" style="overflow-x:auto;margin-bottom:20px">
+    <table class="dtable" id="tabelaFaturaRascunhos"><thead><tr>
+      <th>Nome</th><th>Atualizado em</th><th></th>
+    </tr></thead><tbody></tbody></table>
+  </div>
+
+  <div class="card pad" id="faturaUploadBox">
+    <input type="file" id="faturaArquivo" accept="application/pdf">
+    <div id="faturaMsg" style="margin-top:10px"></div>
+    <div class="formactions" style="margin-top:14px">
+      <button type="button" class="primary" id="btnAnalisarFatura">Analisar fatura</button>
+    </div>
+  </div>
+
+  <div id="faturaResultadoBox" style="display:none">
+    <div class="controls" style="margin:16px 0">
+      <label style="font-size:12.5px;font-weight:600;color:var(--body);display:flex;align-items:center;gap:8px">
+        Pessoa <select id="faturaPessoaSelect" style="font-family:inherit;font-size:13px;border:1px solid var(--line);border-radius:9px;padding:6px 10px"></select>
+      </label>
+      <div class="toolgroup">
+        <button class="ghost" type="button" id="btnAnalisarOutraFatura">Analisar outra fatura</button>
+        <button class="ghost" type="button" id="btnSalvarRascunhoFatura">Salvar rascunho</button>
+        <button class="ghost" type="button" id="btnConsultarStatusFatura">Consultar status dos pedidos</button>
+        <button class="primary" type="button" id="btnSalvarPdfFatura">Salvar em PDF</button>
+      </div>
+    </div>
+    <div id="faturaResumo" class="hint" style="margin-bottom:6px"></div>
+    <div class="hint" style="margin-bottom:10px">Clique em qualquer célula da tabela pra editar antes de salvar o relatório. Linhas em vermelho são estornos (valor negativo na fatura). Marque as linhas conferidas e aperte "Conferência OK" pra mover essas passagens/hospedagens pra Finalizados e guardar no histórico.</div>
+    <div class="card" style="overflow-x:auto">
+      <table class="dtable" id="faturaTabela"><thead><tr>
+        <th><input type="checkbox" id="faturaSelAll"></th>
+        <th>Data</th><th>Descrição</th><th>Companhia</th><th>Localizador</th><th>Valor na fatura</th><th>No portal?</th>
+        <th>Colaborador</th><th>Valor pago no portal</th><th>Pedido</th><th>Status do pedido</th><th></th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+    <div class="formactions" style="margin-top:16px">
+      <button type="button" class="primary green" id="btnConferenciaOk">Conferência OK</button>
+    </div>
+  </div>
+
+  <div class="sec" style="margin-top:28px">Histórico de fechamentos</div>
+  <div class="card" style="overflow-x:auto">
+    <table class="dtable" id="tabelaFechamentosHistorico"><thead><tr>
+      <th>Data da conferência</th><th>Pessoa</th><th>Itens conferidos</th><th></th>
+    </tr></thead><tbody></tbody></table>
+  </div>
+</div>
+

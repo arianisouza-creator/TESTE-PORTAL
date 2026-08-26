@@ -1,0 +1,132 @@
+function parseMoneyBR(v){
+  // Converte valores em qualquer formato razoavel (numero puro, "2588.43",
+  // "2.588,43", "115855") pro numero certo. Antes essa funcao tirava TODOS
+  // os pontos sempre, o que multiplicava por 100 qualquer valor que ja
+  // viesse em formato "normal" (ponto decimal, sem separador de milhar) -
+  // exatamente o que a API externa manda. Isso inflava o total do Dashboard.
+  if(v==null || v==='') return 0;
+  if(typeof v==='number') return Number.isFinite(v) ? v : 0;
+  let s = String(v).trim().replace(/[^\d,.-]/g,'');
+  if(!s) return 0;
+  if(s.includes(',')){
+    // formato BR: virgula sempre e decimal, pontos (se houver) sao milhar
+    s = s.replace(/\./g,'').replace(',', '.');
+  } else if(s.includes('.')){
+    const partes = s.split('.');
+    const ultima = partes[partes.length-1];
+    // mais de um ponto, ou o ultimo grupo com 3 digitos (ex "2.588") =
+    // separador de milhar; ponto unico com 1-2 digitos = decimal normal.
+    if(partes.length>2 || ultima.length===3){
+      s = s.replace(/\./g,'');
+    }
+  }
+  const n = parseFloat(s);
+  return Number.isFinite(n) ? n : 0;
+}
+function fmtMoney(v){
+  return parseMoneyBR(v).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+}
+function fmtDate(v){ if(!v) return '-'; const [y,m,d]=String(v).split('-'); return (y&&m&&d)?`${d}/${m}/${y}`:v; }
+function genId(prefix){ return `${prefix}-${(crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2))}`.slice(0,40); }
+const PUBLIC_TABS = ['inicio','cotarpassagem','solicitar'];
+window.showTab = function(name){
+  if(!IS_ADMIN && !PUBLIC_TABS.includes(name)) name='inicio';
+  document.querySelectorAll('.tab-panel').forEach(p=>p.style.display='none');
+  const panel = document.getElementById('panel-'+name);
+  if(panel) panel.style.display='block';
+  document.querySelectorAll('.nv[data-tab]').forEach(nv=>nv.classList.toggle('on', nv.dataset.tab===name));
+  const titles = {inicio:'Início', cotarpassagem:'Cotar Passagem', solicitar:'Solicitar Passagem', solicitacoes:'Solicitações', aereo:'Aéreo', rodoviario:'Rodoviário',
+    hospedagem:'Hospedagem', carros:'Carros', cadastro:'Cadastro manual', creditos:'Créditos', kpi:'KPI', 'fechamento-cartao':'Fechamento de cartão', 'config-cotacao':'Login LATAM/Azul'};
+  const t=document.getElementById('sectionTitle'); if(t)t.textContent = titles[name]||name;
+  window.location.hash = name;
+  loadTab(name);
+};
+
+const loaded = {};
+function loadTab(name){
+  if(!IS_ADMIN) return;
+  if(name==='solicitacoes'){ loadResumoSolicitacoes(); return loadSolicitacoes(); }
+  if(name==='aereo') return carregarAba('Aereo');
+  if(name==='rodoviario') return carregarAba('Rodoviario');
+  if(name==='hospedagem') return carregarAbaHC('hospedagem');
+  if(name==='carros') return carregarAbaHC('carros');
+  if(name==='creditos') return loadCreditos();
+  if(name==='kpi') return loadKpi();
+  if(name==='fechamento-cartao'){ loadRascunhosFatura(); return loadHistoricoFechamentos(); }
+  if(name==='config-cotacao') return loadConfigCotacao();
+}
+
+async function finalizarPassagens(keys){
+  const complements = await apiFetch('/rest/v1/passagens_complements');
+  const compMap = {}; complements.forEach(c=>{ compMap[c.key]=c.data; });
+  await Promise.all(keys.map(key => {
+    const atual = compMap[key] || {};
+    return apiFetch('/rest/v1/passagens_complements', {method:'POST', body:JSON.stringify({key, data:{...atual, pagoConfirmado:true}})});
+  }));
+}
+// Contrario de finalizarPassagens - usado quando a Ariani exclui um
+// fechamento do historico, pra essas passagens voltarem a aparecer
+// normalmente (Pendentes, e disponiveis de novo pra casar numa fatura).
+async function reabrirPassagens(keys){
+  if(!keys.length) return;
+  const complements = await apiFetch('/rest/v1/passagens_complements');
+  const compMap = {}; complements.forEach(c=>{ compMap[c.key]=c.data; });
+  await Promise.all(keys.map(key => {
+    const atual = compMap[key];
+    if(!atual) return Promise.resolve();
+    return apiFetch('/rest/v1/passagens_complements', {method:'POST', body:JSON.stringify({key, data:{...atual, pagoConfirmado:false}})});
+  }));
+}
+// Botao individual na linha (Aereo/Rodoviario) pra finalizar/reabrir uma
+// passagem so - util principalmente pra corrigir na mao passagens que
+// ficaram finalizadas de fechamentos antigos (de antes da exclusao do
+// historico saber reabrir sozinha).
+window.__pedidosStatusCache = {};
+let __pedidosStatusCacheLoaded = false;
+async function carregarPedidosStatusCache(force){
+  if(__pedidosStatusCacheLoaded && !force) return;
+  try{
+    const rows = await apiFetch('/rest/v1/passagens_pedidos_status');
+    const map = {};
+    (rows||[]).forEach(r=>{ map[r.numero_pedido] = r; });
+    window.__pedidosStatusCache = map;
+    __pedidosStatusCacheLoaded = true;
+  }catch(err){ /* fica sem cache - a tela continua funcionando normal */ }
+}
+function pedidoCellHtml(numero){
+  if(!numero) return '-';
+  const cache = window.__pedidosStatusCache && window.__pedidosStatusCache[numero];
+  if(cache && cache.status_pedido){
+    return `${numero} <span class="badge-status ${statusPedidoClasse(cache.status_pedido)}" style="margin-left:6px">${cache.status_pedido}</span>`;
+  }
+  return numero;
+}
+
+function statusPedidoClasse(status){
+  const s = (status||'').toLowerCase();
+  if(s.includes('finaliz') || s.includes('aprovado')) return 'comprado';
+  if(s.includes('aprova')) return 'cotando';
+  return 'pendente';
+}
+async function checarMiniStatusSync(p){
+  try{
+    const data = await apiFetch('/api/passagens-externas/status');
+    const el = document.getElementById(p+'StatusSyncApi');
+    if(el) el.textContent = data.configurado ? 'Conectado' : 'Token não configurado no .env';
+  }catch(e){}
+  try{
+    const data = await apiFetch('/api/pedidos/config-status');
+    const el = document.getElementById(p+'StatusSyncPedidos');
+    if(el) el.textContent = data.configurado ? 'Conectado' : 'Token não configurado no .env';
+  }catch(e){}
+}
+function statusPedidoBadgeHtml(status){
+  const s = status || 'Não criado';
+  const classe = s==='Aprovado' ? 'comprado' : s==='Em aprovação' ? 'cotando' : 'pendente';
+  return `<span class="badge-status ${classe}">${s}</span>`;
+}
+// --- Hospedagem/Carros: mesmo padrao de Pendentes/Finalizados + filtros que
+// Aereo/Rodoviario ja tinham. "Finalizado" fica gravado dentro do proprio
+// data (data.finalizado) - hospedagem entra em Finalizados quando a
+// Conferencia OK do fechamento de cartao confirma ela; carro so entra manual
+// (nao ha como casar carro com a fatura, pedido da Ariani).

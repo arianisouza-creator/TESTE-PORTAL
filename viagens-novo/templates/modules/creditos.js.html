@@ -1,0 +1,16 @@
+document.getElementById('formCredito').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fd = Object.fromEntries(new FormData(e.target).entries());
+  const id = genId('cred');
+  await apiFetch('/rest/v1/passagens_creditos', {method:'POST', body:JSON.stringify({id, data:fd})});
+  e.target.reset();
+  loadCreditos();
+});
+async function loadCreditos(){
+  const rows = await apiFetch('/rest/v1/passagens_creditos');
+  document.querySelector('#tabelaCreditos tbody').innerHTML = rows.map(r => { const d=r.data; return `
+    <tr><td>${d.companhia||'-'}</td><td>${d.localizador||'-'}</td><td>${d.valor?fmtMoney(d.valor):'-'}</td>
+    <td>${fmtDate(d.validade)}</td><td>${d.status||'-'}</td></tr>`; }).join('')
+    || `<tr><td colspan="5" class="empty">Nenhum crédito cadastrado ainda.</td></tr>`;
+}
+

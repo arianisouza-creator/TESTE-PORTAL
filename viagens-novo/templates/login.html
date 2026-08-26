@@ -1,0 +1,38 @@
+{% extends "base_public.html" %}
+{% block title %}MSE | Login administrativo{% endblock %}
+{% block content %}
+<div class="authwrap">
+  <div class="card authcard">
+    <h1>Área administrativa</h1>
+    <p>Só a Ariani acessa daqui: cotação, aprovação e compra de passagens.</p>
+    {% if erro %}<div class="errmsg">{{ erro }}</div>{% endif %}
+    <form id="loginForm">
+      <label style="display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:600;color:var(--body)">
+        E-mail
+        <input type="email" name="email" required autofocus placeholder="seu.email@mse.com.br"
+          style="font-family:inherit;font-size:14px;border:1px solid var(--line);border-radius:9px;padding:10px 12px">
+      </label>
+      <button type="submit" class="primary" style="width:100%;margin-top:16px">Entrar</button>
+    </form>
+    <p style="margin-top:16px"><a href="/" style="color:var(--blue);font-size:13px">&larr; Voltar para o formulário de solicitação</a></p>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const email = new FormData(event.target).get('email');
+  const resp = await fetch('/api/login', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({email}),
+  });
+  if (resp.ok) {
+    window.location.href = '/portal';
+  } else {
+    window.location.href = '/login?erro=' + encodeURIComponent('Esse e-mail não tem acesso à gestão.');
+  }
+});
+</script>
+{% endblock %}
