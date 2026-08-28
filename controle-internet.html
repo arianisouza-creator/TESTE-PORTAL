@@ -8019,6 +8019,7 @@ AMAURI BARROSO DE MOURA"></textarea>
       if (['mgf'].includes(text) || text.includes('maringa')) return 'maringa';
       if (['gru', 'cgh', 'vcp', 'sao', 'sao paulo'].includes(text) || text.includes('sao paulo') || text.includes('guarulhos') || text.includes('congonhas') || text.includes('viracopos')) return 'sao-paulo';
       if (['cnf', 'plu', 'bhz'].includes(text) || text.includes('belo horizonte') || text.includes('confins') || text.includes('pampulha')) return 'belo-horizonte';
+      if (['moc'].includes(text) || text.includes('montes claros')) return 'montes-claros';
       return text;
     }
 
@@ -8192,8 +8193,8 @@ AMAURI BARROSO DE MOURA"></textarea>
           .filter(quote => {
             const quoteDestination = norm(quote.destino || '');
             const quoteOrigin = norm(quote.origem || '');
-            const sameDestination = quoteDestination.includes(wantedDestination) || wantedDestination.includes(quoteDestination);
-            const sameOrigin = quoteOrigin.includes(wantedOrigin) || wantedOrigin.includes(quoteOrigin) || ['ldb', 'mgf', 'gru', 'sao paulo', 'guarulhos'].some(token => quoteOrigin.includes(token));
+            const sameDestination = quoteDestination.includes(wantedDestination) || wantedDestination.includes(quoteDestination) || sameAirportFamily(quote.destino, item.destino);
+            const sameOrigin = quoteOrigin.includes(wantedOrigin) || wantedOrigin.includes(quoteOrigin) || sameAirportFamily(quote.origem, item.origem) || ['ldb', 'mgf', 'gru', 'sao paulo', 'guarulhos'].some(token => quoteOrigin.includes(token));
             return sameDestination && sameOrigin && Array.isArray(quote.detalhes) && quote.detalhes.length;
           })
           .slice(0, 12)
@@ -8414,9 +8415,17 @@ AMAURI BARROSO DE MOURA"></textarea>
       const companies = solicitacao.companhias && solicitacao.companhias.length ? solicitacao.companhias : ['LATAM'];
       const routeVariants = buildSolicitacaoRouteVariants(solicitacao);
       const quotes = [];
-      for (const company of companies) {
+      const runningCompanies = new Set(companies);
+      const pushQuote = quote => {
+        quotes.push(quote);
+        solicitacao.cotacoes = quotes.slice();
+        saveLocalCache();
+        persistPassagensSolicitacaoRemote(solicitacao);
+        renderPassagens();
+      };
+      const runCompany = async company => {
         for (const route of routeVariants) {
-          solicitacao.status = `Cotando ${company} ${route.origem} - ${route.destino}`;
+          solicitacao.status = `Cotando ${[...runningCompanies].join(' + ')}`;
           saveLocalCache();
           persistPassagensSolicitacaoRemote(solicitacao);
           renderPassagens();
@@ -8443,15 +8452,14 @@ AMAURI BARROSO DE MOURA"></textarea>
               quote.destino = route.destino;
               quote.alternativa = route.alternativa;
               quote.rotaLabel = route.rotaLabel;
-              quotes.push(quote);
-              solicitacao.cotacoes = quotes;
+              pushQuote(quote);
               solicitacao.status = 'Cotacao parcial recebida';
               saveLocalCache();
               persistPassagensSolicitacaoRemote(solicitacao);
               renderPassagens();
             }
           } catch (error) {
-            quotes.push({
+            pushQuote({
               id: createId(),
               createdAt: new Date().toISOString(),
               companhia: company,
@@ -8467,14 +8475,21 @@ AMAURI BARROSO DE MOURA"></textarea>
               rotaLabel: route.rotaLabel,
               status: `Erro API ${company}: ${error && error.message ? error.message : 'Falha na cotacao'}`
             });
-            solicitacao.cotacoes = quotes;
             solicitacao.status = buildSolicitacaoChoices(solicitacao).length ? 'Cotacao parcial recebida' : 'Erro parcial na cotacao';
             saveLocalCache();
             persistPassagensSolicitacaoRemote(solicitacao);
             renderPassagens();
           }
         }
-      }
+        runningCompanies.delete(company);
+        solicitacao.status = runningCompanies.size
+          ? `Cotando ${[...runningCompanies].join(' + ')}`
+          : 'Consolidando cotacoes';
+        saveLocalCache();
+        persistPassagensSolicitacaoRemote(solicitacao);
+        renderPassagens();
+      };
+      await Promise.all(companies.map(company => runCompany(company)));
       solicitacao.cotacoes = quotes;
       solicitacao.status = quotes.some(quote => Array.isArray(quote.detalhes) && quote.detalhes.length)
         ? 'Aguardando escolha'

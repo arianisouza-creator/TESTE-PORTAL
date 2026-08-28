@@ -6,6 +6,7 @@ from typing import Any
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+from cotacoes.connectors.base import CotacaoStageError
 from cotacoes.models import ConnectorConfig, QuoteRequest
 from cotacoes.service import get_company_config, get_config, history, quote, save_config
 
@@ -75,6 +76,19 @@ def quote_test(request: QuoteRequest) -> dict[str, Any]:
         raise HTTPException(status_code=400, detail="Configure o login da Azul antes de cotar.")
     try:
         return {"status": "ok", "quote": quote(request)}
+    except CotacaoStageError as exc:
+        logger.error(
+            "Erro na cotacao %s etapa=%s %s-%s %s/%s: %s\n%s",
+            company,
+            exc.etapa,
+            request.origem,
+            request.destino,
+            request.dataIda,
+            request.dataVolta or "sem-volta",
+            exc.mensagem,
+            traceback.format_exc(),
+        )
+        raise HTTPException(status_code=502, detail=f"{company}: etapa {exc.etapa}: {exc.mensagem}") from exc
     except Exception as exc:
         logger.error(
             "Erro na cotacao %s %s-%s %s/%s: %s\n%s",

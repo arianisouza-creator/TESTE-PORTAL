@@ -81,7 +81,8 @@ class AzulConnector(SandboxConnector):
             raise RuntimeError("A Azul Empresas pediu login. Salve usuario e senha do conector Azul na aba API.")
         self._fill_any(page, ["#username", "input[name='Usuario']", "input[type='text']"], config.usuario)
         self._fill_any(page, ["#password", "input[name='Senha']", "input[type='password']"], config.senha)
-        self._click_button(page, re.compile("Fazer Login|Entrar|Login", re.I), timeout=12000)
+        if not self._submit_login(page):
+            self._click_button(page, re.compile("Fazer Login|Entrar|Login", re.I), timeout=12000)
         try:
             page.wait_for_load_state("networkidle", timeout=45000)
         except Exception:
@@ -541,23 +542,29 @@ class AzulConnector(SandboxConnector):
         text = self._body_text(page)
         lines = [line.strip() for line in text.splitlines() if line.strip()]
         direction = "ida"
+        outbound_route = None
+        current_route = ("", "")
         options = []
         for index, line in enumerate(lines):
-            route_match = re.search(r"para o trajeto\s*([A-Z]{3})\s*\+?\s*([A-Z]{3})", line, flags=re.I)
+            route_match = re.search(r"(?:para o trajeto\s*)?([A-Z]{3})\s*\+?\s*([A-Z]{3})", line, flags=re.I)
             if route_match:
-                route = {route_match.group(1).upper(), route_match.group(2).upper()}
-                if request.destino.upper() in route and request.origem.upper() in route and route_match.group(1).upper() == request.destino.upper():
+                route_from = route_match.group(1).upper()
+                route_to = route_match.group(2).upper()
+                current_route = (route_from, route_to)
+                if self._is_return_route(route_from, route_to, request, outbound_route):
                     direction = "volta"
                 else:
                     direction = "ida"
+                    if not outbound_route:
+                        outbound_route = (route_from, route_to)
             price_match = re.search(r"R\$\s*(\d{1,3}(?:\.\d{3})*,\d{2})", line)
             if not price_match:
                 continue
-            window = lines[max(0, index - 8):index + 4]
+            window = lines[max(0, index - 14):index + 8]
             joined = " | ".join(window)
             times = re.findall(r"\b([0-2]?\d:[0-5]\d)\b", joined)
             airports = re.findall(r"\b([A-Z]{3})\b", joined)
-            if not re.search("Operado por Azul", joined, flags=re.I):
+            if not re.search("Operado por Azul|Voo|Paradas|Azul", joined, flags=re.I):
                 continue
             if re.search(r"Taxas de embarque|Subtotal|Preco total|Preço total|Adulto\\(s\\)|Regras Tarif", joined, flags=re.I):
                 continue
@@ -567,14 +574,21 @@ class AzulConnector(SandboxConnector):
                 "tipo": direction,
                 "saida": times[0],
                 "chegada": times[1],
-                "origem": airports[0] if len(airports) >= 1 else "",
-                "destino": airports[1] if len(airports) >= 2 else "",
+                "origem": current_route[0] or (airports[0] if len(airports) >= 1 else ""),
+                "destino": current_route[1] or (airports[1] if len(airports) >= 2 else ""),
                 "preco": float(price_match.group(1).replace(".", "").replace(",", ".")),
                 "moeda": "BRL",
                 "tarifa": "Azul",
                 "descricao": joined[:280],
             })
         return self._dedupe_options(options)
+
+    def _is_return_route(self, route_from: str, route_to: str, request: QuoteRequest, outbound_route: tuple[str, str] | None) -> bool:
+        if outbound_route and route_from == outbound_route[1] and route_to == outbound_route[0]:
+            return True
+        requested_origin = self._airport_search_value(request.origem).upper()
+        requested_destination = self._airport_search_value(request.destino).upper()
+        return route_from == requested_destination and route_to == requested_origin
 
     def _dedupe_options(self, options: list[dict]) -> list[dict]:
         seen = set()
@@ -627,11 +641,69 @@ class AzulConnector(SandboxConnector):
     def _fill_any(self, page, selectors: list[str], value: str) -> None:
         for selector in selectors:
             try:
-                page.locator(selector).first.fill(value, timeout=5000)
+                field = page.locator(selector).first
+                field.click(timeout=5000)
+                field.fill("", timeout=3000)
+                field.type(value, delay=70, timeout=8000)
+                field.evaluate(
+                    """
+                    (el) => {
+                      el.dispatchEvent(new Event('input', { bubbles: true }));
+                      el.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                    """
+                )
                 return
             except Exception:
                 pass
         raise RuntimeError("Nao encontrei campo de login da Azul Empresas.")
+
+    def _submit_login(self, page) -> bool:
+        clicked = page.evaluate(
+            """
+            () => {
+              const visible = el => {
+                const rect = el.getBoundingClientRect();
+                const style = window.getComputedStyle(el);
+                return rect.width > 0 && rect.height > 0 && style.visibility !== 'hidden' && style.display !== 'none';
+              };
+              const norm = text => (text || '')
+                .normalize('NFD')
+                .replace(/[\\u0300-\\u036f]/g, '')
+                .toLowerCase();
+              const candidates = [...document.querySelectorAll('button, input[type="button"], input[type="submit"], a')]
+                .filter(visible)
+                .filter(el => /fazer login|entrar|login|acessar/.test(norm(el.innerText || el.value || el.title || el.getAttribute('aria-label') || '')))
+                .sort((a, b) => {
+                  const ar = a.getBoundingClientRect();
+                  const br = b.getBoundingClientRect();
+                  return (br.width * br.height) - (ar.width * ar.height);
+                });
+              const target = candidates[0];
+              if (target) {
+                target.click();
+                return true;
+              }
+              const password = document.querySelector('input[type="password"]');
+              const form = password && password.closest('form');
+              if (form) {
+                form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                if (typeof form.submit === 'function') form.submit();
+                return true;
+              }
+              return false;
+            }
+            """
+        )
+        if clicked:
+            page.wait_for_timeout(1200)
+            return True
+        try:
+            page.locator("input[type='password']").first.press("Enter", timeout=3000)
+            page.wait_for_timeout(1200)
+            return True
+        except Exception:
+            return False
 
     def _click_button(self, page, pattern, timeout: int) -> None:
         try:
