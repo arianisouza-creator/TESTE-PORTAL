@@ -20,19 +20,30 @@ passou (`https://drive.google.com/drive/folders/1LyjXgkF9p9TrWH39TbKly0oCG7HXNfR
 
 Isso roda direto no navegador (não existe um servidor do portal enviando os
 arquivos) — por isso é necessário autorizar o portal a acessar o seu Google
-Drive, com o fluxo de login do Google. Essa autorização vale por sessão do
-navegador; expira depois de um tempo e pode pedir para conectar de novo.
+Drive, com o fluxo de login do Google.
+
+**Importante sobre como o login abre:** o Google não deixa a tela de login
+dele rodar dentro do quadro (iframe) que o Streamlit usa para mostrar o
+portal — por segurança, ele bloqueia isso sempre, não importa a
+configuração. Por isso o botão **Conectar Drive** abre uma **aba nova de
+verdade** do navegador para você fazer login. Depois de autorizar, essa aba
+nova volta pro portal, e a aba original (onde você estava trabalhando) se
+conecta sozinha, sem precisar recarregar nada — o portal detecta a conexão
+automaticamente entre as abas.
 
 ## Passo 1 — Descubra a URL do seu portal no Streamlit
 
-Abra o portal no navegador (a tela que você já usa hoje) e copie a URL que
-aparece, só até o domínio — sem nada depois da barra. Normalmente é algo como:
+Abra o portal no navegador (a tela que você já usa hoje) e copie a URL
+completa que aparece na barra de endereço — dessa vez incluindo a barra `/`
+do final, se tiver. Normalmente é algo como:
 
 ```
-https://SEU-APP.streamlit.app
+https://SEU-APP.streamlit.app/
 ```
 
-Você vai precisar exatamente dessa URL no Passo 4.
+Você vai precisar exatamente dessa URL, com o mesmo formato (com ou sem
+barra no final, exatamente como aparece na sua barra de endereço), no
+Passo 5.
 
 ## Passo 2 — Crie um projeto no Google Cloud
 
@@ -78,16 +89,27 @@ Você vai precisar exatamente dessa URL no Passo 4.
 3. Tipo de aplicativo: **Aplicativo da Web**.
 4. Nome: `Portal MSE - KPI Hitachi` (só um rótulo, pode ser qualquer nome).
 5. Em **Origens JavaScript autorizadas**, clique em **Adicionar URI** e cole
-   exatamente a URL que você anotou no Passo 1, por exemplo:
+   a URL só até o domínio, sem barra no final, exemplo:
 
    ```
    https://SEU-APP.streamlit.app
    ```
 
-   Sem barra no final, sem caminho depois do domínio.
-6. Não precisa preencher "URIs de redirecionamento autorizados" para este
-   fluxo. Clique em **Criar**.
-7. O Google vai mostrar o **Client ID** (uma string terminando em
+6. Em **URIs de redirecionamento autorizados** — este é o campo que
+   realmente importa para o login funcionar — clique em **Adicionar URI** e
+   cole a URL **exatamente** como está na barra de endereço do seu portal
+   (a que você anotou no Passo 1, com a barra no final se ela tiver):
+
+   ```
+   https://SEU-APP.streamlit.app/
+   ```
+
+   Se não ficar exatamente igual (com ou sem a barra `/` no final, igual ao
+   que aparece no navegador), o Google recusa o login com esse mesmo tipo de
+   erro. Se depois de configurar você ainda receber "Acesso bloqueado" ou
+   "redirect_uri_mismatch", confira esse detalhe primeiro.
+7. Clique em **Criar**.
+8. O Google vai mostrar o **Client ID** (uma string terminando em
    `.apps.googleusercontent.com`). Copie esse valor.
 
 ## Passo 6 — Cole o Client ID nos Secrets do Streamlit
@@ -106,24 +128,34 @@ Você vai precisar exatamente dessa URL no Passo 4.
 
 ## Passo 7 — Conecte pelo portal
 
-1. Abra o portal, vá em **KPI Hitachi > Cadastro**.
-2. Na seção **Importar documentos dos colaboradores**, você vai ver o bloco
-   **Envio automático para o Google Drive** com o botão **Conectar Google
-   Drive**.
-3. Clique nele. O Google vai abrir uma janela pedindo para você entrar com a
-   conta autorizada (a mesma que você cadastrou como usuária de teste no
-   Passo 4) e confirmar o acesso ao Drive.
-4. Depois de autorizar, o status muda para "Google Drive conectado". A partir
-   daí, todo documento que ficar **OK** — seja pela busca automática na API,
-   pela importação manual, ou por uma troca de status manual — é enviado
-   sozinho para a pasta certa.
+1. Abra o portal. Tanto na tela **Visão Geral** quanto em **Cadastro** do
+   KPI Hitachi, tem um botão **Conectar Drive** na barra de cima, do lado de
+   "Enviar pendências" (na aba Cadastro também tem uma versão do botão, com
+   mais explicação, na seção "Importar documentos dos colaboradores").
+2. Clique em **Conectar Drive**. Uma **aba nova do navegador** abre com a
+   tela de login do Google.
+
+   Se o navegador bloquear a aba nova ("pop-up bloqueado"), permita pop-ups
+   para esse site e clique em Conectar Drive de novo.
+3. Entre com a conta que você cadastrou como usuária de teste no Passo 4.
+   O Google provavelmente vai avisar que "O app não foi verificado" — isso é
+   esperado (é assim que fica até o app passar por revisão do Google, o que
+   não é necessário para uso interno). Clique em **Avançado** e depois em
+   **Acessar Portal MSE (não seguro)** para continuar.
+4. Autorize o acesso ao Google Drive na tela seguinte.
+5. Pronto — essa aba nova volta para o portal já conectada. Você pode
+   fechá-la e voltar para a aba onde estava trabalhando: ela detecta a
+   conexão sozinha, sem precisar recarregar a página.
+6. A partir daí, todo documento que ficar **OK** — seja pela busca
+   automática na API, pela importação manual, ou por uma troca de status
+   manual — é enviado sozinho para a pasta certa.
 
 ## Perguntas comuns
 
-**Preciso clicar em "Conectar" toda vez que abrir o portal?**
-A autorização vale por um tempo dentro daquela sessão do navegador (cerca de
-1 hora, renovada automaticamente enquanto a aba ficar aberta). Se passar
-muito tempo ou você fechar o navegador, pode pedir para conectar de novo.
+**Preciso clicar em "Conectar Drive" toda vez que abrir o portal?**
+A conexão fica salva no navegador (cerca de 1 hora por vez). Se passar
+muito tempo, ou você usar outro navegador/computador, vai pedir para
+conectar de novo.
 
 **E se eu esquecer de conectar antes de importar documentos?**
 Sem problema: os documentos continuam sendo processados e marcados como OK
