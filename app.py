@@ -65,7 +65,7 @@ def load_portal_config() -> dict:
             ),
             "rootFolderId": get_secret(
                 "google_drive_root_folder_id",
-                os.getenv("GOOGLE_DRIVE_ROOT_FOLDER_ID", "1LyjXgkF9p9TrWH39TbKly0oCG7HXNfRc"),
+                os.getenv("GOOGLE_DRIVE_ROOT_FOLDER_ID", "1eySIc97_5hLQo22QQAqUSqaJV24gR8we"),
             ),
         },
     }

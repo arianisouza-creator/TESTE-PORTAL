@@ -1,22 +1,50 @@
 # Guia: conectar o KPI Hitachi ao Google Drive
 
 Este guia mostra como criar as credenciais do Google para que o portal salve
-automaticamente holerite e cartão ponto na sua pasta do Drive, assim que o
-status do documento ficar **OK**.
+automaticamente holerite, cartão ponto, comprovante de pagamento e
+comprovante de adiantamento na sua pasta do Drive, assim que o status do
+documento ficar **OK**.
 
 ## Como funciona
 
-Quando o holerite ou o cartão ponto de um colaborador fica **OK** (assinado),
-o portal:
+Quando o holerite, o cartão ponto, o comprovante de pagamento ou o
+comprovante de adiantamento de um colaborador fica **OK**, o portal:
 
 1. Cria (ou reaproveita, se já existir) uma pasta com o nome da competência
    dentro da sua pasta raiz do Drive — exemplo: `07/2026`.
 2. Dentro dela, cria (ou reaproveita) uma subpasta `Holerite` ou `Cartão Ponto`.
-3. Salva o PDF lá com o nome `NOME DO COLABORADOR - TIPO DE DOCUMENTO.pdf`
-   — exemplo: `ALESSANDRA DA SILVA ASSEN - CARTAO PONTO.pdf`.
+3. **Holerite, comprovante de pagamento e comprovante de adiantamento** ficam
+   todos dentro de `Holerite`, numa subpasta com o nome do colaborador. O
+   Cartão Ponto continua salvo direto dentro da pasta `Cartão Ponto`, sem
+   subpasta por pessoa.
+4. Salva o PDF com o nome `NOME DO COLABORADOR - TIPO DE DOCUMENTO.pdf`
+   — exemplo: `ALESSANDRA DA SILVA ASSEN - HOLERITE.pdf`.
 
-Sua pasta raiz já está configurada por padrão como a pasta do link que você
-passou (`https://drive.google.com/drive/folders/1LyjXgkF9p9TrWH39TbKly0oCG7HXNfRc`).
+O comprovante de pagamento e o de adiantamento normalmente são um único PDF
+com uma folha por colaborador (o que você importa manualmente na aba
+Cadastro). O portal identifica a folha de cada pessoa e envia **só aquela
+folha** para o Drive — nunca o arquivo inteiro com os dados de todo mundo.
+
+Exemplo de estrutura final:
+
+```
+Pasta raiz
+└── 07/2026
+    ├── Holerite
+    │   └── ALESSANDRA DA SILVA ASSEN
+    │       ├── ALESSANDRA DA SILVA ASSEN - HOLERITE.pdf
+    │       ├── ALESSANDRA DA SILVA ASSEN - COMPROVANTE DE PAGAMENTO.pdf
+    │       └── ALESSANDRA DA SILVA ASSEN - COMPROVANTE DE ADIANTAMENTO.pdf
+    └── Cartão Ponto
+        └── ALESSANDRA DA SILVA ASSEN - CARTAO PONTO.pdf
+```
+
+Sua pasta raiz está configurada como a pasta do link
+(`https://drive.google.com/drive/folders/1eySIc97_5hLQo22QQAqUSqaJV24gR8we`).
+Se você já tinha o Client ID e a pasta raiz antiga configurados nos Secrets do
+Streamlit, **atualize a linha `google_drive_root_folder_id`** lá também (veja
+o Passo 6) — o valor salvo nos Secrets sempre tem prioridade sobre o padrão
+do código.
 
 Isso roda direto no navegador (não existe um servidor do portal enviando os
 arquivos) — por isso é necessário autorizar o portal a acessar o seu Google
@@ -119,11 +147,13 @@ Passo 5.
 
    ```toml
    google_drive_client_id = "COLE-AQUI-O-CLIENT-ID.apps.googleusercontent.com"
-   google_drive_root_folder_id = "1LyjXgkF9p9TrWH39TbKly0oCG7HXNfRc"
+   google_drive_root_folder_id = "1eySIc97_5hLQo22QQAqUSqaJV24gR8we"
    ```
 
-   (o `google_drive_root_folder_id` já vem preenchido com a pasta do link que
-   você passou — só troque se quiser apontar para outra pasta raiz.)
+   (o `google_drive_root_folder_id` já vem preenchido com a pasta atual —
+   se você já tinha essa linha configurada com a pasta antiga, precisa
+   trocar o valor manualmente, porque o que está salvo nos Secrets tem
+   prioridade sobre o padrão do código.)
 3. Salve. O Streamlit reinicia o app sozinho em alguns segundos.
 
 ## Passo 7 — Conecte pelo portal
@@ -164,6 +194,16 @@ Google Drive" — assim que conectar, o portal varre todos os colaboradores e
 envia de uma vez qualquer holerite/cartão ponto que já esteja OK e ainda não
 tenha sido salvo no Drive. Depois disso, os próximos que ficarem OK são
 enviados automaticamente, sem precisar clicar em nada.
+
+**E se eu apagar uma pasta que o portal criou (a da Ariani, a do mês 07,
+etc.)?**
+Sem problema. Antes de reaproveitar uma pasta, o portal confere se ela ainda
+existe de verdade no Drive. Se você apagou a pasta de uma pessoa, ele cria
+essa pasta de novo (dentro de Holerite) na próxima vez que houver um
+documento OK dela para enviar — sem mexer nas outras pastas. Se você apagar
+a pasta inteira da competência (ex.: `07/2026`), ele recria a competência e
+tudo o que tinha dentro dela (Holerite, Cartão Ponto, pastas de cada pessoa)
+conforme os documentos forem sendo enviados de novo.
 
 **Por que a pasta da competência tem uma barra no nome, tipo "07/2026"?**
 O Google Drive aceita barra `/` no nome de uma pasta (não é tratado como

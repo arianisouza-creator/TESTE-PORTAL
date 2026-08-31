@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
   <style>
     :root{
       --bg:#e8eaee; --card:#fff; --line:#e4e7ec; --line-2:#eef0f3;
@@ -2670,7 +2671,7 @@ AMAURI BARROSO DE MOURA"></textarea>
     const SUPABASE_ANON_KEY = supabaseConfig.anonKey || '';
     const REMOTE_ENABLED = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
     const GOOGLE_DRIVE_CLIENT_ID = (googleDriveConfig.clientId || '').trim();
-    const GOOGLE_DRIVE_ROOT_FOLDER_ID = (googleDriveConfig.rootFolderId || '1LyjXgkF9p9TrWH39TbKly0oCG7HXNfRc').trim();
+    const GOOGLE_DRIVE_ROOT_FOLDER_ID = (googleDriveConfig.rootFolderId || '1eySIc97_5hLQo22QQAqUSqaJV24gR8we').trim();
     const GOOGLE_DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive';
     const GOOGLE_DRIVE_ENABLED = Boolean(GOOGLE_DRIVE_CLIENT_ID);
     const PASSAGENS_API_ONLY = passagensConfig.useApiOnly !== false;
@@ -4171,6 +4172,33 @@ AMAURI BARROSO DE MOURA"></textarea>
       } catch (error) { /* localStorage indisponivel, segue sem persistir */ }
     }
 
+    function driveForgetCachedId(cacheKey) {
+      try {
+        const map = driveLoadFolderMap();
+        if (cacheKey in map) {
+          delete map[cacheKey];
+          window.localStorage.setItem(DRIVE_FOLDER_MAP_KEY, JSON.stringify(map));
+        }
+      } catch (error) { /* localStorage indisponivel, sem problema */ }
+    }
+
+    // Confere se um ID guardado no cache ainda existe de verdade no Drive (e nao foi
+    // apagado/movido pra lixeira por alguem). So confia no cache depois dessa checagem —
+    // e assim que a pasta/arquivo volta a ser criado sozinho se a pessoa excluir a pasta
+    // da Ariani, a competencia do mes, etc. Só um 404 (ou "trashed: true") conta como
+    // "realmente nao existe mais"; qualquer outro erro (rede, token expirado) sobe normal,
+    // pra nao sair recriando pasta por causa de uma falha passageira.
+    async function driveVerifyIdExists(id) {
+      try {
+        const response = await driveApiFetch(`https://www.googleapis.com/drive/v3/files/${id}?fields=id,trashed&supportsAllDrives=true`);
+        const data = await response.json();
+        return Boolean(data && data.id) && !data.trashed;
+      } catch (error) {
+        if (error && error.status === 404) return false;
+        throw error;
+      }
+    }
+
     function setHitachiDriveStatus(message) {
       const el = document.getElementById('hitachiDriveStatus');
       if (el) el.textContent = message;
@@ -4335,18 +4363,23 @@ AMAURI BARROSO DE MOURA"></textarea>
       const cacheKey = `${parentId}|${name}`;
       if (driveFolderCache.has(cacheKey)) return driveFolderCache.get(cacheKey);
 
-      const persisted = driveLoadFolderMap();
-      if (persisted[cacheKey]) {
-        const resolved = Promise.resolve(persisted[cacheKey]);
-        driveFolderCache.set(cacheKey, resolved);
-        return resolved;
-      }
-
       const promise = (async () => {
+        // Antes de confiar num ID ja guardado, confere se essa pasta ainda existe no
+        // Drive de verdade — se a pessoa apagou a pasta (ex.: a pasta da Ariani, ou a
+        // competencia do mes 07), esquece o ID antigo e cai pro fluxo normal de
+        // buscar/criar de novo, como se fosse a primeira vez.
+        const persisted = driveLoadFolderMap();
+        const cachedId = persisted[cacheKey];
+        if (cachedId) {
+          const stillThere = await driveVerifyIdExists(cachedId);
+          if (stillThere) return cachedId;
+          driveForgetCachedId(cacheKey);
+        }
+
         // Reconfere o cache persistido bem antes de ir na rede: se outra aba (ou uma
         // chamada concorrente aqui mesmo) acabou de resolver essa pasta, reaproveita.
         const freshPersisted = driveLoadFolderMap();
-        if (freshPersisted[cacheKey]) return freshPersisted[cacheKey];
+        if (freshPersisted[cacheKey] && freshPersisted[cacheKey] !== cachedId) return freshPersisted[cacheKey];
 
         const q = `name = '${driveEscapeQueryValue(name)}' and '${parentId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
         const listUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)&spaces=drive&supportsAllDrives=true&includeItemsFromAllDrives=true&orderBy=createdTime`;
@@ -4381,30 +4414,80 @@ AMAURI BARROSO DE MOURA"></textarea>
 
     async function driveFindFileId(name, parentId) {
       const q = `name = '${driveEscapeQueryValue(name)}' and '${parentId}' in parents and trashed = false`;
-      const listUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)&spaces=drive&supportsAllDrives=true&includeItemsFromAllDrives=true`;
+      const listUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)&spaces=drive&supportsAllDrives=true&includeItemsFromAllDrives=true&orderBy=createdTime`;
       const listResponse = await driveApiFetch(listUrl);
       const listData = await listResponse.json();
       return listData.files && listData.files[0] ? listData.files[0].id : '';
     }
 
-    async function driveUploadFile(blob, fileName, parentId, mimeType) {
-      const existingId = await driveFindFileId(fileName, parentId);
-      const metadata = existingId ? { name: fileName } : { name: fileName, parents: [parentId] };
+    // Mesma logica do driveFindOrCreateFolder (busca + criacao memorizada, em memoria e
+    // persistida entre abas) aplicada ao ARQUIVO em si, nao so a pasta. Sem isso, o
+    // arquivo teria a mesma brecha que as pastas tinham: duas sincronizacoes quase ao
+    // mesmo tempo (ou em abas/reconexoes diferentes) poderiam achar "ainda nao existe" e
+    // cada uma criar sua propria copia do mesmo documento.
+    function driveEnsureFileId(fileName, parentId) {
+      const cacheKey = `file|${parentId}|${fileName}`;
+      if (driveFolderCache.has(cacheKey)) return driveFolderCache.get(cacheKey);
+
+      const promise = (async () => {
+        // Mesma checagem de existencia da pasta: se o arquivo (ou a pasta onde ele
+        // estava) foi apagado, o cache antigo e esquecido e ele e recriado.
+        const persisted = driveLoadFolderMap();
+        const cachedId = persisted[cacheKey];
+        if (cachedId) {
+          const stillThere = await driveVerifyIdExists(cachedId);
+          if (stillThere) return cachedId;
+          driveForgetCachedId(cacheKey);
+        }
+
+        const freshPersisted = driveLoadFolderMap();
+        if (freshPersisted[cacheKey] && freshPersisted[cacheKey] !== cachedId) return freshPersisted[cacheKey];
+
+        let fileId = await driveFindFileId(fileName, parentId);
+
+        if (!fileId) {
+          const justBeforeCreate = driveLoadFolderMap();
+          if (justBeforeCreate[cacheKey]) return justBeforeCreate[cacheKey];
+
+          const createResponse = await driveApiFetch('https://www.googleapis.com/drive/v3/files?supportsAllDrives=true', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: fileName, parents: [parentId] })
+          });
+          const createData = await createResponse.json();
+          fileId = createData.id;
+        }
+
+        driveRememberFolderId(cacheKey, fileId);
+        return fileId;
+      })();
+
+      driveFolderCache.set(cacheKey, promise);
+      promise.catch(() => driveFolderCache.delete(cacheKey));
+      return promise;
+    }
+
+    async function driveWriteFileContent(fileId, blob, mimeType) {
       const boundary = `drivebound_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-      const metadataPart = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n`;
+      const metadataPart = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n{}\r\n`;
       const mediaHeader = `--${boundary}\r\nContent-Type: ${mimeType || 'application/pdf'}\r\n\r\n`;
       const closing = `\r\n--${boundary}--`;
       const bodyBlob = new Blob([metadataPart, mediaHeader, blob, closing]);
 
-      const url = existingId
-        ? `https://www.googleapis.com/upload/drive/v3/files/${existingId}?uploadType=multipart&supportsAllDrives=true`
-        : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true`;
-
-      await driveApiFetch(url, {
-        method: existingId ? 'PATCH' : 'POST',
+      await driveApiFetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart&supportsAllDrives=true`, {
+        method: 'PATCH',
         headers: { 'Content-Type': `multipart/related; boundary=${boundary}` },
         body: bodyBlob
       });
+    }
+
+    async function driveUploadFile(blob, fileName, parentId, mimeType) {
+      // 1) garante (sem duplicar) que existe um arquivo com esse nome nessa pasta;
+      // 2) grava o conteudo atual nele — sempre, mesmo se o arquivo ja existia, porque
+      //    e assim que um documento corrigido/reenviado substitui o anterior em vez de
+      //    duplicar.
+      const fileId = await driveEnsureFileId(fileName, parentId);
+      await driveWriteFileContent(fileId, blob, mimeType);
     }
 
     function driveCompetenciaFolderName(monthKey) {
@@ -4418,16 +4501,90 @@ AMAURI BARROSO DE MOURA"></textarea>
       return docType === 'cartaoPonto' ? 'Cartão Ponto' : 'Holerite';
     }
 
+    // Holerite, comprovante de pagamento e comprovante de adiantamento moram todos
+    // dentro da mesma subpasta "Holerite/<nome do colaborador>". Cartao ponto continua
+    // direto dentro da pasta "Cartão Ponto", sem subpasta por pessoa.
+    const HITACHI_DRIVE_DOC_TYPES = {
+      holerite: {
+        label: 'HOLERITE',
+        statusField: 'holerite',
+        storageKeyField: 'holeriteStorageKey',
+        pageField: null,
+        insidePersonFolder: true
+      },
+      cartaoPonto: {
+        label: 'CARTAO PONTO',
+        statusField: 'cartaoPonto',
+        storageKeyField: 'cartaoPontoStorageKey',
+        pageField: null,
+        insidePersonFolder: false
+      },
+      comprovantePagamento: {
+        label: 'COMPROVANTE DE PAGAMENTO',
+        statusField: 'comprovantePagamento',
+        storageKeyField: 'comprovantePagamentoStorageKey',
+        pageField: 'comprovantePagamentoPage',
+        insidePersonFolder: true
+      },
+      comprovanteAdiantamento: {
+        label: 'COMPROVANTE DE ADIANTAMENTO',
+        statusField: 'comprovanteAdiantamento',
+        storageKeyField: 'comprovanteAdiantamentoStorageKey',
+        pageField: 'comprovanteAdiantamentoPage',
+        insidePersonFolder: true
+      }
+    };
+
+    // Comprovante de pagamento/adiantamento sao PDFs unicos com varias folhas, uma por
+    // colaborador (storageKey aponta pro arquivo inteiro, pageField pra folha especifica
+    // daquela pessoa). Aqui separamos so a folha da pessoa antes de enviar, pra nao subir
+    // o arquivo inteiro (com os dados de todo mundo) pro Drive de cada um.
+    async function extractSinglePagePdfBlob(sourceBlob, pageNumber) {
+      if (!window.PDFLib) {
+        console.error('[Drive] PDFLib indisponivel para separar a folha do comprovante.');
+        return null;
+      }
+      try {
+        const buffer = await sourceBlob.arrayBuffer();
+        const sourceDoc = await PDFLib.PDFDocument.load(buffer);
+        const totalPages = sourceDoc.getPageCount();
+        if (!totalPages) return null;
+        const index = Math.min(Math.max(Number(pageNumber) - 1, 0), totalPages - 1);
+        const newDoc = await PDFLib.PDFDocument.create();
+        const [copiedPage] = await newDoc.copyPages(sourceDoc, [index]);
+        newDoc.addPage(copiedPage);
+        const bytes = await newDoc.save();
+        return new Blob([bytes], { type: 'application/pdf' });
+      } catch (error) {
+        console.error('[Drive] falha ao separar a folha do comprovante', error);
+        return null;
+      }
+    }
+
+    async function resolveHitachiDriveFolder(row, config, nomeColaborador) {
+      const competenciaFolderId = await driveFindOrCreateFolder(driveCompetenciaFolderName(row.monthKey), GOOGLE_DRIVE_ROOT_FOLDER_ID);
+      if (!config.insidePersonFolder) {
+        return driveFindOrCreateFolder(driveDocFolderName('cartaoPonto'), competenciaFolderId);
+      }
+      const holeriteFolderId = await driveFindOrCreateFolder(driveDocFolderName('holerite'), competenciaFolderId);
+      return driveFindOrCreateFolder(nomeColaborador, holeriteFolderId);
+    }
+
     async function sendHitachiDocToDrive(row, docType) {
       if (!GOOGLE_DRIVE_ENABLED || !row) return;
-      const storageKey = docType === 'cartaoPonto' ? row.cartaoPontoStorageKey : row.holeriteStorageKey;
-      const status = docType === 'cartaoPonto' ? row.cartaoPonto : row.holerite;
+      const config = HITACHI_DRIVE_DOC_TYPES[docType];
+      if (!config) return;
+
+      const storageKey = row[config.storageKeyField];
+      const status = row[config.statusField];
       if (status !== 'OK' || !storageKey) return;
 
-      const syncedField = docType === 'cartaoPonto' ? 'cartaoPontoDriveSyncKey' : 'holeriteDriveSyncKey';
-      if (row[syncedField] === storageKey) return;
+      const pageNumber = config.pageField ? (row[config.pageField] ?? null) : null;
+      const syncedField = `${docType}DriveSyncKey`;
+      const syncMarker = pageNumber != null ? `${storageKey}|p${pageNumber}` : storageKey;
+      if (row[syncedField] === syncMarker) return;
 
-      const inFlightKey = `${row.id}|${docType}|${storageKey}`;
+      const inFlightKey = `${row.id}|${docType}|${syncMarker}`;
       if (driveSyncInFlight.has(inFlightKey)) return;
       driveSyncInFlight.add(inFlightKey);
 
@@ -4435,20 +4592,31 @@ AMAURI BARROSO DE MOURA"></textarea>
         const stored = await getHitachiDocumentBlob(storageKey);
         if (!stored || !stored.blob) return;
 
-        const competenciaFolderId = await driveFindOrCreateFolder(driveCompetenciaFolderName(row.monthKey), GOOGLE_DRIVE_ROOT_FOLDER_ID);
-        const tipoFolderId = await driveFindOrCreateFolder(driveDocFolderName(docType), competenciaFolderId);
-        const nomeColaborador = normalizePersonName(row.colaborador) || (row.colaborador || '').toUpperCase();
-        const tipoLabel = docType === 'cartaoPonto' ? 'CARTAO PONTO' : 'HOLERITE';
-        const fileName = `${nomeColaborador} - ${tipoLabel}.pdf`;
+        let uploadBlob = stored.blob;
+        if (config.pageField) {
+          // Documento com folha por pessoa: nunca sobe o arquivo inteiro. Se por algum
+          // motivo a folha nao foi identificada, pula o envio em vez de arriscar mandar
+          // os dados de todo mundo pra pasta de uma pessoa so.
+          if (pageNumber == null) {
+            console.warn(`[Drive] ${docType} de ${row.colaborador} sem folha identificada; envio pulado.`);
+            return;
+          }
+          uploadBlob = await extractSinglePagePdfBlob(stored.blob, pageNumber);
+          if (!uploadBlob) return;
+        }
 
-        await driveUploadFile(stored.blob, fileName, tipoFolderId, 'application/pdf');
+        const nomeColaborador = normalizePersonName(row.colaborador) || (row.colaborador || '').toUpperCase();
+        const destinationFolderId = await resolveHitachiDriveFolder(row, config, nomeColaborador);
+        const fileName = `${nomeColaborador} - ${config.label}.pdf`;
+
+        await driveUploadFile(uploadBlob, fileName, destinationFolderId, 'application/pdf');
 
         const idx = hitachiCollaborators.findIndex(item => item.id === row.id);
-        if (idx >= 0) hitachiCollaborators[idx] = { ...hitachiCollaborators[idx], [syncedField]: storageKey };
-        row[syncedField] = storageKey;
+        if (idx >= 0) hitachiCollaborators[idx] = { ...hitachiCollaborators[idx], [syncedField]: syncMarker };
+        row[syncedField] = syncMarker;
         saveLocalCache();
-        setSyncStatus(`${row.colaborador}: ${docType === 'cartaoPonto' ? 'cartao ponto' : 'holerite'} salvo no Google Drive (${driveCompetenciaFolderName(row.monthKey)}).`);
-        setHitachiDriveStatus(`Ultimo envio: ${row.colaborador} - ${tipoLabel} (${driveCompetenciaFolderName(row.monthKey)}).`);
+        setSyncStatus(`${row.colaborador}: ${config.label.toLowerCase()} salvo no Google Drive (${driveCompetenciaFolderName(row.monthKey)}).`);
+        setHitachiDriveStatus(`Ultimo envio: ${row.colaborador} - ${config.label} (${driveCompetenciaFolderName(row.monthKey)}).`);
       } catch (error) {
         console.error('[Drive] falha ao enviar documento', error);
         const precisaConectar = error && (error.status === 401 || error.status === 403 || /Conexao com o Google Drive necessaria/.test(error.message || ''));
@@ -4465,6 +4633,8 @@ AMAURI BARROSO DE MOURA"></textarea>
       if (!GOOGLE_DRIVE_ENABLED || !row) return;
       sendHitachiDocToDrive(row, 'holerite');
       sendHitachiDocToDrive(row, 'cartaoPonto');
+      sendHitachiDocToDrive(row, 'comprovantePagamento');
+      sendHitachiDocToDrive(row, 'comprovanteAdiantamento');
     }
 
     function syncHitachiRowsToDrive(rows) {
