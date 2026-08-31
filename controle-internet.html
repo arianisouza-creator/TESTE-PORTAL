@@ -4141,6 +4141,35 @@ AMAURI BARROSO DE MOURA"></textarea>
     const driveSyncInFlight = new Set();
     let driveConnected = false;
     const DRIVE_TOKEN_STORAGE_KEY = 'portal-mse-hitachi-drive-token';
+    const DRIVE_FOLDER_MAP_KEY = 'portal-mse-hitachi-drive-folders';
+
+    // O KPI Hitachi roda dentro de um iframe que o Streamlit recria do zero a cada
+    // reconexao/reload, entao um cache so-em-memoria (driveFolderCache) protege uma
+    // unica aba, mas nao impede que DUAS abas/reconexoes diferentes, cada uma comecando
+    // do zero, procurem a mesma pasta quase ao mesmo tempo. Pior: o indice de busca do
+    // Drive pode demorar alguns segundos para "enxergar" uma pasta recem-criada, entao
+    // mesmo pesquisas nao simultaneas podem nao encontrar uma pasta que acabou de ser
+    // criada. Por isso guardamos o ID de cada pasta encontrada/criada no localStorage
+    // (mesma origem do portal, compartilhado na hora entre abas) assim que ela e resolvida pela
+    // primeira vez: da em diante, qualquer aba reaproveita esse ID direto, sem depender
+    // da busca do Drive de novo — isso e o que realmente evita pastas duplicadas.
+    function driveLoadFolderMap() {
+      try {
+        const raw = window.localStorage.getItem(DRIVE_FOLDER_MAP_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return parsed && typeof parsed === 'object' ? parsed : {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function driveRememberFolderId(cacheKey, folderId) {
+      try {
+        const map = driveLoadFolderMap();
+        map[cacheKey] = folderId;
+        window.localStorage.setItem(DRIVE_FOLDER_MAP_KEY, JSON.stringify(map));
+      } catch (error) { /* localStorage indisponivel, segue sem persistir */ }
+    }
 
     function setHitachiDriveStatus(message) {
       const el = document.getElementById('hitachiDriveStatus');
@@ -4295,29 +4324,59 @@ AMAURI BARROSO DE MOURA"></textarea>
       return String(value || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     }
 
-    async function driveFindOrCreateFolder(name, parentId) {
+    function driveFindOrCreateFolder(name, parentId) {
+      // Vários documentos ficam OK quase ao mesmo tempo (ex.: holerite e cartao ponto
+      // do mesmo colaborador, ou varios colaboradores num import em lote). Sem isso,
+      // duas chamadas concorrentes para a mesma pasta viam "nao existe ainda" ao mesmo
+      // tempo e cada uma criava a sua -> pastas duplicadas. Guardando a PROMISE (nao so
+      // o resultado) no cache, a segunda chamada espera a primeira terminar em vez de
+      // repetir a busca/criacao. Isso cobre uma unica aba; o cache persistido abaixo
+      // cobre reconexoes e abas diferentes.
       const cacheKey = `${parentId}|${name}`;
       if (driveFolderCache.has(cacheKey)) return driveFolderCache.get(cacheKey);
 
-      const q = `name = '${driveEscapeQueryValue(name)}' and '${parentId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
-      const listUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)&spaces=drive&supportsAllDrives=true&includeItemsFromAllDrives=true`;
-      const listResponse = await driveApiFetch(listUrl);
-      const listData = await listResponse.json();
-
-      let folderId = listData.files && listData.files[0] ? listData.files[0].id : '';
-
-      if (!folderId) {
-        const createResponse = await driveApiFetch('https://www.googleapis.com/drive/v3/files?supportsAllDrives=true', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, mimeType: 'application/vnd.google-apps.folder', parents: [parentId] })
-        });
-        const createData = await createResponse.json();
-        folderId = createData.id;
+      const persisted = driveLoadFolderMap();
+      if (persisted[cacheKey]) {
+        const resolved = Promise.resolve(persisted[cacheKey]);
+        driveFolderCache.set(cacheKey, resolved);
+        return resolved;
       }
 
-      driveFolderCache.set(cacheKey, folderId);
-      return folderId;
+      const promise = (async () => {
+        // Reconfere o cache persistido bem antes de ir na rede: se outra aba (ou uma
+        // chamada concorrente aqui mesmo) acabou de resolver essa pasta, reaproveita.
+        const freshPersisted = driveLoadFolderMap();
+        if (freshPersisted[cacheKey]) return freshPersisted[cacheKey];
+
+        const q = `name = '${driveEscapeQueryValue(name)}' and '${parentId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
+        const listUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)&spaces=drive&supportsAllDrives=true&includeItemsFromAllDrives=true&orderBy=createdTime`;
+        const listResponse = await driveApiFetch(listUrl);
+        const listData = await listResponse.json();
+
+        let folderId = listData.files && listData.files[0] ? listData.files[0].id : '';
+
+        if (!folderId) {
+          // Ultima checagem antes de criar: outra aba pode ter acabado de resolver essa
+          // mesma pasta enquanto a busca acima estava em andamento.
+          const justBeforeCreate = driveLoadFolderMap();
+          if (justBeforeCreate[cacheKey]) return justBeforeCreate[cacheKey];
+
+          const createResponse = await driveApiFetch('https://www.googleapis.com/drive/v3/files?supportsAllDrives=true', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, mimeType: 'application/vnd.google-apps.folder', parents: [parentId] })
+          });
+          const createData = await createResponse.json();
+          folderId = createData.id;
+        }
+
+        driveRememberFolderId(cacheKey, folderId);
+        return folderId;
+      })();
+
+      driveFolderCache.set(cacheKey, promise);
+      promise.catch(() => driveFolderCache.delete(cacheKey));
+      return promise;
     }
 
     async function driveFindFileId(name, parentId) {
