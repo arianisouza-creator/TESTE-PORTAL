@@ -4,7 +4,7 @@ import time
 import unicodedata
 from pathlib import Path
 
-from cotacoes.connectors.base import CotacaoStageError
+from cotacoes.connectors.base import CotacaoStageError, run_stage
 from cotacoes.connectors.sandbox import SandboxConnector
 from cotacoes.models import ConnectorConfig, QuoteRequest, QuoteResult, utc_now
 
@@ -46,52 +46,66 @@ class LatamConnector(SandboxConnector):
             )
             page = browser.pages[0] if browser.pages else browser.new_page()
             try:
-                try:
-                    page.goto(target_url, wait_until="domcontentloaded", timeout=60000)
-                except Exception as exc:
-                    raise CotacaoStageError("abertura_site", f"Nao consegui abrir o site da LATAM: {exc}") from exc
+                run_stage(
+                    page, "LATAM", "abertura_site",
+                    "Nao consegui abrir o site da LATAM",
+                    lambda: page.goto(target_url, wait_until="domcontentloaded", timeout=60000),
+                    retries=1,
+                )
 
-                try:
+                def _do_login() -> None:
                     self._try_click(page, re.compile("Fazer Login|Login|Entrar", re.I), timeout=8000)
                     self._fill_login_if_visible(page, config)
                     self._wait_for_search_ready(page, headless=headless)
-                except Exception as exc:
-                    raise CotacaoStageError("login", f"Parou na etapa de login LATAM: {exc}") from exc
 
-                try:
-                    self._stop_if_manual_validation(page)
-                except Exception as exc:
-                    raise CotacaoStageError("validacao_manual", str(exc)) from exc
+                run_stage(page, "LATAM", "login", "Parou na etapa de login LATAM", _do_login)
 
-                try:
-                    self._fill_search(page, request)
-                except Exception as exc:
-                    raise CotacaoStageError("busca", f"Parou ao preencher origem/destino/datas da LATAM: {exc}") from exc
+                run_stage(
+                    page, "LATAM", "validacao_manual", "",
+                    lambda: self._stop_if_manual_validation(page),
+                )
 
-                try:
-                    self._stop_if_manual_validation(page)
-                except Exception as exc:
-                    raise CotacaoStageError("validacao_manual", str(exc)) from exc
+                run_stage(
+                    page, "LATAM", "busca",
+                    "Parou ao preencher origem/destino/datas da LATAM",
+                    lambda: self._fill_search(page, request),
+                )
 
-                try:
-                    ida_options = self._wait_and_extract_flight_options(page, direction="ida")
-                except Exception as exc:
-                    raise CotacaoStageError("resultados_ida", f"Parou ao ler os voos de ida: {exc}") from exc
+                run_stage(
+                    page, "LATAM", "validacao_manual", "",
+                    lambda: self._stop_if_manual_validation(page),
+                )
+
+                ida_options = run_stage(
+                    page, "LATAM", "resultados_ida",
+                    "Parou ao ler os voos de ida",
+                    lambda: self._wait_and_extract_flight_options(page, direction="ida"),
+                    retries=1,
+                )
 
                 volta_options = []
                 if request.dataVolta:
-                    try:
+                    def _do_volta() -> list[dict]:
                         self._choose_first_light_fare(page)
                         self._wait_for_results_screen(page, direction="volta", timeout=90000)
-                        volta_options = self._wait_and_extract_flight_options(page, direction="volta")
-                    except Exception as exc:
+                        return self._wait_and_extract_flight_options(page, direction="volta")
+
+                    try:
+                        volta_options = run_stage(
+                            page, "LATAM", "resultados_volta",
+                            "Parou ao ler os voos de volta",
+                            _do_volta,
+                            retries=1,
+                        )
+                    except CotacaoStageError as exc:
                         if ida_options:
+                            causa = exc.__cause__ if exc.__cause__ is not None else exc.mensagem
                             return self._build_result(
                                 request=request,
                                 detalhes=ida_options,
-                                status=f"Cotacao parcial LATAM: ida lida, volta nao concluida (etapa: resultados_volta) ({exc})",
+                                status=f"Cotacao parcial LATAM: ida lida, volta nao concluida (etapa: resultados_volta) ({causa})",
                             )
-                        raise CotacaoStageError("resultados_volta", f"Parou ao ler os voos de volta: {exc}") from exc
+                        raise
                 all_options = ida_options + volta_options
                 prices = [item["preco"] for item in all_options if item.get("preco") is not None]
                 if not prices:

@@ -58,6 +58,16 @@ def load_portal_config() -> dict:
                 os.getenv("COTACOES_API_BASE_URL", ""),
             ).rstrip("/"),
         },
+        "googleDrive": {
+            "clientId": get_secret(
+                "google_drive_client_id",
+                os.getenv("GOOGLE_DRIVE_CLIENT_ID", ""),
+            ),
+            "rootFolderId": get_secret(
+                "google_drive_root_folder_id",
+                os.getenv("GOOGLE_DRIVE_ROOT_FOLDER_ID", "1LyjXgkF9p9TrWH39TbKly0oCG7HXNfRc"),
+            ),
+        },
     }
 
 

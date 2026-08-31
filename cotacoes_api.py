@@ -15,11 +15,19 @@ logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
 logger = logging.getLogger("cotacoes_api")
 
 app = FastAPI(title="MSE Cotacoes API", version="0.1.0")
-CORS_ORIGINS = [origin.strip() for origin in os.getenv("COTACOES_CORS_ORIGINS", "*").split(",") if origin.strip()]
+# Antes, sem COTACOES_CORS_ORIGINS configurada a API liberava "*" (qualquer
+# origem). O CORS_REGEX abaixo ja cobre localhost/127.0.0.1 em qualquer porta
+# e qualquer *.streamlit.app, que e o que o projeto realmente precisa; entao
+# agora, sem a variavel definida, nao caimos mais no wildcard.
+CORS_ORIGINS = [origin.strip() for origin in os.getenv("COTACOES_CORS_ORIGINS", "").split(",") if origin.strip()]
 CORS_REGEX = os.getenv("COTACOES_CORS_REGEX", r"https://.*\.streamlit\.app|http://(localhost|127\.0\.0\.1):[0-9]+")
+if not CORS_ORIGINS:
+    logger.info(
+        "COTACOES_CORS_ORIGINS nao configurada; usando apenas o padrao (localhost/127.0.0.1 e *.streamlit.app)."
+    )
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=CORS_ORIGINS or ["*"],
+    allow_origins=CORS_ORIGINS,
     allow_origin_regex=CORS_REGEX or None,
     allow_credentials=False,
     allow_methods=["*"],
@@ -78,13 +86,14 @@ def quote_test(request: QuoteRequest) -> dict[str, Any]:
         return {"status": "ok", "quote": quote(request)}
     except CotacaoStageError as exc:
         logger.error(
-            "Erro na cotacao %s etapa=%s %s-%s %s/%s: %s\n%s",
+            "Erro na cotacao %s etapa=%s %s-%s %s/%s screenshot=%s: %s\n%s",
             company,
             exc.etapa,
             request.origem,
             request.destino,
             request.dataIda,
             request.dataVolta or "sem-volta",
+            getattr(exc, "screenshot_path", None) or "indisponivel",
             exc.mensagem,
             traceback.format_exc(),
         )

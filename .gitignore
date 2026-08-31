@@ -7,6 +7,8 @@ portal_data.db
 cotacoes_data*.json
 .playwright-*-profile/
 .playwright-*/
+debug-output/
+*.lock
 .venv/
 venv/
 env/

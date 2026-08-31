@@ -4,6 +4,7 @@ import time
 import unicodedata
 from pathlib import Path
 
+from cotacoes.connectors.base import CotacaoStageError, run_stage
 from cotacoes.connectors.sandbox import SandboxConnector
 from cotacoes.models import ConnectorConfig, QuoteRequest, QuoteResult, utc_now
 
@@ -46,14 +47,41 @@ class AzulConnector(SandboxConnector):
             )
             page = browser.pages[0] if browser.pages else browser.new_page()
             try:
-                page.goto(target_url, wait_until="domcontentloaded", timeout=70000)
-                self._login_if_needed(page, config)
-                self._wait_for_buy_form(page)
-                self._fill_search(page, request)
-                options = self._wait_and_extract_options(page, request)
+                run_stage(
+                    page, "AZUL", "abertura_site",
+                    "Nao consegui abrir o site da Azul Empresas",
+                    lambda: page.goto(target_url, wait_until="domcontentloaded", timeout=70000),
+                    retries=1,
+                )
+
+                run_stage(
+                    page, "AZUL", "login",
+                    "Parou na etapa de login da Azul Empresas",
+                    lambda: self._login_if_needed(page, config),
+                )
+
+                run_stage(
+                    page, "AZUL", "formulario_compra",
+                    "Parou ao abrir o formulario de compra da Azul Empresas",
+                    lambda: self._wait_for_buy_form(page),
+                    retries=1,
+                )
+
+                run_stage(
+                    page, "AZUL", "busca",
+                    "Parou ao preencher origem/destino/datas da Azul Empresas",
+                    lambda: self._fill_search(page, request),
+                )
+
+                options = run_stage(
+                    page, "AZUL", "resultados",
+                    "Parou ao ler os voos da Azul Empresas",
+                    lambda: self._wait_and_extract_options(page, request),
+                    retries=1,
+                )
                 prices = [item["preco"] for item in options if item.get("preco") is not None]
                 if not prices:
-                    raise RuntimeError("Nao encontrei precos visiveis na tela de resultados da Azul Empresas.")
+                    raise CotacaoStageError("resultados", "Nao encontrei precos visiveis na tela de resultados da Azul Empresas.")
                 return QuoteResult(
                     id=int(time.time() * 1000),
                     createdAt=utc_now(),
