@@ -90,7 +90,7 @@
     .lab{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mut)}
     .lab b{display:block;font-size:11px;color:var(--ink);letter-spacing:2px;text-transform:uppercase}
     .lab small{display:block;font-size:10px;text-transform:uppercase;color:var(--mut);margin-top:3px;letter-spacing:1.4px}
-    .monthbar{display:grid;grid-template-columns:1fr auto auto auto;gap:10px;margin-bottom:16px}
+    .monthbar{display:grid;grid-template-columns:1fr auto auto auto auto;gap:10px;margin-bottom:16px}
     .topmenu{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:6px 0 18px;flex-wrap:wrap}
     .toplink{padding:12px 16px;background:transparent;border:0;border-bottom:2px solid transparent;color:#456191;font-size:12px;font-weight:600}
     .toplink.on{color:var(--blue);border-bottom-color:var(--blue)}
@@ -1570,6 +1570,7 @@
           <div class="selectbox"><span data-icon="calendar"></span><input id="hMonthPicker" type="month"></div>
           <button class="danger" id="resetHitachi"><span data-icon="trash"></span>Zerar mes</button>
           <button class="ghost" id="openHitachiPendencias"><span data-icon="mail"></span>Enviar pendencias</button>
+          <button class="ghost" type="button" id="hitachiDriveConnectTop" title="Ainda nao conectado nesta sessao."><span data-icon="unlock"></span>Conectar Drive</button>
         </div>
 
         <div class="topmenu">
@@ -1758,7 +1759,7 @@ AMAURI BARROSO DE MOURA"></textarea>
                 <b>Envio automatico para o Google Drive</b>
                 Quando o holerite ou o cartao ponto de um colaborador ficar <b>OK</b> (assinado), o portal salva o PDF sozinho na pasta do Drive, dentro da competencia e do tipo de documento.
                 <div style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-                  <button class="ghost" type="button" id="hitachiDriveConnect"><span data-icon="link"></span>Conectar Google Drive</button>
+                  <button class="ghost" type="button" id="hitachiDriveConnect"><span data-icon="unlock"></span>Conectar Google Drive</button>
                   <span class="upload-note" id="hitachiDriveStatus" style="margin:0">Ainda nao conectado nesta sessao.</span>
                 </div>
               </div>
@@ -4138,35 +4139,61 @@ AMAURI BARROSO DE MOURA"></textarea>
     const driveFolderCache = new Map();
     const driveSyncInFlight = new Set();
 
+    let driveConnected = false;
+
     function setHitachiDriveStatus(message) {
       const el = document.getElementById('hitachiDriveStatus');
       if (el) el.textContent = message;
+      const topBtn = document.getElementById('hitachiDriveConnectTop');
+      if (topBtn) topBtn.title = message;
+    }
+
+    function setHitachiDriveButtonsBusy(busy) {
+      ['hitachiDriveConnect', 'hitachiDriveConnectTop'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.disabled = busy;
+      });
+    }
+
+    function setHitachiDriveButtonsConnectedLabel() {
+      const topBtn = document.getElementById('hitachiDriveConnectTop');
+      if (topBtn) topBtn.innerHTML = `${icon('badgeCheck')}Drive conectado`;
+      const connectBtn = document.getElementById('hitachiDriveConnect');
+      if (connectBtn) connectBtn.innerHTML = `${icon('badgeCheck')}Google Drive conectado`;
+    }
+
+    async function connectHitachiDrive() {
+      if (!GOOGLE_DRIVE_ENABLED) return;
+      setHitachiDriveButtonsBusy(true);
+      setHitachiDriveStatus('Conectando ao Google Drive...');
+      try {
+        await requestDriveAccessToken(true);
+        driveConnected = true;
+        setHitachiDriveStatus('Google Drive conectado. Enviando pendencias existentes...');
+        syncHitachiRowsToDrive(hitachiCollaborators);
+        setHitachiDriveStatus('Google Drive conectado. Os documentos marcados como OK serao salvos automaticamente.');
+        setHitachiDriveButtonsConnectedLabel();
+      } catch (error) {
+        console.error('[Drive] falha ao conectar', error);
+        setHitachiDriveStatus('Nao foi possivel conectar ao Google Drive. Tente novamente.');
+      } finally {
+        setHitachiDriveButtonsBusy(false);
+      }
     }
 
     function initHitachiDriveUi() {
-      const block = document.getElementById('hitachiDriveBlock');
       const connectBtn = document.getElementById('hitachiDriveConnect');
-      if (!block || !connectBtn) return;
+      const topBtn = document.getElementById('hitachiDriveConnectTop');
+
       if (!GOOGLE_DRIVE_ENABLED) {
         setHitachiDriveStatus('Integracao com o Google Drive nao configurada neste portal.');
-        connectBtn.disabled = true;
+        if (connectBtn) connectBtn.disabled = true;
+        if (topBtn) topBtn.style.display = 'none';
         return;
       }
-      connectBtn.addEventListener('click', async () => {
-        connectBtn.disabled = true;
-        setHitachiDriveStatus('Conectando ao Google Drive...');
-        try {
-          await requestDriveAccessToken(true);
-          setHitachiDriveStatus('Google Drive conectado. Enviando pendencias existentes...');
-          syncHitachiRowsToDrive(hitachiCollaborators);
-          setHitachiDriveStatus('Google Drive conectado. Os documentos marcados como OK serao salvos automaticamente.');
-        } catch (error) {
-          console.error('[Drive] falha ao conectar', error);
-          setHitachiDriveStatus('Nao foi possivel conectar ao Google Drive. Tente novamente.');
-        } finally {
-          connectBtn.disabled = false;
-        }
-      });
+
+      if (connectBtn) connectBtn.addEventListener('click', connectHitachiDrive);
+      if (topBtn) topBtn.addEventListener('click', connectHitachiDrive);
     }
 
     function ensureDriveTokenClient() {
